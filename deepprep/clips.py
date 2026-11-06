@@ -1,13 +1,14 @@
 """Recortes de tus muertes sacados de la grabación de la partida, para revisarlas sin buscar en el vídeo.
 
 La grabación va en trozos de 5 minutos (r01_seg_000.mkv, ...): un recorte que cae entre dos trozos los une.
+Si ffmpeg se relanzó a media partida, lo de después está en otra serie (r02_seg_000.mkv, ...).
 Se codifica con prioridad mínima y pocos hilos para no molestar si ya estás en otra partida.
 """
 
 import subprocess
 from pathlib import Path
 
-from .revision import TROZO_S
+from .revision import TROZO_S, en_grabacion, nombre_trozo
 
 ANTES_S = 20  # lo que lleva a la muerte
 DESPUES_S = 4
@@ -16,16 +17,34 @@ PRIORIDAD_MINIMA = getattr(subprocess, "IDLE_PRIORITY_CLASS", 0)
 
 
 def tramo(ms, desfase_s):
-    """(trozos de la grabación, segundo de inicio dentro del primero, duración) del recorte de una muerte."""
-    inicio = max(0.0, ms / 1000 + desfase_s - ANTES_S)
-    fin = ms / 1000 + desfase_s + DESPUES_S
+    """(trozos de la grabación, segundo de inicio dentro del primero, duración) del recorte de una muerte.
+
+    desfase_s: como en revision.en_grabacion (por serie; un número es la serie 1). Devuelve None si la muerte es
+    de antes de que empezara la grabación. El recorte no sale de la serie de la muerte: si la serie empezó menos
+    de ANTES_S antes, el recorte empieza con ella.
+    """
+    donde = en_grabacion(ms, desfase_s)
+    if not donde:
+        return None
+    serie, t = donde
+    inicio = max(0.0, t - ANTES_S)
+    fin = t + DESPUES_S
     primero, ultimo = int(inicio // TROZO_S), int(fin // TROZO_S)
-    archivos = [f"r01_seg_{k:03d}.mkv" for k in range(primero, ultimo + 1)]
+    archivos = [nombre_trozo(serie, k) for k in range(primero, ultimo + 1)]
     return archivos, round(inicio - primero * TROZO_S, 2), round(fin - inicio, 2)
 
 
 def nombre_clip(i, muerte):
     return f"{i + 1:02d}_{muerte['t'].replace(':', '-')}.mp4"
+
+
+def lista_concat(rutas):
+    """Texto del archivo de concat de ffmpeg con estos trozos.
+
+    Cada ruta va entre comillas simples. Una comilla dentro de la ruta (C:/Users/O'Neill/...) no se puede poner
+    tal cual: se cierra la comilla, va la comilla escapada (\\') y se vuelve a abrir, como pide ffmpeg.
+    """
+    return "".join("file '{}'\n".format(Path(r).as_posix().replace("'", "'\\''")) for r in rutas)
 
 
 def orden_ffmpeg(ffmpeg, rutas, desde, duracion, destino, lista):
@@ -63,7 +82,10 @@ def orden_ffmpeg(ffmpeg, rutas, desde, duracion, destino, lista):
 def recortar(ffmpeg, carpeta, i, muerte, desfase_s):
     """Hace el recorte de una muerte y devuelve su ruta, o None si la grabación no la cubre."""
     carpeta = Path(carpeta)
-    archivos, desde, duracion = tramo(muerte["ms"], desfase_s)
+    corte = tramo(muerte["ms"], desfase_s)
+    if not corte:
+        return None
+    archivos, desde, duracion = corte
     rutas = [carpeta / a for a in archivos]
     if not all(r.is_file() for r in rutas):
         return None
@@ -74,7 +96,7 @@ def recortar(ffmpeg, carpeta, i, muerte, desfase_s):
         return destino
     lista = salida / f"{destino.stem}.txt"
     if len(rutas) > 1:
-        lista.write_text("".join(f"file '{r.as_posix()}'\n" for r in rutas), encoding="utf-8")
+        lista.write_text(lista_concat(rutas), encoding="utf-8")
     try:
         subprocess.run(
             orden_ffmpeg(ffmpeg, rutas, desde, duracion, destino, lista),

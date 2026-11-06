@@ -84,16 +84,34 @@ def nombre_monstruo(tipo, subtipo):
     return base
 
 
-def en_video(ms, desfase_s):
-    """Dónde cae un momento de la partida en la grabación: (trozo, 'm:ss' dentro del trozo), o None."""
+def nombre_trozo(serie, trozo):
+    """Archivo de un trozo de la grabación (lo que escribe grabacion.py: r01_seg_000.mkv, ...)."""
+    return f"r{serie:02d}_seg_{trozo:03d}.mkv"
+
+
+def en_grabacion(ms, desfase_s):
+    """En qué serie de la grabación cae un momento de la partida y en qué segundo de ella: (serie, s), o None.
+
+    desfase_s: {serie: segundos que lleva grabados antes del 0:00 de la partida}; negativo si la serie empezó
+    ya jugando (ffmpeg se relanza a media partida, p. ej. al cambiar la resolución). Un número solo es la
+    serie 1, como antes de que hubiera series. El momento va en la última serie que ya había empezado.
+    """
     if desfase_s is None:
         return None
-    t = ms / 1000 + desfase_s
-    if t < 0:
+    series = desfase_s if isinstance(desfase_s, dict) else {1: desfase_s}
+    empezadas = [(n, ms / 1000 + d) for n, d in series.items() if ms / 1000 + d >= 0]
+    return min(empezadas, key=lambda s: s[1]) if empezadas else None
+
+
+def en_video(ms, desfase_s):
+    """Dónde cae un momento de la partida en la grabación: (trozo, 'm:ss' dentro del trozo), o None."""
+    donde = en_grabacion(ms, desfase_s)
+    if not donde:
         return None
+    serie, t = donde
     trozo = int(t // TROZO_S)
     dentro = int(t % TROZO_S)
-    return {"archivo": f"r01_seg_{trozo:03d}.mkv", "en": f"{dentro // 60}:{dentro % 60:02d}"}
+    return {"archivo": nombre_trozo(serie, trozo), "en": f"{dentro // 60}:{dentro % 60:02d}"}
 
 
 def _al(linea, pid, minuto):
@@ -105,7 +123,8 @@ def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None
     """Revisión de la partida desde el punto de vista de yo_puuid.
 
     nombre_campeon: función id -> nombre. panel: el panel tal y como estaba al empezar (para comparar).
-    desfase_s: segundos de grabación que hay antes del 0:00 de la partida (None si no hay grabación).
+    desfase_s: segundos de grabación que hay antes del 0:00 de la partida, por serie (ver en_grabacion; None si
+    no hay grabación).
     """
     yo = an.jugador_en(partida, yo_puuid)
     if not yo:

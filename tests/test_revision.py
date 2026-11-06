@@ -54,12 +54,28 @@ class Revision(unittest.TestCase):
     def test_sin_estar_en_la_partida(self):
         self.assertIsNone(rv.revisar(self.partida, self.linea, "nadie", str))
 
+    def test_muertes_de_despues_de_relanzar_ffmpeg(self):
+        relanzado = min(m["ms"] for m in rv.revisar(self.partida, self.linea, self.yo["puuid"], str)["muertes"]) + 1000
+        series = {1: 20, 2: -relanzado / 1000}  # la serie 2 empieza justo después de la primera muerte
+        r = rv.revisar(self.partida, self.linea, self.yo["puuid"], str, desfase_s=series)
+        primera, *resto = r["muertes"]
+        self.assertTrue(primera["video"]["archivo"].startswith("r01_seg_"))
+        self.assertTrue(resto)
+        self.assertTrue(all(m["video"]["archivo"].startswith("r02_seg_") for m in resto))
+
 
 class Video(unittest.TestCase):
     def test_trozos_de_cinco_minutos(self):
         self.assertEqual(rv.en_video(0, 14), {"archivo": "r01_seg_000.mkv", "en": "0:14"})
         self.assertEqual(rv.en_video(10 * 60_000, 14), {"archivo": "r01_seg_002.mkv", "en": "0:14"})
         self.assertIsNone(rv.en_video(1000, None))
+
+    def test_lo_de_despues_de_relanzar_ffmpeg_va_en_su_serie(self):
+        series = {1: 30, 2: -600}  # la serie 2 empezó a los 10:00 de partida
+        self.assertEqual(rv.en_video(9 * 60_000, series), {"archivo": "r01_seg_001.mkv", "en": "4:30"})
+        self.assertEqual(rv.en_video(12 * 60_000, series), {"archivo": "r02_seg_000.mkv", "en": "2:00"})
+        self.assertEqual(rv.en_grabacion(10 * 60_000, series), (2, 0.0))
+        self.assertIsNone(rv.en_video(0, {1: -5}))  # aún no se grababa
 
 
 class Tendencias(unittest.TestCase):

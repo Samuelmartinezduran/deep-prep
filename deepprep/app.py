@@ -15,7 +15,7 @@ from . import recolector as rec
 from . import revision as rv
 from .cache import Cache
 from .ddragon import Datos
-from .grabacion import GRIETA, Grabador, buscar_ffmpeg
+from .grabacion import GRIETA, Grabador, buscar_ffmpeg, inicio_de_series
 from .overlay import MODO_SIN_BORDES, modo_ventana, parsear_atajo
 from .riot import ClaveInvalida, Cliente, ErrorRiot
 from .sesion import LIGA_COLA, NOMBRE_LIGA, Sesion
@@ -38,13 +38,17 @@ EN_JUEGO = ("GameStart", "InProgress", "Reconnect")
 
 
 def _desfase(carpeta, inicio_ms):
-    """Segundos de grabación antes del 0:00 de la partida (la grabación empieza en la pantalla de carga)."""
+    """Por cada serie de la grabación, segundos grabados antes del 0:00 de la partida: {serie: s}, o None.
+
+    La grabación empieza en la pantalla de carga; si ffmpeg se relanza a media partida (p. ej. al cambiar la
+    resolución), esa serie empieza ya jugando y su desfase es negativo.
+    """
     if not carpeta or not inicio_ms:
         return None
-    trozos = sorted(Path(carpeta).glob("r01_seg_*.mkv"))
-    if not trozos:
+    series = inicio_de_series(carpeta)
+    if not series:
         return None
-    return round(inicio_ms / 1000 - trozos[0].stat().st_ctime)
+    return {n: round(inicio_ms / 1000 - t) for n, t in series.items()}
 
 
 # Fases en las que la partida está al caer: el historial propio deja de descargarse.

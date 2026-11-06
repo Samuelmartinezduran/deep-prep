@@ -11,6 +11,7 @@ fuerza el procesador. Las grabaciones más viejas se borran solas al pasar de gr
 import ctypes
 import ctypes.wintypes as wt
 import datetime
+import json
 import msvcrt
 import os
 import re
@@ -25,6 +26,8 @@ from . import config
 
 RUTA_LOG = config.DATOS / "grabacion.log"
 RUTA_CERROJO = config.DATOS / "grabacion.lock"
+# En la carpeta de cada grabación: cuándo empezó cada serie de trozos (rNN_seg_*.mkv), en hora del reloj.
+SERIES = "series.json"
 GRIETA = 11
 # Si el vídeo lleva este tiempo sin crecer, algo va mal y el panel lo avisa.
 SEGUNDOS_SIN_CRECER = 20
@@ -116,6 +119,31 @@ def _carpeta_del_registro(solo_en_curso=False):
     if not m or (solo_en_curso and "TERMINADO" in texto):
         return None
     return Path(m.group(1).strip())
+
+
+def inicio_de_series(carpeta):
+    """{serie: cuándo empezó (segundos del reloj)} de cada serie de trozos que hay en una grabación.
+
+    ffmpeg se relanza a media partida si se corta (p. ej. al cambiar la resolución) y cada arranque es otra
+    serie: r01_seg_*.mkv, r02_seg_*.mkv... El grabador apunta cuándo empieza cada una en series.json; en las
+    grabaciones de antes no está y vale la fecha de creación del primer trozo de la serie, que es casi lo mismo.
+    """
+    carpeta = Path(carpeta)
+    try:
+        apuntadas = {int(n): float(t) for n, t in json.loads((carpeta / SERIES).read_text(encoding="utf-8")).items()}
+    except (OSError, ValueError, TypeError, AttributeError):
+        apuntadas = {}
+    series = {}
+    for primero in carpeta.glob("r*_seg_000.mkv"):
+        m = re.fullmatch(r"r(\d+)_seg_000\.mkv", primero.name)
+        if not m:
+            continue
+        n = int(m.group(1))
+        try:
+            series[n] = apuntadas[n] if n in apuntadas else primero.stat().st_birthtime
+        except OSError:
+            pass
+    return series
 
 
 def _cerrojo_ocupado():
@@ -288,6 +316,19 @@ def limpiar(base, max_gb, actual=None):
     return borradas
 
 
+def apuntar_serie(carpeta, serie, cuando):
+    """Apunta en series.json de la grabación cuándo empezó una serie (segundos del reloj)."""
+    ruta = Path(carpeta) / SERIES
+    try:
+        series = json.loads(ruta.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        series = {}
+    if not isinstance(series, dict):
+        series = {}
+    series[str(serie)] = round(cuando, 3)
+    config.escribir_atomico(ruta, json.dumps(series))
+
+
 # --- el proceso de grabación ("deepprep --grabar") -------------------------------------------------------
 def grabar(cfg, espera_min=5, max_min=100, prueba_seg=0):
     """Espera a la partida, la graba y para al acabar. Escribe lo que hace en grabacion.log.
@@ -319,6 +360,7 @@ def grabar(cfg, espera_min=5, max_min=100, prueba_seg=0):
             n += 1
         carpeta = base / (f"{hoy}_prueba" if prueba_seg else f"{hoy}_partida{n}")
         carpeta.mkdir(exist_ok=True)
+        (carpeta / SERIES).unlink(missing_ok=True)  # la de prueba se reutiliza: fuera las series de la vez anterior
         stop = base / "STOP"
         stop.unlink(missing_ok=True)
         nombre, args = elegir_codificador(ffmpeg, cfg.get("grabacion_codificador", "auto"))
@@ -360,7 +402,13 @@ def grabar(cfg, espera_min=5, max_min=100, prueba_seg=0):
                 "1",
                 str(carpeta / f"r{arranque:02d}_seg_%03d.mkv"),
             ]
+            cuando = time.time()
             p = subprocess.Popen(orden, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log, creationflags=SIN_VENTANA)
+            # Con esto la revisión sabe en qué serie y en qué trozo cae cada momento de la partida.
+            try:
+                apuntar_serie(carpeta, arranque, cuando)
+            except OSError as e:
+                log.write(f"No se pudo apuntar cuándo empieza la serie {arranque}: {e}\n")
             try:
                 ctypes.windll.kernel32.SetPriorityClass(int(p._handle), 0x4000)  # por debajo de lo normal
             except (OSError, AttributeError):

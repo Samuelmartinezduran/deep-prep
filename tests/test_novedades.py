@@ -1,7 +1,9 @@
 """Mapa del jungla rival, tu pool en la selección, LP de la partida, mapa de muertes y recortes."""
 
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from deepprep import analisis as an
 from deepprep import clips
@@ -97,6 +99,67 @@ class Recortes(unittest.TestCase):
 
     def test_sin_grabacion_no_hay_recorte(self):
         self.assertIsNone(clips.recortar("ffmpeg", Path("no-existe"), 0, {"ms": 60_000, "t": "1:00"}, 10))
+
+    # ffmpeg se relanzó a los 10:00 de partida (la serie 1 empezó 30 s antes del 0:00).
+    SERIES = {1: 30, 2: -600}
+
+    def test_cada_muerte_en_su_serie(self):
+        self.assertEqual(clips.tramo(300_000, self.SERIES), (["r01_seg_001.mkv"], 10.0, 24.0))  # 5:00 -> 5:30 de r01
+        self.assertEqual(clips.tramo(720_000, self.SERIES), (["r02_seg_000.mkv"], 100.0, 24.0))  # 12:00 -> 2:00 de r02
+        self.assertEqual(clips.tramo(1_498_000, self.SERIES)[0], ["r02_seg_002.mkv", "r02_seg_003.mkv"])  # 24:58
+
+    def test_justo_despues_de_relanzar_empieza_con_la_serie(self):
+        archivos, desde, dur = clips.tramo(605_000, self.SERIES)  # 10:05: 5 s después de empezar r02
+        self.assertEqual((archivos, desde, dur), (["r02_seg_000.mkv"], 0.0, 5 + clips.DESPUES_S))
+
+    def test_antes_de_que_empiece_la_grabacion_no_hay_tramo(self):
+        self.assertIsNone(clips.tramo(5_000, {1: -10}))  # se empezó a grabar a los 0:10
+        self.assertIsNone(clips.tramo(5_000, None))
+        self.assertIsNone(clips.recortar("ffmpeg", Path("no-existe"), 0, {"ms": 5_000, "t": "0:05"}, {1: -10}))
+
+    def test_lista_de_concat_con_comillas(self):
+        rutas = [Path("C:/Users/O'Neill/Vídeos/LoL-coach/a.mkv"), Path("C:/x/b.mkv")]
+        texto = clips.lista_concat(rutas)
+        self.assertEqual(texto.splitlines()[0], "file 'C:/Users/O'\\''Neill/Vídeos/LoL-coach/a.mkv'")
+        self.assertEqual([leer_concat(linea) for linea in texto.splitlines()], [r.as_posix() for r in rutas])
+
+    def test_recorta_de_la_serie_buena_aunque_la_ruta_lleve_comilla(self):
+        with tempfile.TemporaryDirectory() as d:
+            carpeta = Path(d) / "O'Neill" / "2026-11-06_partida1"
+            carpeta.mkdir(parents=True)
+            for nombre in ("r01_seg_000.mkv", "r01_seg_001.mkv", "r02_seg_000.mkv", "r02_seg_001.mkv"):
+                (carpeta / nombre).write_bytes(b"x")
+            vistas = []
+
+            def ffmpeg_falso(orden, **kw):
+                lista = Path(orden[orden.index("-i") + 1])
+                vistas.append([leer_concat(linea) for linea in lista.read_text(encoding="utf-8").splitlines()])
+                Path(orden[-1]).write_bytes(b"mp4")
+
+            muerte = {"ms": 898_000, "t": "14:58"}  # 4:58 de r02: el recorte une sus dos primeros trozos
+            with mock.patch.object(clips.subprocess, "run", ffmpeg_falso):
+                ruta = clips.recortar("ffmpeg", carpeta, 2, muerte, self.SERIES)
+            self.assertEqual(ruta, carpeta / "muertes" / "03_14-58.mp4")
+            self.assertEqual(vistas, [[(carpeta / "r02_seg_000.mkv").as_posix(), (carpeta / "r02_seg_001.mkv").as_posix()]])
+            self.assertEqual([p.name for p in (carpeta / "muertes").iterdir()], ["03_14-58.mp4"])  # sin la lista
+
+
+def leer_concat(linea):
+    """La ruta de una línea «file ...» tal y como la lee ffmpeg: entre '' todo va tal cual y fuera, \\ escapa."""
+    palabra, _, resto = linea.partition(" ")
+    assert palabra == "file"
+    ruta, i, entre_comillas = [], 0, False
+    while i < len(resto):
+        c = resto[i]
+        if c == "'":
+            entre_comillas = not entre_comillas
+        elif c == "\\" and not entre_comillas:
+            i += 1
+            ruta.append(resto[i])
+        else:
+            ruta.append(c)
+        i += 1
+    return "".join(ruta)
 
 
 if __name__ == "__main__":
