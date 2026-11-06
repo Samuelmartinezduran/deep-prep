@@ -1,4 +1,5 @@
 // Qué se pinta y cuándo: el bucle que pide el estado a la app, las pestañas y el reloj de la partida.
+import { pedirTexto, SIN_CONEXION } from "./api.js";
 import { pintarAjustes } from "./ajustes.js";
 import { chip, pintarCabecera } from "./cabecera.js";
 import { pintarEspera } from "./espera.js";
@@ -46,14 +47,14 @@ export function reloj() {
   el.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-// Pide el estado y repinta solo si ha cambiado. Sin respuesta, lo dice el chip de estado.
+// Pide el estado y repinta solo si ha cambiado. Sin respuesta (o con un error), lo dice el chip de estado.
 export async function refrescar() {
   try {
-    const texto = await (await fetch(estado.overlay ? "/api/estado?vista=overlay" : "/api/estado")).text();
+    const texto = await pedirTexto(estado.overlay ? "/api/estado?vista=overlay" : "/api/estado");
     if (texto === estado.ultimo) return;
     estado.ultimo = texto;
     pintar(JSON.parse(texto));
   } catch {
-    if (!estado.overlay) $("fase").innerHTML = chip("Sin conexión con la app");
+    if (!estado.overlay) $("fase").innerHTML = chip(SIN_CONEXION);
   }
 }

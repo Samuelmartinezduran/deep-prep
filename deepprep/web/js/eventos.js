@@ -27,7 +27,8 @@ export function activarEventos() {
     const b = e.target.closest("button, [data-revision]");
     if (!b) return;
     if (b.id === "volver") {
-      await enviar("/api/volver");
+      const r = await enviar("/api/volver");
+      if (!r.ok) b.lastChild.textContent = r.error;
       refrescar();
     } else if (b.dataset.vista) {
       cambiarVista(b.dataset.vista);
@@ -39,7 +40,7 @@ export function activarEventos() {
       estado.revisionVista = b.dataset.revision;
       pintarRevisiones();
     } else if (b.id === "cerrar-novedades") {
-      await cerrarNovedades();
+      await cerrarNovedades(b);
     } else if (b.dataset.minuto) {
       elegirMinuto(b);
     } else if (b.dataset.filtro) {

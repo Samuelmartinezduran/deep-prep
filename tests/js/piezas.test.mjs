@@ -6,6 +6,7 @@ import { cajaDuelo, tablaComparacion } from "../../deepprep/web/js/duelo.js";
 import {
   barraWr,
   cajaNotas,
+  cajaVacia,
   diferencia,
   etapa,
   etiquetas,
@@ -66,6 +67,10 @@ describe("piezas", () => {
   test("título con y sin subtítulo", () => {
     assert.equal(titulo("Jungla rival"), `<h2><span class="etiqueta-cab">Jungla rival</span></h2>`);
     assert.equal(titulo("A", "b"), `<h2><span class="etiqueta-cab">A</span><small>b</small></h2>`);
+  });
+
+  test("cajaVacia escapa el aviso", () => {
+    assert.equal(cajaVacia("Sin <datos>"), `<section class="caja"><p class="vacio">Sin &lt;datos&gt;</p></section>`);
   });
 
   test("lp y diferencia con signo", () => {

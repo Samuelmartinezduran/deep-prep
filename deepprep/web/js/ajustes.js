@@ -1,6 +1,7 @@
 // Ventana principal, pestaña Ajustes: el formulario, guardarlo y cerrar la app.
-import { enviar } from "./api.js";
+import { enviar, ErrorApi, pedir } from "./api.js";
 import { estado } from "./estado.js";
+import { cajaVacia } from "./piezas.js";
 import { $, esc } from "./util.js";
 
 export function filaReferencia(nombre, rid, estadoRef) {
@@ -67,7 +68,14 @@ export function htmlAjustes(a) {
 }
 
 export async function pintarAjustes() {
-  const a = await (await fetch("/api/ajustes")).json();
+  let a;
+  try {
+    a = await pedir("/api/ajustes");
+  } catch (e) {
+    if (!(e instanceof ErrorApi)) throw e;
+    if (estado.vista === "ajustes") $("principal").innerHTML = cajaVacia(`${e.message}: no se han podido cargar los ajustes.`);
+    return;
+  }
   if (estado.vista !== "ajustes") return;
   estado.campeones = a.campeones;
   $("principal").innerHTML = htmlAjustes(a);
@@ -108,8 +116,10 @@ export async function guardarAjustes() {
     notas,
   });
   if (r.ok) await pintarAjustes(); // así se ve el estado de las referencias nuevas
-  $("ajustes-estado").textContent = r.ok ? "Guardado." : r.error;
-  $("ajustes-estado").className = r.ok ? "bien" : "mal";
+  const aviso = $("ajustes-estado");
+  if (!aviso) return; // la pestaña ya no está (o los ajustes no se han podido volver a cargar)
+  aviso.textContent = r.ok ? "Guardado." : r.error;
+  aviso.className = r.ok ? "bien" : "mal";
 }
 
 export async function salirApp() {

@@ -1,9 +1,9 @@
 // Ventana principal, pestaña Revisiones: lo de hoy, tendencias, mapa de muertes y la revisión de cada partida.
-import { enviar } from "./api.js";
+import { enviar, ErrorApi, pedir } from "./api.js";
 import { tablaComparacion } from "./duelo.js";
 import { estado } from "./estado.js";
 import { ICONO } from "./iconos.js";
-import { barraWr, diferencia, lp, retrato, titulo } from "./piezas.js";
+import { barraWr, cajaVacia, diferencia, lp, retrato, titulo } from "./piezas.js";
 import { tip, tipLineas } from "./tooltip.js";
 import { $, claseWr, coma, enMapa, esc, fecha, ligaTxt, minutos, pct } from "./util.js";
 
@@ -140,9 +140,16 @@ export function filtrarMuertes(b) {
 
 export async function pintarRevisiones() {
   if (estado.vista !== "revisiones") return;
-  const datos = await (await fetch("/api/revisiones")).json();
-  if (!estado.revisionVista && datos.lista.length) estado.revisionVista = datos.lista[0].id;
-  const r = estado.revisionVista ? await (await fetch(`/api/revision?id=${encodeURIComponent(estado.revisionVista)}`)).json() : null;
+  let datos, r;
+  try {
+    datos = await pedir("/api/revisiones");
+    if (!estado.revisionVista && datos.lista.length) estado.revisionVista = datos.lista[0].id;
+    r = estado.revisionVista ? await pedir(`/api/revision?id=${encodeURIComponent(estado.revisionVista)}`) : null;
+  } catch (e) {
+    if (!(e instanceof ErrorApi)) throw e;
+    if (estado.vista === "revisiones") $("principal").innerHTML = cajaVacia(`${e.message}: no se han podido cargar las revisiones.`);
+    return;
+  }
   if (estado.vista !== "revisiones") return;
   const lista = datos.lista.length
     ? datos.lista

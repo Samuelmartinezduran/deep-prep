@@ -27,9 +27,13 @@ export function pintarVersion(v, n) {
   $("novedades").innerHTML = htmlNovedades(n);
 }
 
-// «Entendido»: la app apunta que ya se han visto.
-export async function cerrarNovedades() {
-  await enviar("/api/novedades");
+// «Entendido»: la app apunta que ya se han visto. Si no puede, el error sale en el botón y las novedades siguen.
+export async function cerrarNovedades(b) {
+  const r = await enviar("/api/novedades");
+  if (!r.ok) {
+    b.lastChild.textContent = r.error;
+    return;
+  }
   $("novedades").innerHTML = "";
   estado.novedadesCerradas = true;
 }

@@ -6,6 +6,8 @@ export const retrato = (url, clase = "retrato") => (url ? `<img class="${clase}"
 export const rol = (r) => (ROLES[r] ? `<span class="rol" style="--icono:url('/img/rol/${ROLES[r]}.svg')" title="${esc(ROL_TXT[r] || r)}"></span>` : `<span></span>`);
 // Título de caja. Recibe HTML: lo que venga de la app tiene que llegar ya escapado.
 export const titulo = (txt, extra = "") => `<h2><span class="etiqueta-cab">${txt}</span>${extra ? `<small>${extra}</small>` : ""}</h2>`;
+// Caja vacía con un aviso (sin datos o con un error al pedirlos).
+export const cajaVacia = (texto) => `<section class="caja"><p class="vacio">${esc(texto)}</p></section>`;
 export const lp = (c) => `<span class="num lp ${c > 0 ? "bien" : c < 0 ? "mal" : "suave"}">${c > 0 ? "+" : c < 0 ? "−" : "±"}${Math.abs(c)} LP</span>`;
 export const diferencia = (a, b, sufijo = "") => {
   const d = a - b;
