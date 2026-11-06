@@ -18,7 +18,8 @@ dynamic = ["version"]
 description = "Live League of Legends companion for Windows: pre-game scouting, in-game overlay and post-game review."
 readme = "README.md"
 requires-python = ">=3.14"
-# TODO(licencia): la decide el autor. Cuando la elija, p. ej.: license = "MIT" y license-files = ["LICENSE"]
+license = "MIT"
+license-files = ["LICENSE", "deepprep/web/fuentes/OFL.txt"]
 authors = [{ name = "Samuel Martínez Durán" }]
 keywords = ["league-of-legends", "riot-api", "overlay", "pywebview", "windows"]
 classifiers = [

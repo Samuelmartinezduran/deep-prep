@@ -18,6 +18,7 @@ Porofesor pasa a llamarse Deep Prep y se rehace por dentro para publicar el cód
 ### Añadido
 
 - Modo demo: `py -m deepprep --demo` (o `DeepPrep.exe --demo`) abre la app con una partida de ejemplo y una barra para cambiar de escena, sin el LoL ni clave de Riot. Lo que se guarda va a una carpeta temporal que se borra al salir. Admite `--sin-ventana`, `--puerto` y `--escena`. `herramientas/maqueta.py` pasa a ser la demo con opciones para diseñar.
+- Licencia MIT (`LICENSE`, y `LICENSE.txt` en el zip). La de las fuentes del panel, la SIL Open Font License, va en `deepprep/web/fuentes/OFL.txt`.
 - `pyproject.toml` con las herramientas de desarrollo: ruff, mypy, coverage con un mínimo del 70 %, `.editorconfig` y `.gitattributes`.
 - CI en GitHub Actions: formato, lint, tipos y pruebas con cobertura en Windows con Python 3.14, y las pruebas del panel con Node 24.
 - Pruebas de caracterización (12) antes de reordenar el código, y pruebas del panel con `node --test`.

@@ -158,6 +158,7 @@ def empaquetar(salida=EMP):
             if nombre.endswith(("bin/ffmpeg.exe", "/LICENSE")):
                 (destino / Path(nombre).name).write_bytes(z.read(nombre))
     shutil.copy(EMP / "LEEME.md", dist / "LEEME.txt")
+    shutil.copy(RAIZ / "LICENSE", dist / "LICENSE.txt")
     return dist
 
 

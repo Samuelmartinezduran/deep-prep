@@ -47,4 +47,6 @@ En Ajustes desmarca **Siempre en marcha** y pulsa **Cerrar Deep Prep del todo**.
 
 Deep Prep isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
 
+Deep Prep es software libre con licencia MIT (`LICENSE.txt`, junto a `DeepPrep.exe`).
+
 Incluye [FFmpeg](https://ffmpeg.org/) (licencia GPL v3; build «essentials» de [gyan.dev](https://www.gyan.dev/ffmpeg/builds/)) para grabar la pantalla. Su licencia va en `ffmpeg/LICENSE` dentro del zip y su código fuente está en [ffmpeg.org](https://ffmpeg.org/download.html#get-sources) y en [github.com/FFmpeg/FFmpeg](https://github.com/FFmpeg/FFmpeg).
