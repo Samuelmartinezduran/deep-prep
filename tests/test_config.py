@@ -105,6 +105,23 @@ class Configuracion(unittest.TestCase):
         self.assertEqual(self.ruta.read_text(encoding="utf-8"), "no es json")  # tus datos, intactos
         self.assertIn("No guardo config.json", self.salida.getvalue())
 
+    def test_un_momento_ocupado_no_cuenta_como_roto(self):
+        config.guardar({"cuentas": ["Yo#EUW"]})
+        leer = Path.read_text
+        veces: list[Path] = []
+
+        def ocupado_la_primera_vez(ruta, *a, **k):
+            if ruta == self.ruta and not veces:
+                veces.append(ruta)
+                raise PermissionError("lo tiene abierto el antivirus")
+            return leer(ruta, *a, **k)
+
+        with mock.patch.object(Path, "read_text", ocupado_la_primera_vez), mock.patch.object(config.time, "sleep"):
+            self.assertEqual(config.cargar()["cuentas"], ["Yo#EUW"])
+        self.assertEqual(veces, [self.ruta])
+        self.assertFalse(self.rota.exists())  # no se ha apartado nada
+        self.assertNotIn("AVISO", self.salida.getvalue())
+
     def test_un_json_que_no_es_un_objeto_cuenta_como_roto(self):
         self.ruta.write_text("null", encoding="utf-8")
         self.assertEqual(config.cargar(), config.POR_DEFECTO)

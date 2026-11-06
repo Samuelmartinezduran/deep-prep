@@ -164,6 +164,21 @@ _lock = threading.Lock()
 _no_pisar = ""
 
 
+def _con_reintentos(fn):
+    """fn(), reintentándolo un momento si Windows dice que el archivo está ocupado (PermissionError).
+
+    Pasa si otro lo tiene abierto justo entonces (el antivirus, el proceso que graba leyendo la configuración...).
+    """
+    for intento in range(5):
+        try:
+            return fn()
+        except PermissionError:
+            if intento == 4:
+                raise
+            time.sleep(0.1)
+    return None
+
+
 def escribir_atomico(ruta, texto):
     """Escribe un archivo de texto entero o nada.
 
@@ -177,16 +192,7 @@ def escribir_atomico(ruta, texto):
             f.write(texto)
             f.flush()
             os.fsync(f.fileno())
-        for intento in range(5):
-            try:
-                os.replace(temporal, ruta)
-                break
-            except PermissionError:
-                # Windows no deja cambiar un archivo que otro tiene abierto justo entonces (el antivirus, el
-                # proceso que graba leyendo la configuración...): se reintenta un momento.
-                if intento == 4:
-                    raise
-                time.sleep(0.1)
+        _con_reintentos(lambda: os.replace(temporal, ruta))
     finally:
         try:
             os.unlink(temporal)  # si se cambió ya no está; si no, fuera el temporal a medias
@@ -260,7 +266,8 @@ def cargar():
             escribir_atomico(RUTA_CONFIG, _texto(POR_DEFECTO))
             return cfg
         try:
-            texto = RUTA_CONFIG.read_text(encoding="utf-8")
+            # Un momento ocupado no es estar roto: antes de apartarlo se reintenta.
+            texto = _con_reintentos(lambda: RUTA_CONFIG.read_text(encoding="utf-8"))
             cfg.update(_objeto(texto))
         except (OSError, ValueError) as e:
             cfg.update(_recuperar(e))
