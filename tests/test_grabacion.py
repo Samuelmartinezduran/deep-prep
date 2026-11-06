@@ -1,14 +1,21 @@
 """Pruebas del grabador integrado (lo que no necesita juego ni pantalla)."""
 
+import contextlib
+import gc
+import io
 import json
+import msvcrt
 import os
 import tempfile
 import time
 import unittest
+import warnings
 from pathlib import Path
+from unittest import mock
 
 from deepprep import app
 from deepprep import grabacion as g
+from deepprep import recolector as rec
 
 
 class Limpieza(unittest.TestCase):
@@ -46,6 +53,49 @@ class Registro(unittest.TestCase):
                 self.assertEqual(g._carpeta_del_registro().name, "2026-10-14_partida2")
             finally:
                 g.RUTA_LOG = original
+
+
+class Cerrojo(unittest.TestCase):
+    def setUp(self):
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        self.ruta = Path(d.name) / "grabacion.lock"
+        self.enterContext(mock.patch.object(g, "RUTA_CERROJO", self.ruta))
+        self.grabar = self.enterContext(mock.patch.object(g, "_grabar"))
+
+    def test_si_ya_hay_otro_grabando_no_deja_el_cerrojo_abierto(self):
+        with open(self.ruta, "a") as otro:  # el otro proceso de grabación
+            msvcrt.locking(otro.fileno(), msvcrt.LK_NBLCK, 1)
+            gc.collect()  # lo que hayan dejado otras pruebas no cuenta
+            with warnings.catch_warnings(record=True) as avisos:
+                warnings.simplefilter("always", ResourceWarning)
+                g.grabar({})
+                gc.collect()
+            msvcrt.locking(otro.fileno(), msvcrt.LK_UNLCK, 1)
+        self.grabar.assert_not_called()
+        # Sin cerrarlo, Python lo cierra al soltarlo y avisa: «unclosed file <... name='...grabacion.lock'>».
+        self.assertEqual([str(a.message) for a in avisos if "grabacion.lock" in str(a.message)], [])
+        self.ruta.unlink()  # en Windows no se podría con el archivo aún abierto
+
+    def test_mientras_graba_lo_tiene_cogido_y_al_acabar_lo_suelta(self):
+        ocupado = []
+        self.grabar.side_effect = lambda *a: ocupado.append(g._cerrojo_ocupado())
+        g.grabar({}, prueba_seg=10)
+        self.grabar.assert_called_once_with({}, 5, 100, 10)
+        self.assertEqual(ocupado, [True])
+        self.assertFalse(g._cerrojo_ocupado())
+        self.ruta.unlink()
+
+    def test_el_recolector_tampoco_lo_deja_abierto(self):
+        ruta = self.ruta.with_name("recolector.lock")
+        with mock.patch.object(rec, "RUTA_CERROJO", ruta), mock.patch.object(rec.config, "cargar", dict):
+            r = rec.Recolector(None, str, set(), list, regiones=())
+            with open(ruta, "a") as otro, contextlib.redirect_stdout(io.StringIO()):
+                msvcrt.locking(otro.fileno(), msvcrt.LK_NBLCK, 1)
+                self.assertFalse(r.arrancar())
+                msvcrt.locking(otro.fileno(), msvcrt.LK_UNLCK, 1)
+        self.assertIsNone(r._cerrojo)
+        ruta.unlink()  # sin un archivo abierto por medio
 
 
 class Series(unittest.TestCase):

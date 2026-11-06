@@ -211,12 +211,16 @@ class Recolector:
 
     # --- arranque: solo un recolector a la vez (la app o el suelto) --------------------------------
     def arrancar(self):
+        cerrojo = None
         try:
-            self._cerrojo = open(RUTA_CERROJO, "w")
-            msvcrt.locking(self._cerrojo.fileno(), msvcrt.LK_NBLCK, 1)
+            cerrojo = open(RUTA_CERROJO, "w")  # noqa: SIM115  se queda abierto y cogido mientras viva el recolector
+            msvcrt.locking(cerrojo.fileno(), msvcrt.LK_NBLCK, 1)
         except OSError:
+            if cerrojo:
+                cerrojo.close()
             print("Ya hay otro recolector en marcha; este no arranca")
             return False
+        self._cerrojo = cerrojo
         for c in self.clientes:
             threading.Thread(target=self._bucle, args=(c, False), name=f"recolector-{c.region}", daemon=True).start()
         if self.cliente_europa:

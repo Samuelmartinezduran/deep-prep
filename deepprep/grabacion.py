@@ -335,11 +335,16 @@ def grabar(cfg, espera_min=5, max_min=100, prueba_seg=0):
 
     prueba_seg: graba ese rato sin esperar al juego (para comprobar que funciona).
     """
-    cerrojo = open(RUTA_CERROJO, "a")
-    try:
-        msvcrt.locking(cerrojo.fileno(), msvcrt.LK_NBLCK, 1)
-    except OSError:
-        return  # ya hay otro grabando
+    # El cerrojo se queda cogido mientras dura la grabación: así la app sabe que hay una en marcha.
+    with open(RUTA_CERROJO, "a") as cerrojo:
+        try:
+            msvcrt.locking(cerrojo.fileno(), msvcrt.LK_NBLCK, 1)
+        except OSError:
+            return  # ya hay otro grabando
+        _grabar(cfg, espera_min, max_min, prueba_seg)
+
+
+def _grabar(cfg, espera_min, max_min, prueba_seg):
     with open(RUTA_LOG, "w", encoding="utf-8", buffering=1) as log:
         ffmpeg = buscar_ffmpeg()
         if not ffmpeg:
