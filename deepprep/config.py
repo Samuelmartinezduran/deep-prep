@@ -8,6 +8,7 @@ POROFESOR_DATOS, el nombre de antes, también vale.
 Hasta la 1.0.2 la app se llamaba Porofesor y guardaba los datos en %LOCALAPPDATA%\\Porofesor: la copia
 instalada los muda a la carpeta nueva al arrancar, antes de que nada abra las bases de datos o el registro.
 """
+
 import json
 import os
 import shutil
@@ -18,8 +19,11 @@ from pathlib import Path
 CONGELADA = getattr(sys, "frozen", False)  # app empaquetada (PyInstaller)
 RAIZ = Path(sys.executable).parent if CONGELADA else Path(__file__).resolve().parent.parent
 # Dónde se instala la app empaquetada (lo usa actualizador.py). DEEPPREP_PROGRAMA la manda a otra carpeta.
-PROGRAMA = Path(os.environ.get("DEEPPREP_PROGRAMA") or os.environ.get("POROFESOR_PROGRAMA")
-                or Path(os.environ.get("LOCALAPPDATA", Path.home())) / "Programs" / "DeepPrep")
+PROGRAMA = Path(
+    os.environ.get("DEEPPREP_PROGRAMA")
+    or os.environ.get("POROFESOR_PROGRAMA")
+    or Path(os.environ.get("LOCALAPPDATA", Path.home())) / "Programs" / "DeepPrep"
+)
 # Lo que pasa al mudar los datos de Porofesor. Aún no hay registro abierto: __main__ lo apunta al abrirlo.
 AVISOS = []
 
@@ -73,7 +77,9 @@ def mudar_datos(viejos, nuevos, intentos=30, pausa=0.5):
     except OSError as e:
         AVISOS.append(f"No se pudieron pasar los datos de {viejos} a {nuevos} ({e!r}); sigo con los de {viejos}")
         return viejos
-    AVISOS.append(f"Datos de Porofesor copiados de {viejos} a {nuevos} (no se pudieron mover: {error!r}); la carpeta vieja se queda")
+    AVISOS.append(
+        f"Datos de Porofesor copiados de {viejos} a {nuevos} (no se pudieron mover: {error!r}); la carpeta vieja se queda"
+    )
     return nuevos
 
 

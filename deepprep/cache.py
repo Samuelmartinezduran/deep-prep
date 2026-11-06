@@ -1,4 +1,5 @@
 """Caché local en SQLite. Las partidas no cambian nunca, así que se guardan para siempre."""
+
 import json
 import sqlite3
 import threading

@@ -1,4 +1,5 @@
 """Pruebas del control de cuota, con un reloj falso que avanza al 'dormir'."""
+
 import unittest
 
 from deepprep.riot import Limitador
@@ -69,7 +70,7 @@ class Cuota(unittest.TestCase):
         self.assertFalse(lim.adquirir("h", cancelada=lambda: True))
 
     def test_sincroniza_con_la_cuenta_de_riot(self):
-        lim, reloj = limitador()
+        lim, _reloj = limitador()
         lim.adquirir("h")
         lim.sincronizar("h", "90:120,3:1")  # Riot ha visto 90: la app se reinició y perdió la cuenta
         self.assertEqual(lim.estado("h")["usadas"], 90)

@@ -19,3 +19,12 @@ empaquetado/*.sha256
 empaquetado/*.spec
 novedades.json
 version_vista.txt
+
+# Desarrollo
+.venv/
+.coverage
+htmlcov/
+*.egg-info/
+.ruff_cache/
+.mypy_cache/
+build/

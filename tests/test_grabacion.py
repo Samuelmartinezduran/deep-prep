@@ -1,4 +1,5 @@
 """Pruebas del grabador integrado (lo que no necesita juego ni pantalla)."""
+
 import os
 import tempfile
 import time

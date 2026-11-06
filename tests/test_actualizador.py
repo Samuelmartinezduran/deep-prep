@@ -1,7 +1,8 @@
 """Pruebas del actualizador (sin red: GitHub de mentira)."""
+
 import hashlib
-import json
 import io
+import json
 import tempfile
 import time
 import unittest
@@ -43,8 +44,13 @@ class Actualizador(unittest.TestCase):
 
     def github(self, tag, datos, huella=None):
         huella = huella or hashlib.sha256(datos).hexdigest()
-        rel = {"tag_name": tag, "assets": [{"name": "DeepPrep-9.9.9.zip", "browser_download_url": "zip"},
-                                            {"name": "DeepPrep-9.9.9.zip.sha256", "browser_download_url": "sha"}]}
+        rel = {
+            "tag_name": tag,
+            "assets": [
+                {"name": "DeepPrep-9.9.9.zip", "browser_download_url": "zip"},
+                {"name": "DeepPrep-9.9.9.zip.sha256", "browser_download_url": "sha"},
+            ],
+        }
         respuestas = {"zip": datos, "sha": f"{huella}  DeepPrep-9.9.9.zip\n".encode()}
         return lambda url, binario=False: respuestas[url] if binario else rel
 
@@ -105,6 +111,7 @@ if __name__ == "__main__":
 class Novedades(unittest.TestCase):
     def test_solo_las_de_esta_version_y_una_vez(self):
         import tempfile
+
         from deepprep import __version__
         from deepprep import actualizador as act
 

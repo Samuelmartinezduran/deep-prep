@@ -3,6 +3,7 @@
 La grabación va en trozos de 5 minutos (r01_seg_000.mkv, ...): un recorte que cae entre dos trozos los une.
 Se codifica con prioridad mínima y pocos hilos para no molestar si ya estás en otra partida.
 """
+
 import subprocess
 from pathlib import Path
 
@@ -33,9 +34,30 @@ def orden_ffmpeg(ffmpeg, rutas, desde, duracion, destino, lista):
         entrada = ["-ss", f"{desde}", "-i", str(rutas[0])]
     else:
         entrada = ["-f", "concat", "-safe", "0", "-i", str(lista), "-ss", f"{desde}"]
-    return [ffmpeg, "-hide_banner", "-v", "error", "-y", *entrada, "-t", f"{duracion}",
-            "-vf", "scale=-2:720", "-c:v", "libx264", "-preset", "veryfast", "-crf", "26", "-threads", "2",
-            "-an", "-movflags", "+faststart", str(destino)]
+    return [
+        ffmpeg,
+        "-hide_banner",
+        "-v",
+        "error",
+        "-y",
+        *entrada,
+        "-t",
+        f"{duracion}",
+        "-vf",
+        "scale=-2:720",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-crf",
+        "26",
+        "-threads",
+        "2",
+        "-an",
+        "-movflags",
+        "+faststart",
+        str(destino),
+    ]
 
 
 def recortar(ffmpeg, carpeta, i, muerte, desfase_s):
@@ -54,8 +76,13 @@ def recortar(ffmpeg, carpeta, i, muerte, desfase_s):
     if len(rutas) > 1:
         lista.write_text("".join(f"file '{r.as_posix()}'\n" for r in rutas), encoding="utf-8")
     try:
-        subprocess.run(orden_ffmpeg(ffmpeg, rutas, desde, duracion, destino, lista), check=True, timeout=600,
-                       capture_output=True, creationflags=SIN_VENTANA | PRIORIDAD_MINIMA)
+        subprocess.run(
+            orden_ffmpeg(ffmpeg, rutas, desde, duracion, destino, lista),
+            check=True,
+            timeout=600,
+            capture_output=True,
+            creationflags=SIN_VENTANA | PRIORIDAD_MINIMA,
+        )
     except (subprocess.SubprocessError, OSError) as e:
         print(f"No se pudo recortar la muerte {muerte['t']}: {e}")
         destino.unlink(missing_ok=True)

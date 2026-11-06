@@ -3,21 +3,21 @@
 Uso: py herramientas/maqueta.py [maquetas/partida.json] [--modo previa|seleccion|carga|juego] [--puerto 5252]
 El estado sale de herramientas/simular_propia.py (lo guarda en herramientas/maquetas/partida.json).
 """
+
 import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import gzip  # noqa: E402
+import gzip
 
-from deepprep import analisis as an  # noqa: E402
-from deepprep import config, servidor  # noqa: E402
-from deepprep import revision as rv  # noqa: E402
-from deepprep.app import App  # noqa: E402
-from deepprep import duelos as du  # noqa: E402
-from deepprep.recolector import BaseDuelos  # noqa: E402
-
+from deepprep import analisis as an
+from deepprep import config, servidor
+from deepprep import duelos as du
+from deepprep import revision as rv
+from deepprep.app import App
+from deepprep.recolector import BaseDuelos
 
 AQUI = Path(__file__).parent
 DATOS_PRUEBA = AQUI.parent / "tests" / "datos"
@@ -45,9 +45,14 @@ class AppMaqueta:
         partida = an.reducir_partida(_gz("partida.json.gz"))
         yo = next(j for j in partida["jug"] if j["campeon"] == 131)
         prevision = {"gank": {"linea": "top", "veces": 3, "n": 5}, "lineas": [{"linea": "bot", "veredicto": "Aquí se equivocan"}]}
-        self.ejemplo = rv.revisar(partida, rv.reducir_linea_completa(_gz("linea.json.gz")), yo["puuid"], self.datos.nombre, prevision, 14)
-        self.ejemplo.update(carpeta=str(Path.home() / "Videos" / "LoL-coach" / "2026-10-12_partida1"), icono=self.datos.icono(131),
-                            lp={"lp": 53, "nivel": "emerald", "rank": "I", "cambio": -19})
+        self.ejemplo = rv.revisar(
+            partida, rv.reducir_linea_completa(_gz("linea.json.gz")), yo["puuid"], self.datos.nombre, prevision, 14
+        )
+        self.ejemplo.update(
+            carpeta=str(Path.home() / "Videos" / "LoL-coach" / "2026-10-12_partida1"),
+            icono=self.datos.icono(131),
+            lp={"lp": 53, "nivel": "emerald", "rank": "I", "cambio": -19},
+        )
         for m in self.ejemplo["muertes"][:3]:
             m["clip"] = "maqueta.mp4"
 
@@ -63,8 +68,18 @@ class AppMaqueta:
         if d and d["poco"] and "--duelo-real" not in sys.argv:
             base = self.real.duelos
             todos = [r for rb in base.cuantos(a, yo["rol"]) for r in base.duelo(a, yo["rol"], rb, excluir=set(self.real.cuentas))]
-            d = dict(d, **du.analizar(todos, base.de(set(self.real.cuentas), a, yo["rol"]), yo["campeon"], rival["campeon"], yo["rol"],
-                                      self.datos.objeto, self.datos.runa))
+            d = dict(
+                d,
+                **du.analizar(
+                    todos,
+                    base.de(set(self.real.cuentas), a, yo["rol"]),
+                    yo["campeon"],
+                    rival["campeon"],
+                    yo["rol"],
+                    self.datos.objeto,
+                    self.datos.runa,
+                ),
+            )
         return d
 
     def revisiones(self):
@@ -121,15 +136,25 @@ class AppMaqueta:
 
     def estado(self, contar=True):
         if self.modo == "seleccion":
-            return dict(self.base, modo="previa", fase="ChampSelect", fase_txt="Selección de campeón", panel=None, seleccion=self.seleccion())
+            return dict(
+                self.base,
+                modo="previa",
+                fase="ChampSelect",
+                fase_txt="Selección de campeón",
+                panel=None,
+                seleccion=self.seleccion(),
+            )
         e = dict(self.base, modo=self.modo)
         if "--novedades" in sys.argv:
             # Cómo lo ven los amigos: una versión nueva ya descargada y las novedades de la que acaban de instalar.
             e["version"] = {"version": "1.0.0", "nueva": "1.0.1", "lista": True, "error": ""}
-            e["novedades"] = {"version": "1.0.0", "notas": "Interfaz nueva y más datos para jugar mejor.\n"
-                              "- Tu pool contra el rival en la selección de campeón\n"
-                              "- Mapa de dónde está el jungla rival en sus primeros minutos\n"
-                              "- Clips de cada muerte en la revisión"}
+            e["novedades"] = {
+                "version": "1.0.0",
+                "notas": "Interfaz nueva y más datos para jugar mejor.\n"
+                "- Tu pool contra el rival en la selección de campeón\n"
+                "- Mapa de dónde está el jungla rival en sus primeros minutos\n"
+                "- Clips de cada muerte en la revisión",
+            }
         if e.get("panel"):
             jungla = e["panel"].get("jungla")
             if jungla and "mapa" not in jungla:

@@ -1,4 +1,5 @@
 """Pruebas del núcleo con un cliente del LoL y una API de Riot de mentira."""
+
 import json
 import time
 import unittest
@@ -57,8 +58,10 @@ class RiotFalso:
         return None
 
     def ligas(self, puuid, cancelada=None):
-        return [{"queueType": "RANKED_SOLO_5x5", "tier": "DIAMOND", "rank": "IV", "leaguePoints": 18, "wins": 72, "losses": 65},
-                {"queueType": "RANKED_FLEX_SR", "tier": "PLATINUM", "rank": "II", "leaguePoints": 50, "wins": 10, "losses": 8}]
+        return [
+            {"queueType": "RANKED_SOLO_5x5", "tier": "DIAMOND", "rank": "IV", "leaguePoints": 18, "wins": 72, "losses": 65},
+            {"queueType": "RANKED_FLEX_SR", "tier": "PLATINUM", "rank": "II", "leaguePoints": 50, "wins": 10, "losses": 8},
+        ]
 
     def maestrias(self, puuid, cancelada=None):
         return [{"championId": 1, "championPoints": 900000, "lastPlayTime": 0}]
@@ -232,7 +235,9 @@ class NormasDeRiot(unittest.TestCase):
         app.sesion.panel()
         app.sesion._sucio = False
         app.sesion._panel["plan"] = ["algo interpretativo"]
-        app.sesion._panel["lineas"] = [{"linea": "top", "veredicto": "Aquí se equivocan", "tono": "bien", "rival": [], "aliado": []}]
+        app.sesion._panel["lineas"] = [
+            {"linea": "top", "veredicto": "Aquí se equivocan", "tono": "bien", "rival": [], "aliado": []}
+        ]
         self.assertTrue(app.estado()["panel"]["plan"])
         lol.segundos = 90.0
         app.actualizar_modo()
@@ -249,8 +254,11 @@ class NormasDeRiot(unittest.TestCase):
 
         app, _, lol = montar()
         lol.fase = "InProgress"
+
         # Dos jugadores de cada equipo vienen juntos (los dos primeros de cada lista, sin contarme a mí).
-        con_grupo = lambda equipo, muestras: {p: 1 for p in [x for x in equipo if x != "puuid-yo"][:2]}
+        def con_grupo(equipo, muestras):
+            return dict.fromkeys([x for x in equipo if x != "puuid-yo"][:2], 1)
+
         with mock.patch("deepprep.analisis.premades", side_effect=con_grupo):
             app._paso()
             self.assertTrue(esperar(app.sesion))
@@ -272,7 +280,9 @@ class NormasDeRiot(unittest.TestCase):
         yo = next(f for f in app.sesion.jugadores if f["puuid"] == "puuid-yo")
         rival = next(f for f in app.sesion.jugadores if f["equipo"] != yo["equipo"] and f["rol"] == yo["rol"])
         for i in range(12):
-            app.duelos.guardar(f"KR_{i}", [dict(registro(i % 2), pos=yo["rol"], a=yo["campeon"], b=rival["campeon"], puuid=f"p{i}")])
+            app.duelos.guardar(
+                f"KR_{i}", [dict(registro(i % 2), pos=yo["rol"], a=yo["campeon"], b=rival["campeon"], puuid=f"p{i}")]
+            )
         app.sesion._sucio = True
         d = app.estado()["panel"]["duelo"]
         self.assertEqual((d["n"], d["wr"], d["poco"]), (12, 50, False))
@@ -329,7 +339,9 @@ class NormasDeRiot(unittest.TestCase):
             self.assertTrue(app.guardar_ajustes({"comparar_con": modo})["ok"])
             self.assertEqual(muertes(), esperado)
         self.assertTrue(app.guardar_ajustes({"referencias": {"131": "Otp#KR1"}})["ok"])
-        self.assertEqual(muertes(), ("Otp contra Campeón 64", "1,0"))  # la referencia del campeón manda (y hay 5+ contra ese rival)
+        self.assertEqual(
+            muertes(), ("Otp contra Campeón 64", "1,0")
+        )  # la referencia del campeón manda (y hay 5+ contra ese rival)
         self.assertEqual(app._referencias(), [{"puuid": "otp", "region": "asia", "campeon": 131}])
         self.assertFalse(app.guardar_ajustes({"comparar_con": "nadie"})["ok"])
 
@@ -341,7 +353,9 @@ class NormasDeRiot(unittest.TestCase):
         app.duelos.kv_set("ref:pro#euw", {"puuid": "pro", "plataforma": "euw1", "rid": "Pro#EUW"})
         for i in range(3):
             app.duelos.guardar(f"PRO_{i}", [dict(registro(True, m10=1), puuid="pro")])  # Diana (131) en jungla
-            app.duelos.guardar(f"MIA_{i}", [dict(registro(False, m10=2), puuid="puuid-yo"), dict(registro(False, m10=2), a=11, puuid="puuid-yo")])
+            app.duelos.guardar(
+                f"MIA_{i}", [dict(registro(False, m10=2), puuid="puuid-yo"), dict(registro(False, m10=2), a=11, puuid="puuid-yo")]
+            )
         self.assertTrue(app.guardar_ajustes({"comparar_con": "perfil", "perfil_base": "Pro#EUW"})["ok"])
         self.assertEqual(app.duelo(131, "JUNGLE", 64)["tu"]["ref"], "Pro con Campeón 131")
         # Con un campeón que él no juega: sus partidas en tu posición.
@@ -426,9 +440,18 @@ class RevisionYAjustes(unittest.TestCase):
         app, _, _ = montar()
         self.assertFalse(app.guardar_ajustes({"atajo_overlay": "ctrl+nada"})["ok"])
         self.assertFalse(app.guardar_ajustes({"cuentas": ["sin-tag"]})["ok"])
-        self.assertTrue(app.guardar_ajustes({"atajo_overlay": "Alt+X", "overlay_opacidad": 3, "notas": {"11": " no pelear solo ", "64": "  "}})["ok"])
-        self.assertEqual((app.cfg["atajo_overlay"], app.cfg["overlay_opacidad"], app.cfg["notas"]), ("alt+x", 1.0, {"11": "no pelear solo"}))
-        self.assertEqual(app.notas_de([11, 64, 11], rivales={11}), [{"campeon": "Campeón 11", "icono": "", "texto": "no pelear solo", "rival": True}])
+        self.assertTrue(
+            app.guardar_ajustes(
+                {"atajo_overlay": "Alt+X", "overlay_opacidad": 3, "notas": {"11": " no pelear solo ", "64": "  "}}
+            )["ok"]
+        )
+        self.assertEqual(
+            (app.cfg["atajo_overlay"], app.cfg["overlay_opacidad"], app.cfg["notas"]), ("alt+x", 1.0, {"11": "no pelear solo"})
+        )
+        self.assertEqual(
+            app.notas_de([11, 64, 11], rivales={11}),
+            [{"campeon": "Campeón 11", "icono": "", "texto": "no pelear solo", "rival": True}],
+        )
         self.assertIn("campeones", app.ajustes())
 
     def test_recuerda_la_cuenta_secundaria(self):
@@ -446,13 +469,35 @@ class SeleccionDeCampeon(unittest.TestCase):
         app, _, lol = montar()
 
         def jug(puuid, equipo, campeon, gana):
-            return {"puuid": puuid, "equipo": equipo, "campeon": campeon, "pos": "JUNGLE", "gana": gana, "pid": 1,
-                    "nombre": puuid, "tag": "", "k": 0, "d": 0, "a": 0, "ch": {}}
+            return {
+                "puuid": puuid,
+                "equipo": equipo,
+                "campeon": campeon,
+                "pos": "JUNGLE",
+                "gana": gana,
+                "pid": 1,
+                "nombre": puuid,
+                "tag": "",
+                "k": 0,
+                "d": 0,
+                "a": 0,
+                "ch": {},
+            }
 
         ahora = int(time.time() * 1000)
         for i, (cola, gana) in enumerate([(420, True), (420, False), (440, True)]):
-            app.cache.guardar_partida({"id": f"m{i}", "creacion": ahora - i, "duracion": 1800, "cola": cola, "mapa": 11,
-                                       "remake": False, "equipos": {}, "jug": [jug("puuid-yo", 100, 131, gana), jug("r", 200, 11, not gana)]})
+            app.cache.guardar_partida(
+                {
+                    "id": f"m{i}",
+                    "creacion": ahora - i,
+                    "duracion": 1800,
+                    "cola": cola,
+                    "mapa": 11,
+                    "remake": False,
+                    "equipos": {},
+                    "jug": [jug("puuid-yo", 100, 131, gana), jug("r", 200, 11, not gana)],
+                }
+            )
         lol.fase = "ChampSelect"
         lol.eleccion = {"mio": 131, "aliados": [], "rivales": [11], "cola": 420}
         app._paso()

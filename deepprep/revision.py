@@ -2,12 +2,18 @@
 
 Riot anima justo a esto: jugar primero y analizar después. Aquí sí se sacan conclusiones.
 """
+
 from . import analisis as an
 
 MONSTRUOS = {"DRAGON": "Dragón", "BARON_NASHOR": "Barón", "RIFTHERALD": "Heraldo", "HORDE": "Larvas", "ATAKHAN": "Atakhan"}
 DRAGONES = {
-    "FIRE_DRAGON": "infernal", "WATER_DRAGON": "oceánico", "EARTH_DRAGON": "de montaña", "AIR_DRAGON": "de nube",
-    "HEXTECH_DRAGON": "hextech", "CHEMTECH_DRAGON": "quimtech", "ELDER_DRAGON": "ancestral",
+    "FIRE_DRAGON": "infernal",
+    "WATER_DRAGON": "oceánico",
+    "EARTH_DRAGON": "de montaña",
+    "AIR_DRAGON": "de nube",
+    "HEXTECH_DRAGON": "hextech",
+    "CHEMTECH_DRAGON": "quimtech",
+    "ELDER_DRAGON": "ancestral",
 }
 # Un objetivo que el rival hace poco después de una muerte tuya cuenta como perdido por ella.
 VENTANA_OBJETIVO_MS = 90_000
@@ -23,17 +29,38 @@ def reducir_linea_completa(t):
             p = pf.get("position") or {}
             pos.setdefault(pid, []).append([p.get("x", 0), p.get("y", 0)])
             est.setdefault(pid, []).append(
-                [pf.get("totalGold", 0), pf.get("xp", 0), pf.get("minionsKilled", 0) + pf.get("jungleMinionsKilled", 0), pf.get("level", 1)]
+                [
+                    pf.get("totalGold", 0),
+                    pf.get("xp", 0),
+                    pf.get("minionsKilled", 0) + pf.get("jungleMinionsKilled", 0),
+                    pf.get("level", 1),
+                ]
             )
     kills, monstruos = [], []
     for f in info["frames"]:
         for e in f.get("events", []):
             if e["type"] == "CHAMPION_KILL":
                 p = e.get("position") or {}
-                kills.append([e["timestamp"], p.get("x", 0), p.get("y", 0), e.get("killerId", 0), e.get("victimId", 0), e.get("assistingParticipantIds") or []])
+                kills.append(
+                    [
+                        e["timestamp"],
+                        p.get("x", 0),
+                        p.get("y", 0),
+                        e.get("killerId", 0),
+                        e.get("victimId", 0),
+                        e.get("assistingParticipantIds") or [],
+                    ]
+                )
             elif e["type"] == "ELITE_MONSTER_KILL":
                 monstruos.append(
-                    [e["timestamp"], e.get("monsterType", ""), e.get("monsterSubType") or "", e.get("killerId", 0), e.get("killerTeamId", 0), e.get("assistingParticipantIds") or []]
+                    [
+                        e["timestamp"],
+                        e.get("monsterType", ""),
+                        e.get("monsterSubType") or "",
+                        e.get("killerId", 0),
+                        e.get("killerTeamId", 0),
+                        e.get("assistingParticipantIds") or [],
+                    ]
                 )
     return {"id": t["metadata"]["matchId"], "pos": pos, "est": est, "kills": kills, "monstruos": monstruos}
 
@@ -134,7 +161,9 @@ def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None
                 "asesino": campeon(asesino),
                 "ayudas": [campeon(a) for a in ayudas],
                 "rivales": (1 if asesino in por_pid else 0) + len(ayudas),
-                "perdido": f"{nombre_monstruo(perdido[1], perdido[2])} rival {an.mmss(perdido[0] - t)} después" if perdido else "",
+                "perdido": f"{nombre_monstruo(perdido[1], perdido[2])} rival {an.mmss(perdido[0] - t)} después"
+                if perdido
+                else "",
                 "video": en_video(t, desfase_s),
             }
         )
@@ -154,7 +183,12 @@ def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None
         for minuto in (10, 15):
             mio, suyo = _al(linea, pid, minuto), _al(linea, directo["pid"], minuto)
             if mio and suyo:
-                filas[str(minuto)] = {"oro": [mio[0], suyo[0]], "xp": [mio[1], suyo[1]], "cs": [mio[2], suyo[2]], "nivel": [mio[3], suyo[3]]}
+                filas[str(minuto)] = {
+                    "oro": [mio[0], suyo[0]],
+                    "xp": [mio[1], suyo[1]],
+                    "cs": [mio[2], suyo[2]],
+                    "nivel": [mio[3], suyo[3]],
+                }
         out["comparacion"] = {"rival": nombre_campeon(directo["campeon"]), "minutos": filas} if filas else None
 
     out["prevision"] = _prevision(panel, linea, partida, equipo, jr)
@@ -224,7 +258,9 @@ def tendencias(partidas, mis_puuids, nombre_campeon, hora_local):
     directos = {}  # (campeón rival, posición) -> resultados, contra tu rival de posición
     for m, yo in juegos:
         h = hora_local(m["creacion"])
-        franja = "Madrugada (0-6 h)" if h < 6 else "Mañana (6-14 h)" if h < 14 else "Tarde (14-20 h)" if h < 20 else "Noche (20-24 h)"
+        franja = (
+            "Madrugada (0-6 h)" if h < 6 else "Mañana (6-14 h)" if h < 14 else "Tarde (14-20 h)" if h < 20 else "Noche (20-24 h)"
+        )
         franjas[franja].append(yo["gana"])
         minutos = m["duracion"] / 60
         duraciones["Menos de 25 min" if minutos < 25 else "25 a 35 min" if minutos <= 35 else "Más de 35 min"].append(yo["gana"])
@@ -261,5 +297,16 @@ def mapa_muertes(revisiones):
             if "x" not in m:
                 continue
             x, y = (m["x"], m["y"]) if r["equipo"] == 100 else an.espejo(m["x"], m["y"])
-            out.append({"x": x, "y": y, "ms": m["ms"], "t": m["t"], "id": r["id"], "campeon": r["campeon"], "gana": r["gana"], "asesino": m["asesino"]})
+            out.append(
+                {
+                    "x": x,
+                    "y": y,
+                    "ms": m["ms"],
+                    "t": m["t"],
+                    "id": r["id"],
+                    "campeon": r["campeon"],
+                    "gana": r["gana"],
+                    "asesino": m["asesino"],
+                }
+            )
     return out

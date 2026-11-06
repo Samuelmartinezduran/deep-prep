@@ -5,6 +5,7 @@ Lo que Riot aprueba es superponer datos que ya existían antes de la partida. Po
 - El atajo se consulta preguntando a Windows si las teclas están pulsadas: no hay ganchos de teclado.
 - La ventana no coge el foco y deja pasar los clics: el juego sigue recibiendo todo.
 """
+
 import configparser
 import ctypes
 import ctypes.wintypes as wt
@@ -14,10 +15,25 @@ from pathlib import Path
 
 # Nombres de tecla que se aceptan en "atajo_overlay" (además de letras, números y F1-F12).
 TECLAS = {
-    "ctrl": 0x11, "control": 0x11, "shift": 0x10, "mayus": 0x10, "alt": 0x12,
-    "tab": 0x09, "espacio": 0x20, "space": 0x20, "º": 0xDC, "capslock": 0x14,
-    "insert": 0x2D, "inicio": 0x24, "home": 0x24, "fin": 0x23, "end": 0x23,
-    "repag": 0x21, "avpag": 0x22, "pageup": 0x21, "pagedown": 0x22,
+    "ctrl": 0x11,
+    "control": 0x11,
+    "shift": 0x10,
+    "mayus": 0x10,
+    "alt": 0x12,
+    "tab": 0x09,
+    "espacio": 0x20,
+    "space": 0x20,
+    "º": 0xDC,
+    "capslock": 0x14,
+    "insert": 0x2D,
+    "inicio": 0x24,
+    "home": 0x24,
+    "fin": 0x23,
+    "end": 0x23,
+    "repag": 0x21,
+    "avpag": 0x22,
+    "pageup": 0x21,
+    "pagedown": 0x22,
 }
 CLASE_JUEGO = "RiotWindowClass"
 MODO_SIN_BORDES = "2"
@@ -151,7 +167,9 @@ class VentanaWin32:
         self.hwnd = wt.HWND(hwnd)
         self.ancho, self.alto = ancho, alto
         ex = _u32.GetWindowLongPtrW(self.hwnd, GWL_EXSTYLE)
-        _u32.SetWindowLongPtrW(self.hwnd, GWL_EXSTYLE, ex | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE)
+        _u32.SetWindowLongPtrW(
+            self.hwnd, GWL_EXSTYLE, ex | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE
+        )
         self.opacidad(opacidad)
 
     def opacidad(self, valor):

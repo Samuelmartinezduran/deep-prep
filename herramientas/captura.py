@@ -3,6 +3,7 @@
 Uso: py herramientas/captura.py URL salida.png [ancho alto]
 Ejemplo: py herramientas/captura.py "http://127.0.0.1:5252/?vista=overlay" overlay.png 1180 620
 """
+
 import os
 import subprocess
 import sys
@@ -22,9 +23,21 @@ def main():
     exe = next(p for p in CHROME if p.is_file())
     with tempfile.TemporaryDirectory() as perfil:
         subprocess.run(
-            [str(exe), "--headless=new", "--disable-gpu", "--hide-scrollbars", f"--user-data-dir={perfil}",
-             f"--window-size={ancho},{alto}", "--virtual-time-budget=5000", f"--screenshot={salida}", url],
-            check=True, capture_output=True, timeout=60)
+            [
+                str(exe),
+                "--headless=new",
+                "--disable-gpu",
+                "--hide-scrollbars",
+                f"--user-data-dir={perfil}",
+                f"--window-size={ancho},{alto}",
+                "--virtual-time-budget=5000",
+                f"--screenshot={salida}",
+                url,
+            ],
+            check=True,
+            capture_output=True,
+            timeout=60,
+        )
     print(salida)
 
 

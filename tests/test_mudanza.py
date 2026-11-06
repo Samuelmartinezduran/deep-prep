@@ -2,6 +2,7 @@
 
 Todo pasa en carpetas temporales: ni los datos, ni el programa, ni los accesos directos de verdad se tocan.
 """
+
 import contextlib
 import hashlib
 import importlib.util
@@ -48,7 +49,7 @@ class ConCarpetaTemporal(unittest.TestCase):
         self.avisos = len(config.AVISOS)
 
     def tearDown(self):
-        del config.AVISOS[self.avisos:]
+        del config.AVISOS[self.avisos :]
         self._tmp.cleanup()
 
 
@@ -96,8 +97,10 @@ class MudanzaDeDatos(ConCarpetaTemporal):
 
     def test_si_tampoco_se_puede_copiar_sigue_con_la_vieja(self):
         datos_de_porofesor(self.viejos)
-        with mock.patch("deepprep.config.os.rename", side_effect=PermissionError("en uso")), \
-                mock.patch("deepprep.config.shutil.copytree", side_effect=OSError("disco lleno")):
+        with (
+            mock.patch("deepprep.config.os.rename", side_effect=PermissionError("en uso")),
+            mock.patch("deepprep.config.shutil.copytree", side_effect=OSError("disco lleno")),
+        ):
             self.assertEqual(config.mudar_datos(self.viejos, self.nuevos, intentos=2, pausa=0), self.viejos)
         self.assertFalse((self.nuevos / "config.json").exists())  # así se vuelve a intentar en el próximo arranque
         self.assertTrue((self.viejos / "clave.txt").is_file())
@@ -114,8 +117,10 @@ class MudanzaDeDatos(ConCarpetaTemporal):
     def test_las_novedades_salen_despues_de_mudar(self):
         datos_de_porofesor(self.viejos)
         config.mudar_datos(self.viejos, self.nuevos, pausa=0)
-        with mock.patch.object(act, "NOVEDADES", self.nuevos / "novedades.json"), \
-                mock.patch.object(act, "VISTA", self.nuevos / "version_vista.txt"):
+        with (
+            mock.patch.object(act, "NOVEDADES", self.nuevos / "novedades.json"),
+            mock.patch.object(act, "VISTA", self.nuevos / "version_vista.txt"),
+        ):
             a = act.Actualizador(app=None)
             self.assertEqual(a.novedades()["notas"], NOTAS)
             self.assertFalse(a._faltan_novedades())  # están: no hay que pedírselas a GitHub
@@ -126,8 +131,11 @@ class QuienMudaLosDatos(ConCarpetaTemporal):
         super().setUp()
         self.viejos, self.nuevos = self.tmp / "Porofesor", self.tmp / "DeepPrep"
         self.programa = self.tmp / "Programs" / "DeepPrep"
-        self.parches = [mock.patch.object(config, "CONGELADA", True), mock.patch.object(config, "PROGRAMA", self.programa),
-                        mock.patch.object(config, "RAIZ", self.programa)]
+        self.parches = [
+            mock.patch.object(config, "CONGELADA", True),
+            mock.patch.object(config, "PROGRAMA", self.programa),
+            mock.patch.object(config, "RAIZ", self.programa),
+        ]
         for p in self.parches:
             p.start()
         self.entorno = {"LOCALAPPDATA": str(self.tmp)}
@@ -160,7 +168,9 @@ class QuienMudaLosDatos(ConCarpetaTemporal):
         datos_de_porofesor(self.viejos)
         self.assertEqual(config.elegir_datos({**self.entorno, "DEEPPREP_DATOS": "C:/a"}, []), Path("C:/a"))
         self.assertEqual(config.elegir_datos({**self.entorno, "POROFESOR_DATOS": "C:/b"}, []), Path("C:/b"))
-        self.assertEqual(config.elegir_datos({**self.entorno, "DEEPPREP_DATOS": "C:/a", "POROFESOR_DATOS": "C:/b"}, []), Path("C:/a"))
+        self.assertEqual(
+            config.elegir_datos({**self.entorno, "DEEPPREP_DATOS": "C:/a", "POROFESOR_DATOS": "C:/b"}, []), Path("C:/a")
+        )
         self.assertTrue((self.viejos / "clave.txt").is_file())  # con carpeta propia no se muda nada
         with mock.patch.object(config, "CONGELADA", False):
             self.assertEqual(config.elegir_datos(self.entorno, []), self.programa)  # desde el código, la RAIZ
@@ -251,7 +261,9 @@ class InstalacionDesdePorofesor(ConInstalaciones):
         self.assertFalse((self.escritorio / "Porofesor.lnk").exists())
         self.assertFalse((self.inicio / "Porofesor.lnk").exists())
         exe = self.nueva / "DeepPrep.exe"
-        self.assertEqual(self.creados, [(self.escritorio / "Deep Prep.lnk", exe, ""), (self.inicio / "Deep Prep.lnk", exe, "--oculta")])
+        self.assertEqual(
+            self.creados, [(self.escritorio / "Deep Prep.lnk", exe, ""), (self.inicio / "Deep Prep.lnk", exe, "--oculta")]
+        )
 
     def test_sin_siempre_en_marcha_no_arranca_con_windows(self):
         self.cfg["siempre_en_marcha"] = False
@@ -276,8 +288,11 @@ class InstalacionDesdePorofesor(ConInstalaciones):
         self.assertEqual(self.lanzado()[0][0], str(self.nueva / "DeepPrep.exe"))
 
     def test_si_no_se_puede_instalar_abre_la_de_antes(self):
-        with mock.patch.object(act.shutil, "copytree", side_effect=OSError("disco lleno")), \
-                mock.patch.object(act.time, "sleep"), contextlib.redirect_stdout(io.StringIO()):
+        with (
+            mock.patch.object(act.shutil, "copytree", side_effect=OSError("disco lleno")),
+            mock.patch.object(act.time, "sleep"),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
             self.assertFalse(act.terminar_actualizacion("0", str(self.vieja), "--oculta"))
         self.assertEqual(self.lanzado(), ([str(self.vieja / "Porofesor.exe"), "--oculta"], str(self.vieja)))
         self.assertTrue((self.vieja / "Porofesor.exe").is_file())
@@ -367,8 +382,14 @@ def actualizador_de_la_1_0_x(rel, bajar, carpeta):
 def version_publicada(zip_ruta, tag="v2.0.0"):
     """La versión como la devuelve GitHub (releases/latest) y una descarga de mentira de sus archivos."""
     sha = Path(f"{zip_ruta}.sha256")
-    rel = {"tag_name": tag, "body": NOTAS, "assets": [{"name": zip_ruta.name, "browser_download_url": str(zip_ruta)},
-                                                      {"name": sha.name, "browser_download_url": str(sha)}]}
+    rel = {
+        "tag_name": tag,
+        "body": NOTAS,
+        "assets": [
+            {"name": zip_ruta.name, "browser_download_url": str(zip_ruta)},
+            {"name": sha.name, "browser_download_url": str(sha)},
+        ],
+    }
     return rel, lambda url, binario=True: Path(url).read_bytes() if binario else rel
 
 
@@ -382,7 +403,9 @@ class ZipPuente(ConInstalaciones):
 
     def comprimir(self, puente):
         with contextlib.redirect_stdout(io.StringIO()):
-            return self.publicar.comprimir("2.0.0", puente=puente, dist=self.dist, carpeta=self.tmp / ("puente" if puente else "zip"))
+            return self.publicar.comprimir(
+                "2.0.0", puente=puente, dist=self.dist, carpeta=self.tmp / ("puente" if puente else "zip")
+            )
 
     def test_la_1_0_x_encuentra_porofesor_exe_en_el_zip_puente(self):
         rel, bajar = version_publicada(self.comprimir(puente=True))
@@ -403,9 +426,13 @@ class ZipPuente(ConInstalaciones):
         for puente in (False, True):
             descargas = self.tmp / f"descargas{puente}"
             descargas.mkdir()
-            rel, bajar = version_publicada(self.comprimir(puente), tag="v9.9.9")
-            with mock.patch.object(act, "CARPETA_DESCARGA", descargas), mock.patch.object(act, "NOVEDADES", descargas / "novedades.json"), \
-                    mock.patch.object(act, "_get", lambda url, binario=False: bajar(url, binario)), contextlib.redirect_stdout(io.StringIO()):
+            _rel, bajar = version_publicada(self.comprimir(puente), tag="v9.9.9")
+            with (
+                mock.patch.object(act, "CARPETA_DESCARGA", descargas),
+                mock.patch.object(act, "NOVEDADES", descargas / "novedades.json"),
+                mock.patch.object(act, "_get", lambda url, binario=False: bajar(url, binario)),
+                contextlib.redirect_stdout(io.StringIO()),
+            ):
                 a = act.Actualizador(app=None)
                 self.assertTrue(a.comprobar())
             self.assertTrue((a._carpeta_nueva / "DeepPrep.exe").is_file())
@@ -417,7 +444,9 @@ class ZipPuente(ConInstalaciones):
         # La 1.0.x lanza: Porofesor.exe --actualizar PID ...\Programs\Porofesor --oculta
         with mock.patch.object(act, "sys", types.SimpleNamespace(executable=str(exe))), contextlib.redirect_stdout(io.StringIO()):
             self.assertTrue(act.terminar_actualizacion("0", str(self.vieja), "--oculta"))
-        self.assertEqual(sorted(p.name for p in self.nueva.iterdir()), ["DeepPrep.exe", "LEEME.txt", "_internal", "ffmpeg", "version.txt"])
+        self.assertEqual(
+            sorted(p.name for p in self.nueva.iterdir()), ["DeepPrep.exe", "LEEME.txt", "_internal", "ffmpeg", "version.txt"]
+        )
         self.assertFalse(self.vieja.exists())
         self.assertEqual(self.lanzado()[0], [str(self.nueva / "DeepPrep.exe"), "--oculta"])
 

@@ -1,4 +1,5 @@
 """Pruebas del duelo contra el rival directo: extracción de registros, análisis y base."""
+
 import gzip
 import json
 import unittest
@@ -17,9 +18,25 @@ def cargar(nombre):
 
 
 def registro(g, peleas=(), m10=0, oro10=0, dur=28.0, cs10=70, ka10=2, larvas=1, drag1=0, item=(3100, 10.0), muertes=()):
-    return {"pos": "JUNGLE", "a": 131, "b": 64, "g": int(g), "dur": dur, "v": "16.20", "dif": {"10": [oro10, 0, 0]}, "cs10": cs10,
-            "peleas": [list(p) for p in peleas], "muertes": [list(m) for m in muertes], "m10": m10, "ka10": ka10,
-            "item": list(item), "runa": [8010, 8300], "hab": "QWE>QWE", "larvas": larvas, "drag1": drag1}
+    return {
+        "pos": "JUNGLE",
+        "a": 131,
+        "b": 64,
+        "g": int(g),
+        "dur": dur,
+        "v": "16.20",
+        "dif": {"10": [oro10, 0, 0]},
+        "cs10": cs10,
+        "peleas": [list(p) for p in peleas],
+        "muertes": [list(m) for m in muertes],
+        "m10": m10,
+        "ka10": ka10,
+        "item": list(item),
+        "runa": [8010, 8300],
+        "hab": "QWE>QWE",
+        "larvas": larvas,
+        "drag1": drag1,
+    }
 
 
 class Extraccion(unittest.TestCase):
@@ -56,7 +73,15 @@ class Analisis(unittest.TestCase):
         despues = [(9.0, 7, 6, 1, 2, "rio", "inf", False)] * 3
         regs = [registro(True, antes[:1] + despues, m10=0, oro10=600) for _ in range(12)]
         regs += [registro(False, antes, m10=3, oro10=-600, muertes=[(4.0, 1, "jungla", "sup", True)] * 2) for _ in range(12)]
-        r = du.analizar(regs, [registro(False, antes, m10=2)] * 4, "Diana", "Nidalee", "JUNGLE", nombre_objeto=lambda i: f"O{i}", nombre_runa=lambda i: f"R{i}")
+        r = du.analizar(
+            regs,
+            [registro(False, antes, m10=2)] * 4,
+            "Diana",
+            "Nidalee",
+            "JUNGLE",
+            nombre_objeto=lambda i: f"O{i}",
+            nombre_runa=lambda i: f"R{i}",
+        )
         textos = " | ".join(d["texto"] for d in r["datos"])
         self.assertIn("Diana gana el 20% de las peleas con Nidalee antes de su 6; desde el 6, el 100%.", textos)
         self.assertIn("Peleas con Nidalee antes del 6: 1,0 en las que gana Diana, 4,0 en las que pierde.", textos)
@@ -66,7 +91,10 @@ class Analisis(unittest.TestCase):
         c = du.comparar([registro(False, antes, m10=2)] * 4, [x for x in regs if x["g"]], "JUNGLE", "Ganan este duelo")
         tu = {f["que"]: f for f in c["filas"]}
         self.assertEqual((c["ref"], c["n"], c["n_ref"]), ("Ganan este duelo", 4, 12))
-        self.assertEqual((tu["Muertes antes del 10"]["tu"], tu["Muertes antes del 10"]["ref"], tu["Muertes antes del 10"]["mejor"]), ("2,0", "0,0", False))
+        self.assertEqual(
+            (tu["Muertes antes del 10"]["tu"], tu["Muertes antes del 10"]["ref"], tu["Muertes antes del 10"]["mejor"]),
+            ("2,0", "0,0", False),
+        )
         self.assertIsNone(tu["Peleas con tu rival antes del 6"]["mejor"])
         self.assertIsNone(du.comparar([registro(True)], [registro(True)] * 2, "JUNGLE", "X"))  # referencia con muy pocas partidas
 
@@ -76,13 +104,18 @@ class Analisis(unittest.TestCase):
 
         regs = [reg(True, 15) for _ in range(12)] + [reg(False, -15) for _ in range(12)]
         r = du.analizar(regs, [reg(False, -5)] * 4, "Katarina", "Ahri", "MIDDLE")
-        self.assertIn("Diferencia de CS con Ahri al 10: 15,0 en las que gana Katarina, -15,0 en las que pierde.", [d["texto"] for d in r["datos"]])
+        self.assertIn(
+            "Diferencia de CS con Ahri al 10: 15,0 en las que gana Katarina, -15,0 en las que pierde.",
+            [d["texto"] for d in r["datos"]],
+        )
         c = du.comparar([reg(False, -5)] * 4, regs[:12], "MIDDLE", "Faker")
         self.assertIn({"que": "CS sobre tu rival al 10", "tu": "-5", "ref": "+15", "mejor": False}, c["filas"])
         self.assertNotIn("CS al 10", [f["que"] for f in du.comparar(regs, regs, "UTILITY", "X")["filas"]])
         self.assertFalse(any("Larvas" in d["texto"] or "dragón" in d["texto"] for d in r["datos"]))
         en_mid = [dict(x, muertes=[[5.0, 1, "mid", "sup", True]] * 2) for x in regs]
-        self.assertFalse(any("muertes de Katarina" in d["texto"] for d in du.analizar(en_mid, [], "Katarina", "Ahri", "MIDDLE")["datos"]))
+        self.assertFalse(
+            any("muertes de Katarina" in d["texto"] for d in du.analizar(en_mid, [], "Katarina", "Ahri", "MIDDLE")["datos"])
+        )
         sup = du.analizar([dict(x, pos="UTILITY") for x in regs], [], "Thresh", "Nautilus", "UTILITY")
         self.assertFalse(any("CS" in d["texto"] for d in sup["datos"]))
 
@@ -93,7 +126,13 @@ class Analisis(unittest.TestCase):
 
 
 class Seleccion(unittest.TestCase):
-    ROLES = {64: {"JUNGLE": 0.9, "TOP": 0.1}, 103: {"MIDDLE": 1.0}, 222: {"BOTTOM": 1.0}, 412: {"UTILITY": 1.0}, 266: {"TOP": 1.0}}
+    ROLES = {
+        64: {"JUNGLE": 0.9, "TOP": 0.1},
+        103: {"MIDDLE": 1.0},
+        222: {"BOTTOM": 1.0},
+        412: {"UTILITY": 1.0},
+        266: {"TOP": 1.0},
+    }
 
     def test_rival_probable(self):
         self.assertEqual(an.rival_probable([103, 64], "JUNGLE", self.ROLES), 64)

@@ -4,6 +4,7 @@ El dibujo es la Grieta reducida a lo esencial: el borde son las líneas de top y
 las esquinas son las dos bases y el punto del centro eres tú. Violeta de la app sobre fondo oscuro.
 Uso: py herramientas/logo.py [vista_previa.png]
 """
+
 import sys
 from pathlib import Path
 
@@ -28,17 +29,17 @@ def dibujar(tam):
     # El río, más tenue, de esquina a esquina por el otro lado (en los tamaños muy pequeños no se ve: fuera).
     if tam > 20:
         rio = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-        ImageDraw.Draw(rio).line([a + 3 * u, a + 3 * u, b - 3 * u, b - 3 * u], fill=VIOLETA[:3] + (90,), width=round(grueso * .6))
+        ImageDraw.Draw(rio).line([a + 3 * u, a + 3 * u, b - 3 * u, b - 3 * u], fill=(*VIOLETA[:3], 90), width=round(grueso * 0.6))
         img.alpha_composite(rio)
     d.rounded_rectangle([a, a, b, b], radius=2.5 * u, outline=VIOLETA, width=round(grueso))
     # Las dos bases, metidas en sus esquinas, y mid uniéndolas.
     lado = 5.5 * u
     d.rounded_rectangle([a, b - lado, a + lado, b], radius=2.5 * u, fill=VIOLETA)
     d.rounded_rectangle([b - lado, a, b, a + lado], radius=2.5 * u, fill=VIOLETA)
-    d.line([a + lado * .5, b - lado * .5, b - lado * .5, a + lado * .5], fill=VIOLETA, width=round(grueso))
+    d.line([a + lado * 0.5, b - lado * 0.5, b - lado * 0.5, a + lado * 0.5], fill=VIOLETA, width=round(grueso))
     # Tú: punto en el centro, separado de mid por un anillo del color del fondo.
     c, r = 16 * u, 2.4 * u
-    hueco = r + grueso * .55
+    hueco = r + grueso * 0.55
     d.ellipse([c - hueco, c - hueco, c + hueco, c + hueco], fill=FONDO)
     d.ellipse([c - r, c - r, c + r, c + r], fill=VIOLETA)
     return img.resize((tam, tam), Image.LANCZOS)

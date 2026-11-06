@@ -1,4 +1,5 @@
 """Datos estáticos: campeones (Data Dragon) y en qué rol se juega cada uno (Meraki)."""
+
 import json
 import urllib.request
 
@@ -47,9 +48,13 @@ class Datos:
                     "objetos": {k: o["name"] for k, o in objetos.items()},
                     # Completos: caros, sin mejora posterior, de la Grieta y que no son botas.
                     "legendarios": [
-                        int(k) for k, o in objetos.items()
-                        if o["gold"]["total"] >= 2200 and o["gold"].get("purchasable", True) and not o.get("into")
-                        and o.get("maps", {}).get("11") and "Boots" not in o.get("tags", [])
+                        int(k)
+                        for k, o in objetos.items()
+                        if o["gold"]["total"] >= 2200
+                        and o["gold"].get("purchasable", True)
+                        and not o.get("into")
+                        and o.get("maps", {}).get("11")
+                        and "Boots" not in o.get("tags", [])
                     ],
                     "runas": runas,
                 }
@@ -67,10 +72,7 @@ class Datos:
         roles = cache.kv_get("roles", max_edad=7 * DIA)
         if roles is None:
             try:
-                roles = {
-                    k: {pos: d.get("playRate", 0) for pos, d in v.items()}
-                    for k, v in _descargar(URL_ROLES)["data"].items()
-                }
+                roles = {k: {pos: d.get("playRate", 0) for pos, d in v.items()} for k, v in _descargar(URL_ROLES)["data"].items()}
                 cache.kv_set("roles", roles)
             except (OSError, ValueError, KeyError) as e:
                 roles = cache.kv_get("roles") or {}

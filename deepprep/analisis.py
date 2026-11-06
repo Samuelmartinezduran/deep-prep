@@ -1,4 +1,5 @@
 """Cálculos sobre partidas y líneas de tiempo. Funciones puras: no tocan red ni disco."""
+
 import itertools
 import statistics
 from collections import Counter
@@ -440,7 +441,13 @@ def etiquetas(res, rol, maestria, ahora_ms):
     elif puntos is not None and puntos >= 300000:
         out.append({"t": "Main", "tono": "fuerte", "d": f"{puntos // 1000}k de maestría"})
     if cuenta_nueva:
-        out.append({"t": "Cuenta nueva", "tono": "neutro", "d": f"{total // 1000}k de maestría entre todos sus campeones: posible cuenta secundaria"})
+        out.append(
+            {
+                "t": "Cuenta nueva",
+                "tono": "neutro",
+                "d": f"{total // 1000}k de maestría entre todos sus campeones: posible cuenta secundaria",
+            }
+        )
     elif puntos is not None and puntos < 5000 and camp["n"] <= 1:
         out.append({"t": "Primera vez", "tono": "flojo", "d": f"{puntos} puntos de maestría"})
     elif puntos is not None and puntos < 25000 and camp["n"] <= 2:
@@ -738,7 +745,7 @@ def fuerza(res, rol, primera_vez=False):
         elif m15["media"] <= MUERTES15_NORMAL - 1.5:
             motivos.append(f"apenas muere antes del 15 ({num(m15['media'])})")
     if res["n"] >= 6:
-        s += (res["v"] / res["n"] - 0.5)
+        s += res["v"] / res["n"] - 0.5
     if res["racha_actual"] <= -3:
         s -= 0.2
         motivos.append(f"lleva {-res['racha_actual']} derrotas seguidas")
@@ -824,7 +831,9 @@ def mi_historial(mis_puuids, mis_partidas, mi_campeon, rivales, presentes, ahora
     }
 
     for r in rivales:
-        contra = [(m, yo) for m, yo in juegos if any(j["campeon"] == r["campeon"] and j["equipo"] != yo["equipo"] for j in m["jug"])]
+        contra = [
+            (m, yo) for m, yo in juegos if any(j["campeon"] == r["campeon"] and j["equipo"] != yo["equipo"] for j in m["jug"])
+        ]
         mio = [(m, yo) for m, yo in contra if yo["campeon"] == mi_campeon]
         fila = {
             "campeon": r["campeon"],

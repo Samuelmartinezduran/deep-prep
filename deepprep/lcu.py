@@ -3,6 +3,7 @@
 El cliente deja en su carpeta un 'lockfile' con el puerto y la contraseña de esa sesión.
 Con eso se sabe qué cuenta está abierta y en qué fase está (cola, selección, partida).
 """
+
 import base64
 import json
 import os
@@ -14,9 +15,29 @@ import urllib.request
 from pathlib import Path
 
 # Región del cliente -> plataforma de la API de Riot.
-PLATAFORMA_DE = {"EUW": "euw1", "EUNE": "eun1", "NA": "na1", "KR": "kr", "BR": "br1", "LAN": "la1", "LAS": "la2", "OCE": "oc1",
-                 "TR": "tr1", "RU": "ru", "JP": "jp1", "ME": "me1", "PH": "ph2", "SG": "sg2", "TH": "th2", "TW": "tw2", "VN": "vn2"}
-AJUSTES_RIOT = Path(os.environ.get("PROGRAMDATA", "C:/ProgramData")) / "Riot Games/Metadata/league_of_legends.live/league_of_legends.live.product_settings.yaml"
+PLATAFORMA_DE = {
+    "EUW": "euw1",
+    "EUNE": "eun1",
+    "NA": "na1",
+    "KR": "kr",
+    "BR": "br1",
+    "LAN": "la1",
+    "LAS": "la2",
+    "OCE": "oc1",
+    "TR": "tr1",
+    "RU": "ru",
+    "JP": "jp1",
+    "ME": "me1",
+    "PH": "ph2",
+    "SG": "sg2",
+    "TH": "th2",
+    "TW": "tw2",
+    "VN": "vn2",
+}
+AJUSTES_RIOT = (
+    Path(os.environ.get("PROGRAMDATA", "C:/ProgramData"))
+    / "Riot Games/Metadata/league_of_legends.live/league_of_legends.live.product_settings.yaml"
+)
 
 
 def rutas_posibles(configurada):

@@ -1,4 +1,5 @@
 """Servidor web local del panel. Solo escucha en 127.0.0.1."""
+
 import json
 import re
 import urllib.request
@@ -13,7 +14,14 @@ ARCHIVOS = {
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/estilo.css": ("estilo.css", "text/css; charset=utf-8"),
 }
-TIPOS = {".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".woff2": "font/woff2", ".css": "text/css; charset=utf-8", ".ico": "image/x-icon"}
+TIPOS = {
+    ".svg": "image/svg+xml",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".woff2": "font/woff2",
+    ".css": "text/css; charset=utf-8",
+    ".ico": "image/x-icon",
+}
 # Imágenes de campeones de Data Dragon: se bajan una vez y se sirven desde disco (el overlay no espera a la red).
 URL_DDRAGON = {
     "campeon": "https://ddragon.leagueoflegends.com/cdn/{v}/img/champion/{n}.png",

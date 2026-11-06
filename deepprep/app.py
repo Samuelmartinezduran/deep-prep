@@ -1,4 +1,5 @@
 """Núcleo: vigila el cliente del LoL, abre una sesión por partida y da el estado al panel."""
+
 import datetime
 import json
 import os
@@ -7,17 +8,15 @@ import time
 import traceback
 from pathlib import Path
 
+from . import actualizador, clips, config, inicio_windows, lcu
 from . import analisis as an
-from . import config, lcu
 from . import duelos as du
-from . import actualizador, inicio_windows
 from . import recolector as rec
-from . import clips
 from . import revision as rv
-from .overlay import MODO_SIN_BORDES, modo_ventana, parsear_atajo
 from .cache import Cache
 from .ddragon import Datos
 from .grabacion import GRIETA, Grabador, buscar_ffmpeg
+from .overlay import MODO_SIN_BORDES, modo_ventana, parsear_atajo
 from .riot import ClaveInvalida, Cliente, ErrorRiot
 from .sesion import LIGA_COLA, NOMBRE_LIGA, Sesion
 from .trabajo import Cola
@@ -36,6 +35,8 @@ FASES = {
     "EndOfGame": "Fin de partida",
 }
 EN_JUEGO = ("GameStart", "InProgress", "Reconnect")
+
+
 def _desfase(carpeta, inicio_ms):
     """Segundos de grabación antes del 0:00 de la partida (la grabación empieza en la pantalla de carga)."""
     if not carpeta or not inicio_ms:
@@ -129,9 +130,16 @@ class App:
         # Tu región va con el cliente del panel (y su cuota); las demás, cada una con la suya.
         fuera = [(p, r) for p, r in rec.TODAS if r != self.cfg["region"]]
         self.recolector = rec.Recolector(
-            self.duelos, config.leer_clave, self.datos.legendarios, pool=self.pool,
-            mis_partidas=self.mis_partidas, mis_puuids=lambda: set(self.cuentas),
-            cliente_europa=self.cliente, puede_europa=self._europa_libre, referencias=self._referencias, regiones=fuera,
+            self.duelos,
+            config.leer_clave,
+            self.datos.legendarios,
+            pool=self.pool,
+            mis_partidas=self.mis_partidas,
+            mis_puuids=lambda: set(self.cuentas),
+            cliente_europa=self.cliente,
+            puede_europa=self._europa_libre,
+            referencias=self._referencias,
+            regiones=fuera,
         )
         if not self.recolector.arrancar():
             self.recolector = None
@@ -139,7 +147,12 @@ class App:
     # --- duelos de Master+ ---------------------------------------------------------------------
     def _europa_libre(self):
         """EUW comparte cuota con el panel: el recolector solo la usa con el cliente quieto."""
-        return not self.error_clave and self.fase not in PARTIDA_CERCA + EN_JUEGO and not self._cargando()             and self.sync["hechas"] >= self.sync["total"]
+        return (
+            not self.error_clave
+            and self.fase not in PARTIDA_CERCA + EN_JUEGO
+            and not self._cargando()
+            and self.sync["hechas"] >= self.sync["total"]
+        )
 
     def pool(self):
         """Tus campeones por posición (de tus clasificatorias de la temporada); se recalcula cada 10 min."""
@@ -159,11 +172,19 @@ class App:
         registros = self.duelos.duelo(a, pos, b, excluir=mias)
         res = du.analizar(registros, [], self.datos.nombre(a), self.datos.nombre(b), pos, self.datos.objeto, self.datos.runa)
         ref, nombre_ref = self.referencia(a, pos, b, registros)
-        res["tu"] = du.comparar(self.duelos.de(mias, a, pos), ref, pos, nombre_ref, minimo=3 if nombre_ref != "Ganan este duelo" else du.MIN_GRUPO)
-        res.update({
-            "a": self.datos.nombre(a), "b": self.datos.nombre(b), "icono_a": self.datos.icono(a), "icono_b": self.datos.icono(b),
-            "pos": an.NOMBRE_POS.get(pos, pos), "en_pool": (a, pos) in set(self.pool()),
-        })
+        res["tu"] = du.comparar(
+            self.duelos.de(mias, a, pos), ref, pos, nombre_ref, minimo=3 if nombre_ref != "Ganan este duelo" else du.MIN_GRUPO
+        )
+        res.update(
+            {
+                "a": self.datos.nombre(a),
+                "b": self.datos.nombre(b),
+                "icono_a": self.datos.icono(a),
+                "icono_b": self.datos.icono(b),
+                "pos": an.NOMBRE_POS.get(pos, pos),
+                "en_pool": (a, pos) in set(self.pool()),
+            }
+        )
         self._duelos_cache[clave] = (time.time(), res)
         return res
 
@@ -179,7 +200,12 @@ class App:
         filas = an.pool_contra(pool, pos, rival, registros, self.mis_partidas(cola), mias, du.MIN_GRUPO)
         for f in filas:
             f.update(nombre=self.datos.nombre(f["campeon"]), icono=self.datos.icono(f["campeon"]))
-        return {"rival": self.datos.nombre(rival), "icono_rival": self.datos.icono(rival), "pos": an.NOMBRE_POS.get(pos, pos), "filas": filas}
+        return {
+            "rival": self.datos.nombre(rival),
+            "icono_rival": self.datos.icono(rival),
+            "pos": an.NOMBRE_POS.get(pos, pos),
+            "filas": filas,
+        }
 
     def _resolver_referencia(self, rid):
         """Busca la cuenta y su servidor; devuelve un texto de error o ''."""
@@ -192,12 +218,21 @@ class App:
             cuenta = self.cliente.cuenta_por_riot_id(nombre.strip(), tag.strip())
             if not cuenta:
                 return f"No encuentro la cuenta {rid}."
-            plataforma = (self.cliente._get(self.cliente.region, f"/riot/account/v1/region/by-game/lol/by-puuid/{cuenta['puuid']}") or {}).get("region", "")
+            plataforma = (
+                self.cliente._get(self.cliente.region, f"/riot/account/v1/region/by-game/lol/by-puuid/{cuenta['puuid']}") or {}
+            ).get("region", "")
         except ErrorRiot as e:
             return f"No pude buscar {rid}: {e}"
         if plataforma.lower() not in rec.REGION_DE:
             return f"No sé en qué servidor juega {rid}."
-        self.duelos.kv_set(f"ref:{rid.lower()}", {"puuid": cuenta["puuid"], "plataforma": plataforma.lower(), "rid": f"{cuenta.get('gameName', nombre)}#{cuenta.get('tagLine', tag)}"})
+        self.duelos.kv_set(
+            f"ref:{rid.lower()}",
+            {
+                "puuid": cuenta["puuid"],
+                "plataforma": plataforma.lower(),
+                "rid": f"{cuenta.get('gameName', nombre)}#{cuenta.get('tagLine', tag)}",
+            },
+        )
         return ""
 
     def _referencias(self):
@@ -232,7 +267,11 @@ class App:
             suyos = self.duelos.campeon(a, pos, {info.get("puuid")})
             if len(suyos) >= 3:
                 contra = [r for r in suyos if r["b"] == b]
-                return (contra, f"{nombre} contra {self.datos.nombre(b)}") if len(contra) >= 5 else (suyos, f"{nombre} con {self.datos.nombre(a)}")
+                return (
+                    (contra, f"{nombre} contra {self.datos.nombre(b)}")
+                    if len(contra) >= 5
+                    else (suyos, f"{nombre} con {self.datos.nombre(a)}")
+                )
             en_pos = self.duelos.posicion(pos, {info.get("puuid")})
             if len(en_pos) >= 3:
                 return en_pos, f"{nombre} de {an.NOMBRE_POS.get(pos, pos)}"
@@ -483,7 +522,9 @@ class App:
         self.cache.kv_set("revisiones", indice[:100])
         if rev.get("carpeta"):
             try:
-                (Path(rev["carpeta"]) / "revision.json").write_text(json.dumps(rev, ensure_ascii=False, indent=1), encoding="utf-8")
+                (Path(rev["carpeta"]) / "revision.json").write_text(
+                    json.dumps(rev, ensure_ascii=False, indent=1), encoding="utf-8"
+                )
             except OSError as e:
                 print(f"No se pudo guardar la revisión junto a la grabación: {e}")
 
@@ -500,7 +541,13 @@ class App:
         e = next((x for x in entradas if x.get("queueType") == tipo), None)
         if not e:
             return None
-        despues = {"nivel": e.get("tier", ""), "rank": e.get("rank", ""), "lp": e.get("leaguePoints", 0), "v": e.get("wins", 0), "d": e.get("losses", 0)}
+        despues = {
+            "nivel": e.get("tier", ""),
+            "rank": e.get("rank", ""),
+            "lp": e.get("leaguePoints", 0),
+            "v": e.get("wins", 0),
+            "d": e.get("losses", 0),
+        }
         out = {"lp": despues["lp"], "nivel": despues["nivel"].lower(), "rank": despues["rank"]}
         yo = next((f for f in ((panel or {}).get("equipos") or {}).get("aliado", []) if f.get("soy_yo")), None)
         antes = ((yo or {}).get("liga") or {}).get("solo" if cola == 420 else "flex")
@@ -578,10 +625,28 @@ class App:
         return du.comparar([mio], ref, mio["pos"], nombre, minimo=3)
 
     # --- ajustes -----------------------------------------------------------------------------------
-    EDITABLES = ("cuentas", "recordatorios", "notas", "grabar", "overlay", "atajo_overlay", "overlay_opacidad", "siempre_en_marcha",
-                 "comparar_con", "referencias", "perfil_base", "grabacion_codificador", "grabacion_max_gb")
-    COMPARAR_CON = {"perfil": "Un jugador (tu perfil de referencia)", "ganan": "Los que ganan este duelo", "challenger": "Challenger",
-                    "gm": "Gran Maestro o más", "mis_victorias": "Tus victorias"}
+    EDITABLES = (
+        "cuentas",
+        "recordatorios",
+        "notas",
+        "grabar",
+        "overlay",
+        "atajo_overlay",
+        "overlay_opacidad",
+        "siempre_en_marcha",
+        "comparar_con",
+        "referencias",
+        "perfil_base",
+        "grabacion_codificador",
+        "grabacion_max_gb",
+    )
+    COMPARAR_CON = {
+        "perfil": "Un jugador (tu perfil de referencia)",
+        "ganan": "Los que ganan este duelo",
+        "challenger": "Challenger",
+        "gm": "Gran Maestro o más",
+        "mis_victorias": "Tus victorias",
+    }
 
     def ajustes(self):
         campeones = sorted(({"id": i, "nombre": c["nombre"]} for i, c in self.datos.campeones.items()), key=lambda c: c["nombre"])
@@ -592,8 +657,14 @@ class App:
         perfil = self.cfg.get("perfil_base")
         info = self.duelos.kv_get(f"ref:{perfil.lower()}") if perfil else None
         perfil_partidas = len(self.duelos.vistas_de(info["puuid"])) if info else None
-        return {**{k: self.cfg.get(k) for k in self.EDITABLES}, "campeones": campeones, "opciones_comparar": self.COMPARAR_CON,
-                "referencias_partidas": partidas, "perfil_partidas": perfil_partidas, "version": self.actualizador.estado}
+        return {
+            **{k: self.cfg.get(k) for k in self.EDITABLES},
+            "campeones": campeones,
+            "opciones_comparar": self.COMPARAR_CON,
+            "referencias_partidas": partidas,
+            "perfil_partidas": perfil_partidas,
+            "version": self.actualizador.estado,
+        }
 
     def guardar_ajustes(self, cambios):
         nuevo = {}
@@ -620,7 +691,9 @@ class App:
                     error = self._resolver_referencia(nuevo["perfil_base"])
                     if error:
                         return {"ok": False, "error": error}
-            if (nuevo.get("comparar_con") or self.cfg.get("comparar_con")) == "perfil" and not nuevo.get("perfil_base", self.cfg.get("perfil_base")):
+            if (nuevo.get("comparar_con") or self.cfg.get("comparar_con")) == "perfil" and not nuevo.get(
+                "perfil_base", self.cfg.get("perfil_base")
+            ):
                 return {"ok": False, "error": "Para compararte con un jugador, escribe su Nombre#TAG en el perfil de referencia."}
             if "referencias" in cambios:
                 refs = {}
@@ -676,7 +749,9 @@ class App:
         for c in campeones:
             if c and c not in vistos and notas.get(str(c)):
                 vistos.add(c)
-                out.append({"campeon": self.datos.nombre(c), "icono": self.datos.icono(c), "texto": notas[str(c)], "rival": c in rivales})
+                out.append(
+                    {"campeon": self.datos.nombre(c), "icono": self.datos.icono(c), "texto": notas[str(c)], "rival": c in rivales}
+                )
         return out
 
     def revisiones(self):
@@ -832,7 +907,9 @@ class App:
         pos = s.get("pos", "")
         rival = an.rival_probable(s["rivales"], pos, datos.roles) if pos else None
         rivales = [{"campeon": c, "pos": pos if c == rival else "", "nombre_campeon": datos.nombre(c)} for c in s["rivales"]]
-        h = an.mi_historial(set(self.cuentas), self.mis_partidas(s["cola"]), s["mio"], rivales, {}, int(time.time() * 1000), mi_pos=pos)
+        h = an.mi_historial(
+            set(self.cuentas), self.mis_partidas(s["cola"]), s["mio"], rivales, {}, int(time.time() * 1000), mi_pos=pos
+        )
         h["cola_txt"] = NOMBRE_LIGA.get(s["cola"], "")
         for fila in h["vs"]:
             fila["icono"] = datos.icono(fila["campeon"])
@@ -840,7 +917,9 @@ class App:
             "duelo": self.duelo(s["mio"], pos, rival) if s["mio"] and rival else None,
             "pool": self.pool_contra(pos, rival, s["cola"]),
             "pos": an.NOMBRE_POS.get(pos, ""),
-            "mio": {"nombre": datos.nombre(s["mio"]), "icono": datos.icono(s["mio"]), "splash": datos.splash(s["mio"])} if s["mio"] else None,
+            "mio": {"nombre": datos.nombre(s["mio"]), "icono": datos.icono(s["mio"]), "splash": datos.splash(s["mio"])}
+            if s["mio"]
+            else None,
             "historial": h,
             "notas": self.notas_de([s["mio"], *s["rivales"]], rivales=set(s["rivales"])),
         }

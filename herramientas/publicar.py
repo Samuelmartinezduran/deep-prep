@@ -10,6 +10,7 @@ Uso: py herramientas/publicar.py 2.0.1 "Qué cambia" [--puente]   (sin versión:
    actualizan las 1.0.x, con el zip puente (empaquetado/puente/, ver comprimir): así les llega sola.
 La clave de GitHub sale del administrador de credenciales de git; no se guarda en ningún sitio.
 """
+
 import hashlib
 import json
 import re
@@ -45,18 +46,43 @@ def leer_version():
 
 def empaquetar():
     paso("PyInstaller")
-    subprocess.run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--windowed", "--name", "DeepPrep",
-                    "--icon", str(RAIZ / "deepprep" / "web" / "icono.ico"),
-                    "--add-data", f"{RAIZ / 'deepprep' / 'web'};deepprep/web",
-                    "--collect-all", "webview", "--collect-all", "clr_loader", "--collect-all", "pythonnet",
-                    "--distpath", str(EMP / "dist"), "--workpath", str(EMP / "build"), "--specpath", str(EMP),
-                    str(EMP / "entrada.py")], check=True, cwd=RAIZ)
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "PyInstaller",
+            "--noconfirm",
+            "--clean",
+            "--windowed",
+            "--name",
+            "DeepPrep",
+            "--icon",
+            str(RAIZ / "deepprep" / "web" / "icono.ico"),
+            "--add-data",
+            f"{RAIZ / 'deepprep' / 'web'};deepprep/web",
+            "--collect-all",
+            "webview",
+            "--collect-all",
+            "clr_loader",
+            "--collect-all",
+            "pythonnet",
+            "--distpath",
+            str(EMP / "dist"),
+            "--workpath",
+            str(EMP / "build"),
+            "--specpath",
+            str(EMP),
+            str(EMP / "entrada.py"),
+        ],
+        check=True,
+        cwd=RAIZ,
+    )
     paso("ffmpeg")
     destino = DIST / "ffmpeg"
     destino.mkdir(exist_ok=True)
     with zipfile.ZipFile(FFMPEG_ZIP) as z:
         for nombre in z.namelist():
-            if nombre.endswith("bin/ffmpeg.exe") or nombre.endswith("/LICENSE"):
+            if nombre.endswith(("bin/ffmpeg.exe", "/LICENSE")):
                 (destino / Path(nombre).name).write_bytes(z.read(nombre))
     shutil.copy(EMP / "LEEME.md", DIST / "LEEME.txt")
 
@@ -87,14 +113,25 @@ def comprimir(v, puente=False, dist=DIST, carpeta=None):
 
 
 def token():
-    r = subprocess.run(["git", "credential", "fill"], input="protocol=https\nhost=github.com\n\n", capture_output=True, text=True, check=True)
+    r = subprocess.run(
+        ["git", "credential", "fill"], input="protocol=https\nhost=github.com\n\n", capture_output=True, text=True, check=True
+    )
     return next(l.split("=", 1)[1] for l in r.stdout.splitlines() if l.startswith("password="))
 
 
 def github(metodo, url, datos=None, tipo="application/json", tok=None):
     cuerpo = datos if isinstance(datos, bytes) else (json.dumps(datos).encode() if datos is not None else None)
-    pet = urllib.request.Request(url, data=cuerpo, method=metodo, headers={
-        "Authorization": f"Bearer {tok}", "Accept": "application/vnd.github+json", "Content-Type": tipo, "User-Agent": "deep-prep"})
+    pet = urllib.request.Request(
+        url,
+        data=cuerpo,
+        method=metodo,
+        headers={
+            "Authorization": f"Bearer {tok}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": tipo,
+            "User-Agent": "deep-prep",
+        },
+    )
     with urllib.request.urlopen(pet, timeout=600) as r:
         return json.loads(r.read() or b"null")
 
@@ -102,8 +139,12 @@ def github(metodo, url, datos=None, tipo="application/json", tok=None):
 def publicar(v, notas, zip_ruta, repo=REPO):
     paso(f"GitHub ({repo})")
     tok = token()
-    rel = github("POST", f"https://api.github.com/repos/{repo}/releases",
-                 {"tag_name": f"v{v}", "name": f"Deep Prep {v}", "body": notas, "make_latest": "true"}, tok=tok)
+    rel = github(
+        "POST",
+        f"https://api.github.com/repos/{repo}/releases",
+        {"tag_name": f"v{v}", "name": f"Deep Prep {v}", "body": notas, "make_latest": "true"},
+        tok=tok,
+    )
     subida = rel["upload_url"].split("{")[0]
     for f, tipo in ((zip_ruta, "application/zip"), (Path(f"{zip_ruta}.sha256"), "text/plain")):
         github("POST", f"{subida}?name={f.name}", f.read_bytes(), tipo, tok=tok)
@@ -116,7 +157,9 @@ def main():
     args = [a for a in sys.argv[1:] if a != "--puente"]
     v = args[0] if args else None
     paso("Pruebas")
-    if subprocess.run([sys.executable, "-X", "utf8", "-m", "unittest", "discover", "-s", "tests", "-t", "."], cwd=RAIZ).returncode:
+    if subprocess.run(
+        [sys.executable, "-X", "utf8", "-m", "unittest", "discover", "-s", "tests", "-t", "."], cwd=RAIZ
+    ).returncode:
         sys.exit("Fallan pruebas: no se publica")
     if v:
         poner_version(v)

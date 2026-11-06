@@ -1,4 +1,5 @@
 """Revisión post-partida con la clasificatoria real de tests/datos (Diana contra Master Yi, 12/10/2026)."""
+
 import gzip
 import json
 import unittest
@@ -67,7 +68,16 @@ class Tendencias(unittest.TestCase):
             yo = {"puuid": "yo", "pid": 2, "equipo": 100, "campeon": 131, "pos": "JUNGLE", "gana": gana}
             otro = {"puuid": "r", "pid": 7, "equipo": 200, "campeon": rival, "pos": "JUNGLE", "gana": not gana}
             # Cada partida empieza 40 minutos después de la anterior: todas en la misma sesión.
-            return {"id": f"m{i}", "creacion": i * 2_400_000, "duracion": 1500, "cola": 420, "mapa": 11, "remake": False, "hora": hora, "jug": [yo, otro]}
+            return {
+                "id": f"m{i}",
+                "creacion": i * 2_400_000,
+                "duracion": 1500,
+                "cola": 420,
+                "mapa": 11,
+                "remake": False,
+                "hora": hora,
+                "jug": [yo, otro],
+            }
 
         lista = [partida(0, True, 21), partida(1, False, 22), partida(2, False, 23), partida(3, True, 10)]
         horas = {m["creacion"]: m["hora"] for m in lista}
@@ -80,8 +90,12 @@ class Tendencias(unittest.TestCase):
         self.assertEqual(franjas, {"Mañana (6-14 h)": 1, "Noche (20-24 h)": 3})
         self.assertEqual(t["rivales"][0], {"nombre": "C64", "n": 4, "v": 2, "campeon": 64})
         # Con varias posiciones se dice en cuál fue cada duelo.
-        adc = dict(lista[0], id="m9", jug=[dict(lista[0]["jug"][0], pos="BOTTOM", campeon=29), dict(lista[0]["jug"][1], pos="BOTTOM", campeon=22)])
-        t = rv.tendencias(list(reversed(lista)) + [adc], {"yo"}, lambda c: f"C{c}", lambda ms: 12)
+        adc = dict(
+            lista[0],
+            id="m9",
+            jug=[dict(lista[0]["jug"][0], pos="BOTTOM", campeon=29), dict(lista[0]["jug"][1], pos="BOTTOM", campeon=22)],
+        )
+        t = rv.tendencias([*list(reversed(lista)), adc], {"yo"}, lambda c: f"C{c}", lambda ms: 12)
         self.assertEqual({f["nombre"] for f in t["rivales"]}, {"C64 (jungla)", "C22 (ADC)"})
         self.assertIsNone(rv.tendencias([], {"yo"}, str, lambda ms: 0))
 

@@ -3,6 +3,7 @@
 Sirve para ver el panel con el historial propio sin tener que jugar. Cierra antes la app normal (usan el mismo puerto y la misma cuota).
 Uso: py herramientas/simular_propia.py [segundos] [--servir]   (con --servir el panel se ve en el navegador mientras dura)
 """
+
 import json
 import random
 import sys
@@ -11,10 +12,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from anonimizar import anonimizar  # noqa: E402
-from deepprep import config  # noqa: E402
-from deepprep.app import App  # noqa: E402
-from deepprep.riot import Cliente  # noqa: E402
+from anonimizar import anonimizar
+from deepprep import config
+from deepprep.app import App
+from deepprep.riot import Cliente
 
 SALIDA = Path(__file__).parent / "panel_simulado.json"  # volcado del panel para mirarlo con calma
 MAQUETA = Path(__file__).parent / "maquetas" / "partida.json"
@@ -98,7 +99,15 @@ def main():
         print("AVISO", a["tono"], a["texto"])
     for lado in ("aliado", "rival"):
         for f in p["equipos"][lado]:
-            print(lado[:3], f["rol_txt"].ljust(8), f["campeon"][:12].ljust(12), ((f["liga"] or {}).get("solo") or {}).get("txt", "..."), f["muestra"], [t["t"] for t in f["etiquetas"]], "(yo)" if f["soy_yo"] else "")
+            print(
+                lado[:3],
+                f["rol_txt"].ljust(8),
+                f["campeon"][:12].ljust(12),
+                ((f["liga"] or {}).get("solo") or {}).get("txt", "..."),
+                f["muestra"],
+                [t["t"] for t in f["etiquetas"]],
+                "(yo)" if f["soy_yo"] else "",
+            )
     j = p["jungla"]
     print("JUNGLA RIVAL:", j["campeon"], j["n"], j["n_campeon"], j["n_lineas"])
     for t in j["tarjetas"]:

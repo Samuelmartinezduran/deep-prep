@@ -6,6 +6,7 @@ y empieza por tus propias partidas (para comparar tus números con los de Master
 
 Uso suelto (sin la app): py -m deepprep.recolector [--minutos 60] [--sin-europa]
 """
+
 import json
 import msvcrt
 import random
@@ -23,9 +24,25 @@ from .riot import ClaveInvalida, Cliente, ErrorRiot
 RUTA_DB = config.DATOS / "duelos.db"
 RUTA_CERROJO = config.DATOS / "recolector.lock"
 # Plataforma de una cuenta -> región de sus partidas (match-v5).
-REGION_DE = {"euw1": "europe", "eun1": "europe", "tr1": "europe", "ru": "europe", "me1": "europe", "kr": "asia", "jp1": "asia",
-             "na1": "americas", "br1": "americas", "la1": "americas", "la2": "americas",
-             "oc1": "sea", "sg2": "sea", "tw2": "sea", "vn2": "sea", "th2": "sea", "ph2": "sea"}
+REGION_DE = {
+    "euw1": "europe",
+    "eun1": "europe",
+    "tr1": "europe",
+    "ru": "europe",
+    "me1": "europe",
+    "kr": "asia",
+    "jp1": "asia",
+    "na1": "americas",
+    "br1": "americas",
+    "la1": "americas",
+    "la2": "americas",
+    "oc1": "sea",
+    "sg2": "sea",
+    "tw2": "sea",
+    "vn2": "sea",
+    "th2": "sea",
+    "ph2": "sea",
+}
 NIVEL_LIGA = {"challengerleagues": "CHALLENGER", "grandmasterleagues": "GRANDMASTER", "masterleagues": "MASTER"}
 # (plataforma, región) con su propia cuota. EUW va aparte: comparte cuota con el panel.
 TODAS = [("euw1", "europe"), ("kr", "asia"), ("na1", "americas"), ("vn2", "sea")]
@@ -108,7 +125,9 @@ class BaseDuelos:
         """Registros en esa posición (con cualquier campeón) de los jugadores en puuids."""
         marcas = ",".join("?" * len(puuids))
         with self._lock:
-            filas = self._db.execute(f"SELECT puuid, datos FROM reg WHERE pos=? AND puuid IN ({marcas})", (pos, *puuids)).fetchall()
+            filas = self._db.execute(
+                f"SELECT puuid, datos FROM reg WHERE pos=? AND puuid IN ({marcas})", (pos, *puuids)
+            ).fetchall()
         return [dict(_desempaquetar(d), _p=p) for p, d in filas]
 
     def vistas_de(self, puuid):
@@ -133,7 +152,9 @@ class BaseDuelos:
         marcas = ",".join("?" * len(puuids))
         filtro, args = ("AND pos=?", (pos,)) if pos else ("", ())
         with self._lock:
-            filas = self._db.execute(f"SELECT datos FROM reg WHERE puuid IN ({marcas}) AND a=? {filtro}", (*puuids, a, *args)).fetchall()
+            filas = self._db.execute(
+                f"SELECT datos FROM reg WHERE puuid IN ({marcas}) AND a=? {filtro}", (*puuids, a, *args)
+            ).fetchall()
         return [_desempaquetar(d) for (d,) in filas]
 
     def cuantos(self, a, pos):
@@ -161,8 +182,19 @@ def pool_de(partidas, puuids, minimo=5):
 class Recolector:
     """Un hilo por región. 'pool' y 'puede_europa' son funciones: se consultan en cada vuelta."""
 
-    def __init__(self, base, leer_clave, legendarios, pool, mis_partidas=lambda: [], mis_puuids=lambda: set(),
-                 cliente_europa=None, puede_europa=lambda: False, regiones=REGIONES, referencias=lambda: []):
+    def __init__(
+        self,
+        base,
+        leer_clave,
+        legendarios,
+        pool,
+        mis_partidas=list,
+        mis_puuids=lambda: set(),
+        cliente_europa=None,
+        puede_europa=lambda: False,
+        regiones=REGIONES,
+        referencias=list,
+    ):
         self.base = base
         self.legendarios = legendarios
         self.pool = pool
@@ -330,10 +362,14 @@ def main():
     base = BaseDuelos()
     mias = app.mis_partidas
     rec = Recolector(
-        base, config.leer_clave, app.datos.legendarios,
+        base,
+        config.leer_clave,
+        app.datos.legendarios,
         pool=lambda: pool_de(mias(), set(app.cuentas)),
-        mis_partidas=mias, mis_puuids=lambda: set(app.cuentas),
-        cliente_europa=None if "--sin-europa" in sys.argv else app.cliente, puede_europa=lambda: True,
+        mis_partidas=mias,
+        mis_puuids=lambda: set(app.cuentas),
+        cliente_europa=None if "--sin-europa" in sys.argv else app.cliente,
+        puede_europa=lambda: True,
     )
     print("Pool:", [(app.datos.nombre(c), p) for c, p in rec.pool()])
     if not rec.arrancar():

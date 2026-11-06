@@ -19,10 +19,36 @@ from typing import Any
 
 ETIQUETA = "DEMO"
 NOMBRES = [
-    "Kestrel", "Nightjar", "Mossback", "Lanternfish", "Quillon", "Sablewing", "Driftmark", "Brindle",
-    "Tallow", "Corvid", "Ashgrove", "Saltmarsh", "Halcyon", "Fennec", "Ironbark", "Gloam", "Vesper",
-    "Larkspur", "Thistle", "Kelpie", "Mistral", "Orrery", "Petrichor", "Starling", "Wrenfield",
-    "Bramble", "Cinderowl", "Rookseven", "Marrow", "Pinefall",
+    "Kestrel",
+    "Nightjar",
+    "Mossback",
+    "Lanternfish",
+    "Quillon",
+    "Sablewing",
+    "Driftmark",
+    "Brindle",
+    "Tallow",
+    "Corvid",
+    "Ashgrove",
+    "Saltmarsh",
+    "Halcyon",
+    "Fennec",
+    "Ironbark",
+    "Gloam",
+    "Vesper",
+    "Larkspur",
+    "Thistle",
+    "Kelpie",
+    "Mistral",
+    "Orrery",
+    "Petrichor",
+    "Starling",
+    "Wrenfield",
+    "Bramble",
+    "Cinderowl",
+    "Rookseven",
+    "Marrow",
+    "Pinefall",
 ]
 CLAVES_PUUID = {"puuid"}
 CLAVES_INVOCADOR = {"summonerId", "accountId"}
@@ -41,7 +67,8 @@ class Anonimizador:
     def nombre(self, real: str) -> str:
         if real not in self.nombres:
             self.nombres[real] = NOMBRES[len(self.nombres) % len(NOMBRES)] + (
-                "" if len(self.nombres) < len(NOMBRES) else str(len(self.nombres) // len(NOMBRES)))
+                "" if len(self.nombres) < len(NOMBRES) else str(len(self.nombres) // len(NOMBRES))
+            )
         return self.nombres[real]
 
     def puuid(self, real: str) -> str:

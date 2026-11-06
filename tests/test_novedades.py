@@ -1,4 +1,5 @@
 """Mapa del jungla rival, tu pool en la selección, LP de la partida, mapa de muertes y recortes."""
+
 import unittest
 from pathlib import Path
 
@@ -48,9 +49,26 @@ class Liga(unittest.TestCase):
 class MapaMuertes(unittest.TestCase):
     def test_todo_desde_la_base_azul(self):
         revs = [
-            {"id": "a", "equipo": 100, "campeon": "Diana", "gana": True, "muertes": [{"x": 100, "y": 200, "ms": 1, "t": "0:01", "asesino": "Yi"}]},
-            {"id": "b", "equipo": 200, "campeon": "Diana", "gana": False, "muertes": [{"x": 100, "y": 200, "ms": 2, "t": "0:02", "asesino": "Yi"}]},
-            {"id": "c", "campeon": "Diana", "gana": False, "muertes": [{"t": "0:03", "ms": 3}]},  # revisión antigua sin posiciones
+            {
+                "id": "a",
+                "equipo": 100,
+                "campeon": "Diana",
+                "gana": True,
+                "muertes": [{"x": 100, "y": 200, "ms": 1, "t": "0:01", "asesino": "Yi"}],
+            },
+            {
+                "id": "b",
+                "equipo": 200,
+                "campeon": "Diana",
+                "gana": False,
+                "muertes": [{"x": 100, "y": 200, "ms": 2, "t": "0:02", "asesino": "Yi"}],
+            },
+            {
+                "id": "c",
+                "campeon": "Diana",
+                "gana": False,
+                "muertes": [{"t": "0:03", "ms": 3}],
+            },  # revisión antigua sin posiciones
             None,
         ]
         out = rv.mapa_muertes(revs)

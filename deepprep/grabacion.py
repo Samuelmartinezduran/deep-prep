@@ -7,6 +7,7 @@ La app solo lo lanza, mira el registro para saber en qué carpeta graba y avisa 
 Codificador: "auto" usa el de la gráfica si hay (NVIDIA, AMD o Intel) y si no el procesador; "cpu"
 fuerza el procesador. Las grabaciones más viejas se borran solas al pasar de grabacion_max_gb (0 = nunca).
 """
+
 import ctypes
 import ctypes.wintypes as wt
 import datetime
@@ -69,8 +70,13 @@ class Grabador:
                 orden = [sys.executable, "-X", "utf8", "-m", "deepprep", "--grabar"]
             try:
                 self._proceso = subprocess.Popen(
-                    orden, cwd=str(config.RAIZ), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                    creationflags=SIN_VENTANA | subprocess.CREATE_NEW_PROCESS_GROUP)
+                    orden,
+                    cwd=str(config.RAIZ),
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=SIN_VENTANA | subprocess.CREATE_NEW_PROCESS_GROUP,
+                )
             except OSError as e:
                 print(f"No se pudo lanzar el grabador: {e}")
                 return
@@ -155,6 +161,7 @@ def buscar_ffmpeg():
 
 def carpeta_videos():
     """Vídeos del usuario (aunque esté movida a OneDrive u otro disco)."""
+
     class GUID(ctypes.Structure):
         _fields_ = [("a", ctypes.c_ulong), ("b", ctypes.c_ushort), ("c", ctypes.c_ushort), ("d", ctypes.c_ubyte * 8)]
 
@@ -189,7 +196,13 @@ def salida_del_juego():
         _fields_ = [("a", ctypes.c_ulong), ("b", ctypes.c_ushort), ("c", ctypes.c_ushort), ("d", ctypes.c_ubyte * 8)]
 
     class DESC(ctypes.Structure):
-        _fields_ = [("nombre", ctypes.c_wchar * 32), ("rect", wt.RECT), ("unida", wt.BOOL), ("giro", ctypes.c_int), ("monitor", wt.HMONITOR)]
+        _fields_ = [
+            ("nombre", ctypes.c_wchar * 32),
+            ("rect", wt.RECT),
+            ("unida", wt.BOOL),
+            ("giro", ctypes.c_int),
+            ("monitor", wt.HMONITOR),
+        ]
 
     def metodo(obj, indice, *tipos):
         tabla = ctypes.cast(obj, ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p)))[0]
@@ -204,11 +217,15 @@ def salida_del_juego():
     try:
         if ctypes.windll.dxgi.CreateDXGIFactory1(ctypes.byref(iid), ctypes.byref(fabrica)) != 0:
             return 0
-        if metodo(fabrica, 12, ctypes.c_uint, ctypes.POINTER(ctypes.c_void_p))(fabrica, 0, ctypes.byref(adaptador)) != 0:  # EnumAdapters1
+        if (
+            metodo(fabrica, 12, ctypes.c_uint, ctypes.POINTER(ctypes.c_void_p))(fabrica, 0, ctypes.byref(adaptador)) != 0
+        ):  # EnumAdapters1
             return 0
         for i in range(8):
             salida = ctypes.c_void_p()
-            if metodo(adaptador, 7, ctypes.c_uint, ctypes.POINTER(ctypes.c_void_p))(adaptador, i, ctypes.byref(salida)) != 0:  # EnumOutputs
+            if (
+                metodo(adaptador, 7, ctypes.c_uint, ctypes.POINTER(ctypes.c_void_p))(adaptador, i, ctypes.byref(salida)) != 0
+            ):  # EnumOutputs
                 break
             desc = DESC()
             metodo(salida, 7, ctypes.POINTER(DESC))(salida, ctypes.byref(desc))  # GetDesc
@@ -228,7 +245,22 @@ def elegir_codificador(ffmpeg, modo):
     if modo == "cpu":
         return "procesador", CPU
     for nombre, args in CODIFICADORES.items():
-        prueba = [ffmpeg, "-hide_banner", "-v", "error", "-f", "lavfi", "-i", "color=c=black:s=1280x720:r=30", "-frames:v", "5", *args, "-f", "null", "-"]
+        prueba = [
+            ffmpeg,
+            "-hide_banner",
+            "-v",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "color=c=black:s=1280x720:r=30",
+            "-frames:v",
+            "5",
+            *args,
+            "-f",
+            "null",
+            "-",
+        ]
         try:
             if subprocess.run(prueba, capture_output=True, timeout=20, creationflags=SIN_VENTANA).returncode == 0:
                 return nombre, args
@@ -243,7 +275,9 @@ def limpiar(base, max_gb, actual=None):
         return []
     carpetas = sorted((c for c in base.glob("*_partida*") if c.is_dir() and c != actual), key=lambda c: c.stat().st_mtime)
     tam = {c: sum(f.stat().st_size for f in c.rglob("*") if f.is_file()) for c in carpetas}
-    total = sum(tam.values()) + (sum(f.stat().st_size for f in actual.rglob("*") if f.is_file()) if actual and actual.is_dir() else 0)
+    total = sum(tam.values()) + (
+        sum(f.stat().st_size for f in actual.rglob("*") if f.is_file()) if actual and actual.is_dir() else 0
+    )
     borradas = []
     for c in carpetas:
         if total <= max_gb * 1024**3:
@@ -303,10 +337,29 @@ def grabar(cfg, espera_min=5, max_min=100, prueba_seg=0):
         for arranque in range(1, 200):
             if not seguir():
                 break
-            orden = [ffmpeg, "-hide_banner", "-v", "error", "-y", "-f", "lavfi",
-                     "-i", f"ddagrab=output_idx={salida}:framerate=30,hwdownload,format=bgra", "-t", "6000", *args,
-                     "-g", "60", "-f", "segment", "-segment_time", "300", "-reset_timestamps", "1",
-                     str(carpeta / f"r{arranque:02d}_seg_%03d.mkv")]
+            orden = [
+                ffmpeg,
+                "-hide_banner",
+                "-v",
+                "error",
+                "-y",
+                "-f",
+                "lavfi",
+                "-i",
+                f"ddagrab=output_idx={salida}:framerate=30,hwdownload,format=bgra",
+                "-t",
+                "6000",
+                *args,
+                "-g",
+                "60",
+                "-f",
+                "segment",
+                "-segment_time",
+                "300",
+                "-reset_timestamps",
+                "1",
+                str(carpeta / f"r{arranque:02d}_seg_%03d.mkv"),
+            ]
             p = subprocess.Popen(orden, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log, creationflags=SIN_VENTANA)
             try:
                 ctypes.windll.kernel32.SetPriorityClass(int(p._handle), 0x4000)  # por debajo de lo normal

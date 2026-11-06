@@ -83,7 +83,9 @@ version = { attr = "deepprep.__version__" }
 # que se pasa; con 100 o 120 reharía cientos de llamadas que hoy caben en una línea. E501 sigue activa para
 # los textos y comentarios que el formateador no puede partir.
 line-length = 130
-target-version = "py314"
+# py313 y no py314: con py314 el formateador escribe `except A, B:` (PEP 758), válido en 3.14 pero que
+# cualquiera que lea el código confunde con sintaxis de Python 2. requires-python sigue siendo >=3.14.
+target-version = "py313"
 # herramientas/ como raíz para que `from anonimizar import ...` cuente como import propio al ordenar.
 src = [".", "herramientas"]
 

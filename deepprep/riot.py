@@ -4,6 +4,7 @@ La clave personal/de desarrollo permite 20 peticiones por segundo y 100 cada 2 m
 por cada host (euw1 y europe cuentan aparte). El limitador espera en vez de dejar que
 Riot devuelva 429.
 """
+
 import gzip
 import json
 import threading
@@ -105,7 +106,9 @@ class Cliente:
     def _get(self, host, ruta, fondo=False, cancelada=None):
         clave = self._leer_clave()
         if not clave:
-            raise ClaveInvalida("Falta tu clave de la API de Riot. Entra en developer.riotgames.com con tu cuenta del LoL, copia la clave y pégala aquí.")
+            raise ClaveInvalida(
+                "Falta tu clave de la API de Riot. Entra en developer.riotgames.com con tu cuenta del LoL, copia la clave y pégala aquí."
+            )
         url = f"https://{host}{ruta}"
         for intento in range(4):
             if not self.limitador.adquirir(host, fondo, cancelada):
@@ -162,9 +165,7 @@ class Cliente:
 
     def maestrias(self, puuid, cancelada=None):
         """Maestría de todos los campeones de la cuenta, de más a menos puntos."""
-        return self._get(
-            self.plataforma, f"/lol/champion-mastery/v4/champion-masteries/by-puuid/{puuid}", cancelada=cancelada
-        )
+        return self._get(self.plataforma, f"/lol/champion-mastery/v4/champion-masteries/by-puuid/{puuid}", cancelada=cancelada)
 
     # --- historial (host regional) ---------------------------------------------------
     def ids_partidas(self, puuid, cola=None, tipo=None, inicio=0, n=20, desde=None, fondo=False, cancelada=None):

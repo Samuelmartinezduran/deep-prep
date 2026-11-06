@@ -3,14 +3,15 @@
 Uso: py herramientas/buscar_en_vivo.py [intentos]
 Imprime el Riot ID de un jugador en partida clasificatoria en la Grieta.
 """
+
 import random
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from deepprep import config  # noqa: E402
-from deepprep.riot import Cliente  # noqa: E402
+from deepprep import config
+from deepprep.riot import Cliente
 
 
 def main():

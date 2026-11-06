@@ -5,6 +5,7 @@ jugador ('a') contra el de su misma posición en el otro equipo ('b'). Luego, pa
 se buscan los datos que no son de manual: quién gana las peleas antes y después del 6, cuánto pesa ir
 por delante, qué hacen distinto los que ganan, dónde se muere, si escala, y tus números al lado.
 """
+
 import statistics
 from collections import Counter
 
@@ -60,7 +61,9 @@ def extraer(partida, linea, legendarios):
                 nivel[e["participantId"]] = e["level"]
             elif ty == "CHAMPION_KILL":
                 implicados = {e.get("killerId", 0), e["victimId"], *(e.get("assistingParticipantIds") or [])} - {0}
-                kills.append((e["timestamp"], e.get("killerId", 0), e["victimId"], implicados, e.get("position") or {}, dict(nivel)))
+                kills.append(
+                    (e["timestamp"], e.get("killerId", 0), e["victimId"], implicados, e.get("position") or {}, dict(nivel))
+                )
             elif ty == "ITEM_PURCHASED" and e.get("itemId") in legendarios:
                 compras.setdefault(e["participantId"], [e["itemId"], round(e["timestamp"] / MIN, 1)])
             elif ty == "SKILL_LEVEL_UP" and e.get("levelUpType", "NORMAL") == "NORMAL":
@@ -85,7 +88,7 @@ def extraer(partida, linea, legendarios):
                 dif[str(minuto)] = [fa["totalGold"] - fb["totalGold"], fa["xp"] - fb["xp"], cs(fa) - cs(fb)]
         f10 = marco(10, A)
         peleas, muertes, m10, ka10 = [], [], 0, 0
-        for ts, killer, victima, implicados, posicion, niveles in kills:
+        for ts, _killer, victima, implicados, posicion, niveles in kills:
             if ts < FIN_PELEAS and A in implicados and B in implicados and len(implicados) <= MAX_IMPLICADOS:
                 gana = pid_equipo.get(victima) != eq
                 peleas.append([round(ts / MIN, 1), niveles[A], niveles[B], int(gana), len(implicados), *_zona(posicion, eq)])
@@ -95,9 +98,13 @@ def extraer(partida, linea, legendarios):
             elif A in implicados and victima != A and ts < 10 * MIN:
                 ka10 += 1
         orden = habilidades.get(A, [])
-        hab = "".join("QWER"[s - 1] for s in orden[:3]) + ">" + "".join(
-            sorted("QWE", key=lambda s: (-orden[:11].count("QWER".index(s) + 1), "QWE".index(s)))
-        ) if orden else ""
+        hab = (
+            "".join("QWER"[s - 1] for s in orden[:3])
+            + ">"
+            + "".join(sorted("QWE", key=lambda s: (-orden[:11].count("QWER".index(s) + 1), "QWE".index(s))))
+            if orden
+            else ""
+        )
         estilos = (a.get("perks") or {}).get("styles") or []
         r = {
             "pos": pos,
@@ -187,18 +194,34 @@ def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre
     despues = [p for p in peleas if p[1] >= 6]
     if len(antes) >= MIN_PELEAS and len(despues) >= MIN_PELEAS:
         pa, pd = _pct(sum(p[3] for p in antes), len(antes)), _pct(sum(p[3] for p in despues), len(despues))
-        datos.append((abs(pa - pd) + abs(pa - 50) / 2, f"{nombre_a} gana el {pa}% de las peleas con {nombre_b} antes de su 6; desde el 6, el {pd}%.",
-                      f"{len(antes)} y {len(despues)} peleas de 2 a 4 jugadores antes del 15"))
+        datos.append(
+            (
+                abs(pa - pd) + abs(pa - 50) / 2,
+                f"{nombre_a} gana el {pa}% de las peleas con {nombre_b} antes de su 6; desde el 6, el {pd}%.",
+                f"{len(antes)} y {len(despues)} peleas de 2 a 4 jugadores antes del 15",
+            )
+        )
     elif len(peleas) >= MIN_PELEAS:
         pt = _pct(sum(p[3] for p in peleas), len(peleas))
-        datos.append((abs(pt - 50), f"{nombre_a} gana el {pt}% de las peleas con {nombre_b} antes del 15.", f"{len(peleas)} peleas de 2 a 4 jugadores"))
+        datos.append(
+            (
+                abs(pt - 50),
+                f"{nombre_a} gana el {pt}% de las peleas con {nombre_b} antes del 15.",
+                f"{len(peleas)} peleas de 2 a 4 jugadores",
+            )
+        )
     ventaja = [p for p in peleas if p[1] > p[2]]
     igual = [p for p in peleas if p[1] == p[2]]
     if len(ventaja) >= MIN_PELEAS and len(igual) >= MIN_PELEAS:
         pv, pi = _pct(sum(p[3] for p in ventaja), len(ventaja)), _pct(sum(p[3] for p in igual), len(igual))
         if pv - pi >= 10:
-            datos.append((pv - pi, f"Con un nivel más que {nombre_b}, {nombre_a} gana el {pv}% de las peleas; a la par, el {pi}%.",
-                          f"{len(ventaja)} y {len(igual)} peleas"))
+            datos.append(
+                (
+                    pv - pi,
+                    f"Con un nivel más que {nombre_b}, {nombre_a} gana el {pv}% de las peleas; a la par, el {pi}%.",
+                    f"{len(ventaja)} y {len(igual)} peleas",
+                )
+            )
 
     # 2. Cuánto pesa ir por delante al 10.
     con10 = [r for r in registros if "10" in r["dif"]]
@@ -206,8 +229,13 @@ def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre
     detras = [r for r in con10 if r["dif"]["10"][0] <= -500]
     if len(delante) >= MIN_GRUPO and len(detras) >= MIN_GRUPO:
         wd, wt = _pct(sum(r["g"] for r in delante), len(delante)), _pct(sum(r["g"] for r in detras), len(detras))
-        datos.append((abs(wd - wt) / 2, f"{nombre_a} con +500 de oro sobre {nombre_b} al 10 gana el {wd}% de las partidas; con −500, el {wt}%.",
-                      f"{len(delante)} y {len(detras)} partidas"))
+        datos.append(
+            (
+                abs(wd - wt) / 2,
+                f"{nombre_a} con +500 de oro sobre {nombre_b} al 10 gana el {wd}% de las partidas; con −500, el {wt}%.",
+                f"{len(delante)} y {len(detras)} partidas",
+            )
+        )
 
     # 3. Si escala o se decide pronto.
     cortas = [r for r in registros if r["dur"] < 25]
@@ -215,7 +243,13 @@ def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre
     if len(cortas) >= MIN_GRUPO and len(largas) >= MIN_GRUPO:
         wc, wl = _pct(sum(r["g"] for r in cortas), len(cortas)), _pct(sum(r["g"] for r in largas), len(largas))
         if abs(wc - wl) >= 10:
-            datos.append((abs(wc - wl), f"{nombre_a} gana el {wc}% de las partidas que acaban antes del 25 y el {wl}% de las que pasan del 32.", f"{len(cortas)} y {len(largas)} partidas"))
+            datos.append(
+                (
+                    abs(wc - wl),
+                    f"{nombre_a} gana el {wc}% de las partidas que acaban antes del 25 y el {wl}% de las que pasan del 32.",
+                    f"{len(cortas)} y {len(largas)} partidas",
+                )
+            )
 
     # 4. Qué hacen distinto los que ganan este duelo.
     habitos = [
@@ -250,8 +284,13 @@ def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre
         # Que un jugador de línea muera en su línea no dice nada.
         propia = {"TOP": "la línea de top", "MIDDLE": "mid", "BOTTOM": "la línea de bot", "UTILITY": "la línea de bot"}.get(pos)
         if veces / len(muertes) >= 0.25 and zona != propia:
-            datos.append((100 * veces / len(muertes) - 15, f"El {_pct(veces, len(muertes))}% de las muertes de {nombre_a} con {nombre_b} de por medio antes del 15 son en {zona}.",
-                          f"{len(muertes)} muertes"))
+            datos.append(
+                (
+                    100 * veces / len(muertes) - 15,
+                    f"El {_pct(veces, len(muertes))}% de las muertes de {nombre_a} con {nombre_b} de por medio antes del 15 son en {zona}.",
+                    f"{len(muertes)} muertes",
+                )
+            )
 
     datos.sort(key=lambda d: d[0], reverse=True)
     # Lo que hacen distinto los que ganan es lo más aprovechable: al menos uno entra siempre.
@@ -290,8 +329,10 @@ def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre
 
 def metricas(pos):
     """Lo que se compara entre tú y tu referencia: (nombre, función del registro, decimales, con signo)."""
-    filas = [("Muertes antes del 10", lambda r: r["m10"], 1, False),
-             ("Peleas con tu rival antes del 6", lambda r: sum(1 for p in r["peleas"] if p[1] < 6), 1, False)]
+    filas = [
+        ("Muertes antes del 10", lambda r: r["m10"], 1, False),
+        ("Peleas con tu rival antes del 6", lambda r: sum(1 for p in r["peleas"] if p[1] < 6), 1, False),
+    ]
     if pos == "JUNGLE":
         filas.append(("CS al 10", lambda r: r["cs10"], 0, False))
     elif pos != "UTILITY":

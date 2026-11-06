@@ -1,4 +1,5 @@
 """Una partida en vivo: pide los datos de los diez jugadores y monta el panel."""
+
 import threading
 import time
 from collections import Counter
@@ -250,7 +251,14 @@ class Sesion:
             txt = NIVELES.get(tier, tier.capitalize())
             if tier not in SIN_DIVISION:
                 txt += f" {e.get('rank', '')}"
-            return {"nivel": tier.lower(), "rank": e.get("rank", ""), "txt": txt, "lp": e.get("leaguePoints", 0), "v": e.get("wins", 0), "d": e.get("losses", 0)}
+            return {
+                "nivel": tier.lower(),
+                "rank": e.get("rank", ""),
+                "txt": txt,
+                "lp": e.get("leaguePoints", 0),
+                "v": e.get("wins", 0),
+                "d": e.get("losses", 0),
+            }
 
         return {"solo": una("RANKED_SOLO_5x5"), "flex": una("RANKED_FLEX_SR") if self.cola == 440 else None}
 
@@ -283,7 +291,14 @@ class Sesion:
             etiquetas = an.etiquetas(res, j["rol"], j["maestria"], ahora_ms) if res["n"] else []
             grupo = letra.get((j["equipo"], grupos.get(j["puuid"])), "")
             if grupo and j["puuid"] != self.yo:
-                etiquetas.insert(0, {"t": f"Premade {grupo}", "tono": "neutro", "d": "ha jugado en el mismo equipo que otro jugador de esta partida en 2 o más partidas recientes"})
+                etiquetas.insert(
+                    0,
+                    {
+                        "t": f"Premade {grupo}",
+                        "tono": "neutro",
+                        "d": "ha jugado en el mismo equipo que otro jugador de esta partida en 2 o más partidas recientes",
+                    },
+                )
             primera_vez = any(e["t"] in ("Primera vez", "Poco rodado") for e in etiquetas)
             lado = "aliado" if j["equipo"] == self.mi_equipo else "rival"
             filas[j["puuid"] or id(j)] = {"j": j, "res": res, "etiquetas": etiquetas, "primera_vez": primera_vez, "lado": lado}
@@ -374,8 +389,11 @@ class Sesion:
             "plan": self._plan(lineas_juego, perfil, gank),
             "bans": [{"nombre": datos.nombre(b), "icono": datos.icono(b)} for b in self.bans],
             "recordatorios": app.cfg.get("recordatorios", []) if self.origen == "propia" else [],
-            "notas": app.notas_de([j["campeon"] for j in self.jugadores], {j["campeon"] for j in self.jugadores if j["equipo"] != self.mi_equipo})
-            if self.origen == "propia" else [],
+            "notas": app.notas_de(
+                [j["campeon"] for j in self.jugadores], {j["campeon"] for j in self.jugadores if j["equipo"] != self.mi_equipo}
+            )
+            if self.origen == "propia"
+            else [],
         }
 
     def _historial(self, muestras, por_pos, ahora_ms):
@@ -412,7 +430,13 @@ class Sesion:
         if vj and vj["n_mio"] >= 2:
             d = vj["n_mio"] - vj["v_mio"]
             tono = "ojo" if vj["v_mio"] < d else ("bien" if vj["v_mio"] > d else "neutro")
-            avisos.append((9 if tono == "ojo" else 4, tono, f"{historial['mi_campeon']} contra {vj['nombre']} en {vj['pos']}: {vj['v_mio']}V {d}D."))
+            avisos.append(
+                (
+                    9 if tono == "ojo" else 4,
+                    tono,
+                    f"{historial['mi_campeon']} contra {vj['nombre']} en {vj['pos']}: {vj['v_mio']}V {d}D.",
+                )
+            )
         elif vj and vj["n"] >= 3:
             d = vj["n"] - vj["v"]
             tono = "ojo" if vj["v"] < d else ("bien" if vj["v"] > d else "neutro")
@@ -436,7 +460,9 @@ class Sesion:
                 if j["rol"] != "JUNGLE" and res["n"] >= 6 and res["solo"] >= an.UMBRAL_SOLO.get(j["rol"], 9):
                     avisos.append((5, "ojo", f"{campeon} ({rol}) saca {an.num(res['solo'])} kills en solitario por partida."))
                 if camp["n"] >= 5 and camp["v"] / camp["n"] >= 0.7:
-                    avisos.append((6, "ojo", f"{campeon} ({rol}) ha ganado {camp['v']} de sus últimas {camp['n']} con ese campeón."))
+                    avisos.append(
+                        (6, "ojo", f"{campeon} ({rol}) ha ganado {camp['v']} de sus últimas {camp['n']} con ese campeón.")
+                    )
             if j["puuid"] != self.yo and (f["primera_vez"] or an.fuera_de_rol(res, j["rol"])):
                 motivo = "poco rodaje" if f["primera_vez"] else "fuera de rol"
                 verdes[f["lado"]].append(f"{campeon} ({rol}, {motivo})")

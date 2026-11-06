@@ -1,4 +1,5 @@
 """Cuándo se ve el panel encima del juego, sin Windows de por medio."""
+
 import tempfile
 import unittest
 from pathlib import Path
@@ -63,7 +64,7 @@ class Visibilidad(unittest.TestCase):
         self.assertEqual(ventana.cambios, 4)  # sin cambios, no se toca la ventana
 
     def test_fuera_de_partida_nunca(self):
-        app, ventana, ctl, teclas = montar(pulsadas={0x11, 0x09})
+        app, ventana, ctl, _teclas = montar(pulsadas={0x11, 0x09})
         app.modo = "previa"
         ctl.paso()
         self.assertFalse(ventana.visible)

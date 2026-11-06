@@ -1,4 +1,5 @@
 """Arranque: py -m deepprep  (--sin-ventana: solo el servidor, sin ventanas)"""
+
 import json
 import os
 import subprocess
@@ -34,7 +35,9 @@ def abrir_ventana(url):
 
 def pedir_que_se_muestre(url):
     """Ya hay otra copia en marcha: que enseñe su ventana. Devuelve False si no sabe hacerlo."""
-    pet = urllib.request.Request(url + "api/mostrar", data=b"{}", headers={"Origin": url.rstrip("/"), "Content-Type": "application/json"})
+    pet = urllib.request.Request(
+        url + "api/mostrar", data=b"{}", headers={"Origin": url.rstrip("/"), "Content-Type": "application/json"}
+    )
     try:
         with urllib.request.urlopen(pet, timeout=5) as r:
             return bool(json.loads(r.read()).get("ok"))
@@ -102,7 +105,9 @@ def main():
             print(f"Sin ventanas propias ({e!r}); abro el panel en el navegador y no habrá overlay")
             abrir_ventana(url)
     try:
-        while app.cfg.get("siempre_en_marcha") or time.time() - app.ultima_consulta < MINUTOS_SIN_PANEL * 60 or app.fase is not None:
+        while (
+            app.cfg.get("siempre_en_marcha") or time.time() - app.ultima_consulta < MINUTOS_SIN_PANEL * 60 or app.fase is not None
+        ):
             time.sleep(5)
         print("Nadie mira el panel y el cliente está cerrado; cierro.")
     except KeyboardInterrupt:

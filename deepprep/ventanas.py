@@ -4,6 +4,7 @@ Cerrar la principal solo la esconde: la app sigue viva mientras el cliente del L
 enseñar el overlay y grabar la siguiente partida. Se cierra sola a los 5 minutos de cerrar el cliente,
 salvo con "siempre en marcha" (entonces solo se cierra desde Ajustes o al apagar el PC).
 """
+
 import threading
 import time
 
@@ -31,15 +32,26 @@ class Ventanas:
         oculta: arranque con Windows; la ventana principal empieza escondida (el acceso directo la enseña).
         """
         cfg = self.app.cfg
-        self.principal = webview.create_window("Deep Prep", self.url, width=1500, height=950, min_size=(1100, 700),
-                                               background_color=FONDO, hidden=oculta)
+        self.principal = webview.create_window(
+            "Deep Prep", self.url, width=1500, height=950, min_size=(1100, 700), background_color=FONDO, hidden=oculta
+        )
         if oculta:
             self.oculta_desde = time.time()
         self.principal.events.closing += self._al_cerrar
         if cfg.get("overlay", True):
             self.flotante = webview.create_window(
-                "Deep Prep · partida", self.url + "?vista=overlay", width=ANCHO_OVERLAY, height=ALTO_OVERLAY,
-                frameless=True, easy_drag=False, on_top=True, focus=False, hidden=True, shadow=False, background_color=FONDO)
+                "Deep Prep · partida",
+                self.url + "?vista=overlay",
+                width=ANCHO_OVERLAY,
+                height=ALTO_OVERLAY,
+                frameless=True,
+                easy_drag=False,
+                on_top=True,
+                focus=False,
+                hidden=True,
+                shadow=False,
+                background_color=FONDO,
+            )
         self.app.al_mostrar = self.mostrar_principal
         self.app.al_salir = self.salir
         self.app.ventana_visible = lambda: self.oculta_desde is None

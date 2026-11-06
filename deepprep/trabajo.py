@@ -1,4 +1,5 @@
 """Cola de tareas con prioridad: lo que más informa (el jungla rival) se pide antes."""
+
 import itertools
 import queue
 import threading

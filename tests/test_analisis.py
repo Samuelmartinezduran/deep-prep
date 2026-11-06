@@ -1,4 +1,5 @@
 """Pruebas del análisis. Los datos reales son una clasificatoria del 12/10/2026 (Diana contra Master Yi)."""
+
 import gzip
 import json
 import unittest
@@ -17,14 +18,40 @@ def cargar(nombre):
 
 def jug(puuid, equipo, pos, campeon, gana, pid=1, k=0, d=0, a=0, **ch):
     return {
-        "puuid": puuid, "nombre": puuid, "tag": "", "pid": pid, "equipo": equipo, "campeon": campeon, "pos": pos,
-        "gana": gana, "k": k, "d": d, "a": a, "cs": 0, "oro": 0, "dano": 0, "vision": 0, "wards": 0, "control": 0,
-        "s1": 4, "s2": 11 if pos == "JUNGLE" else 14, "ch": ch,
+        "puuid": puuid,
+        "nombre": puuid,
+        "tag": "",
+        "pid": pid,
+        "equipo": equipo,
+        "campeon": campeon,
+        "pos": pos,
+        "gana": gana,
+        "k": k,
+        "d": d,
+        "a": a,
+        "cs": 0,
+        "oro": 0,
+        "dano": 0,
+        "vision": 0,
+        "wards": 0,
+        "control": 0,
+        "s1": 4,
+        "s2": 11 if pos == "JUNGLE" else 14,
+        "ch": ch,
     }
 
 
 def partida(id_, jugadores, creacion=0, cola=420, remake=False):
-    return {"id": id_, "creacion": creacion, "duracion": 1800, "cola": cola, "mapa": 11, "remake": remake, "equipos": {}, "jug": jugadores}
+    return {
+        "id": id_,
+        "creacion": creacion,
+        "duracion": 1800,
+        "cola": cola,
+        "mapa": 11,
+        "remake": remake,
+        "equipos": {},
+        "jug": jugadores,
+    }
 
 
 class Geografia(unittest.TestCase):
@@ -67,7 +94,7 @@ class DatosReales(unittest.TestCase):
         self.assertEqual((p["cola"], p["mapa"], p["remake"], len(p["jug"])), (420, 11, False, 10))
         d = self.diana
         self.assertEqual((d["pos"], d["equipo"], d["gana"], d["k"], d["d"], d["a"]), ("JUNGLE", 200, False, 4, 8, 6))
-        self.assertEqual(Counter(j["pos"] for j in p["jug"]), Counter({pos: 2 for pos in an.POSICIONES}))
+        self.assertEqual(Counter(j["pos"] for j in p["jug"]), Counter(dict.fromkeys(an.POSICIONES, 2)))
         self.assertIn("enemyJungleMonsterKills", d["ch"])
         self.assertEqual(p["equipos"]["100"]["gana"], True)
         self.assertLess(len(json.dumps(p)), 15000)
@@ -111,8 +138,11 @@ class DatosReales(unittest.TestCase):
 class Roles(unittest.TestCase):
     def test_smite_manda_y_el_resto_sale_del_campeon(self):
         tasas = {
-            1: {"MIDDLE": 5}, 2: {"TOP": 5}, 3: {"JUNGLE": 3, "TOP": 1},
-            4: {"BOTTOM": 5}, 5: {"UTILITY": 4, "MIDDLE": 1},
+            1: {"MIDDLE": 5},
+            2: {"TOP": 5},
+            3: {"JUNGLE": 3, "TOP": 1},
+            4: {"BOTTOM": 5},
+            5: {"UTILITY": 4, "MIDDLE": 1},
         }
         equipo = [
             {"campeon": 4, "s1": 4, "s2": 7, "puuid": "a"},
@@ -124,7 +154,9 @@ class Roles(unittest.TestCase):
         self.assertEqual(an.asignar_roles(equipo, tasas), ["BOTTOM", "UTILITY", "MIDDLE", "TOP", "JUNGLE"])
 
     def test_el_historial_desempata(self):
-        equipo = [{"campeon": 9, "s1": 4, "s2": 14, "puuid": p} for p in "abcd"] + [{"campeon": 9, "s1": 11, "s2": 4, "puuid": "e"}]
+        equipo = [{"campeon": 9, "s1": 4, "s2": 14, "puuid": p} for p in "abcd"] + [
+            {"campeon": 9, "s1": 11, "s2": 4, "puuid": "e"}
+        ]
         hist = {"a": Counter(UTILITY=9), "b": Counter(TOP=9), "c": Counter(BOTTOM=9), "d": Counter(MIDDLE=9)}
         self.assertEqual(an.asignar_roles(equipo, {}, hist), ["UTILITY", "TOP", "BOTTOM", "MIDDLE", "JUNGLE"])
 
@@ -135,7 +167,9 @@ class Roles(unittest.TestCase):
 class Resumen(unittest.TestCase):
     def muestra(self, resultados, pos="TOP", campeon=10):
         return [
-            partida(f"m{i}", [jug("yo", 100, pos, campeon, g, k=5, d=2, a=3), jug("otro", 200, pos, 20, not g)], creacion=1000 - i)
+            partida(
+                f"m{i}", [jug("yo", 100, pos, campeon, g, k=5, d=2, a=3), jug("otro", 200, pos, 20, not g)], creacion=1000 - i
+            )
             for i, g in enumerate(resultados)
         ]
 
@@ -182,8 +216,9 @@ class Resumen(unittest.TestCase):
         # En una cuenta recién hecha, tener poca maestría con el campeón no cuenta como estreno.
         nueva = {"championPoints": 900, "total": 60000}
         self.assertEqual([e["t"] for e in an.etiquetas(res, "TOP", nueva, ahora)], ["Cuenta nueva"])
-        self.assertEqual([e["t"] for e in an.etiquetas(res, "TOP", {"championPoints": 900, "total": 3000000}, ahora)], ["Poco rodado"])
-
+        self.assertEqual(
+            [e["t"] for e in an.etiquetas(res, "TOP", {"championPoints": 900, "total": 3000000}, ahora)], ["Poco rodado"]
+        )
 
     def test_premade_con_dos_partidas_juntos(self):
         juntos = [partida(f"m{i}", [jug("a", 100, "TOP", 1, True), jug("b", 100, "MIDDLE", 2, True)]) for i in range(2)]
@@ -199,8 +234,13 @@ class Lineas(unittest.TestCase):
 
         def res(pos, gana_linea):
             m = [
-                partida(f"{pos}{i}", [jug("p", 100, pos, 1, gana_linea, **{campo: int(gana_linea)}),
-                                      jug("r", 200, pos, 2, not gana_linea, **{campo: int(not gana_linea)})])
+                partida(
+                    f"{pos}{i}",
+                    [
+                        jug("p", 100, pos, 1, gana_linea, **{campo: int(gana_linea)}),
+                        jug("r", 200, pos, 2, not gana_linea, **{campo: int(not gana_linea)}),
+                    ],
+                )
                 for i in range(8)
             ]
             return an.resumen_jugador("p", m, 1)
@@ -226,20 +266,29 @@ class Historial(unittest.TestCase):
         ahora = 100 * dia
         mias = [
             # Diana jungla contra Yi jungla: una derrota y una victoria.
-            partida("a", [jug("yo", 100, "JUNGLE", 131, False), jug("x", 200, "JUNGLE", 11, True), jug("z", 200, "TOP", 50, True)], creacion=ahora - 2 * dia),
+            partida(
+                "a",
+                [jug("yo", 100, "JUNGLE", 131, False), jug("x", 200, "JUNGLE", 11, True), jug("z", 200, "TOP", 50, True)],
+                creacion=ahora - 2 * dia,
+            ),
             partida("b", [jug("yo", 200, "JUNGLE", 131, True), jug("y", 100, "JUNGLE", 11, False)], creacion=ahora - 5 * dia),
             # Yi rival, pero en top: no cuenta como duelo de junglas.
             partida("c", [jug("yo", 100, "JUNGLE", 64, True), jug("y", 200, "TOP", 11, False)], creacion=ahora - 9 * dia),
             # Yi en mi equipo: no es un cruce.
             partida("d", [jug("yo", 100, "JUNGLE", 131, True), jug("w", 100, "TOP", 11, True)], creacion=ahora - 10 * dia),
         ]
-        rivales = [{"campeon": 11, "pos": "JUNGLE", "nombre_campeon": "Master Yi"}, {"campeon": 99, "pos": "TOP", "nombre_campeon": "Lux"}]
+        rivales = [
+            {"campeon": 11, "pos": "JUNGLE", "nombre_campeon": "Master Yi"},
+            {"campeon": 99, "pos": "TOP", "nombre_campeon": "Lux"},
+        ]
         h = an.mi_historial({"yo"}, mias, 131, rivales, {"x": "Equis", "nuevo": "Nuevo"}, ahora, mi_pos="JUNGLE")
         self.assertEqual(h["n"], 4)
         self.assertEqual((h["campeon"]["n"], h["campeon"]["v"]), (3, 2))
         self.assertEqual(h["vs_directo"], {"nombre": "Master Yi", "pos": "jungla", "n": 2, "v": 1, "n_mio": 2, "v_mio": 1})
         # Si juegas top, tu duelo directo es el de top (Yi en top en la partida c).
-        top = an.mi_historial({"yo"}, mias, 64, [{"campeon": 11, "pos": "TOP", "nombre_campeon": "Master Yi"}], {}, ahora, mi_pos="TOP")
+        top = an.mi_historial(
+            {"yo"}, mias, 64, [{"campeon": 11, "pos": "TOP", "nombre_campeon": "Master Yi"}], {}, ahora, mi_pos="TOP"
+        )
         self.assertEqual((top["vs_directo"]["pos"], top["vs_directo"]["n"]), ("top", 0))
         yi = next(f for f in h["vs"] if f["campeon"] == 11)
         self.assertEqual((yi["n"], yi["v"], yi["n_mio"], yi["v_mio"]), (3, 2, 2, 1))
