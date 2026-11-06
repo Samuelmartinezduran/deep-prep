@@ -1,190 +1,75 @@
-"""Sirve el panel con un estado guardado, para diseñarlo y revisarlo sin partida.
+"""Sirve el panel de la demo (deepprep/demo) en un puerto fijo, sin ventanas, para diseñarlo y revisarlo sin partida.
 
-Uso: py herramientas/maqueta.py [maquetas/partida.json] [--modo previa|seleccion|carga|juego] [--puerto 5252]
-El estado sale de herramientas/simular_propia.py (lo guarda en herramientas/maquetas/partida.json).
+Uso: py herramientas/maqueta.py [estado.json] [--escena seleccion|carga|juego] [--puerto 5252] [--novedades]
+
+Es la demo (py -m deepprep --demo --sin-ventana) con lo que viene bien al diseñar:
+- estado.json: el panel de ese estado en vez del de la demo, p. ej. el que guarda herramientas/simular_propia.py en
+  herramientas/maquetas/partida.json (un nombre suelto se busca también en herramientas/).
+- --novedades: el aviso de una versión nueva ya descargada y las novedades de la recién instalada, como los ven los
+  amigos al actualizarse.
+Nada va a tus datos ni a la carpeta del proyecto: todo va a una carpeta temporal que se borra al cerrar (Ctrl+C).
 """
 
 import json
+import os
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+AQUI = Path(__file__).resolve().parent
+sys.path.insert(0, str(AQUI.parent))
 
-import gzip
-
-from deepprep import analisis as an
-from deepprep import config, servidor
-from deepprep import duelos as du
-from deepprep import revision as rv
-from deepprep.app import App, crear_app
-from deepprep.base_duelos import BaseDuelos
-
-AQUI = Path(__file__).parent
-DATOS_PRUEBA = AQUI.parent / "tests" / "datos"
+NOTAS = (
+    "Interfaz nueva y más datos para jugar mejor.\n"
+    "- Tu pool contra el rival en la selección de campeón\n"
+    "- Mapa de dónde está el jungla rival en sus primeros minutos\n"
+    "- Clips de cada muerte en la revisión"
+)
 
 
-def opcion(nombre, defecto):
-    return sys.argv[sys.argv.index(nombre) + 1] if nombre in sys.argv else defecto
+def opcion(nombre, defecto=None):
+    return sys.argv[sys.argv.index(nombre) + 1] if nombre in sys.argv[:-1] else defecto
 
 
-def _gz(nombre):
-    with gzip.open(DATOS_PRUEBA / nombre, "rt", encoding="utf-8") as f:
-        return json.load(f)
-
-
-class AppMaqueta:
-    """Estado fijo para el panel; revisiones, tendencias y ajustes salen de la app real (solo lectura)."""
-
-    def __init__(self, estado, modo):
-        self.base = estado
-        self.modo = modo
-        # Con la configuración en memoria no escribe config.json.
-        self.real = crear_app(config.Configuracion.en_memoria(config.cargar()), grabar=False, duelos=BaseDuelos())
-        self.real.comprobar_clave()
-        self.datos = self.real.datos
-        # Una revisión de ejemplo con la partida real de las pruebas (Diana contra Master Yi).
-        partida = an.reducir_partida(_gz("partida.json.gz"))
-        yo = next(j for j in partida["jug"] if j["campeon"] == 131)
-        prevision = {"gank": {"linea": "top", "veces": 3, "n": 5}, "lineas": [{"linea": "bot", "veredicto": "Aquí se equivocan"}]}
-        self.ejemplo = rv.revisar(
-            partida, rv.reducir_linea_completa(_gz("linea.json.gz")), yo["puuid"], self.datos.nombre, prevision, 14
-        )
-        self.ejemplo.update(
-            carpeta=str(Path.home() / "Videos" / "LoL-coach" / "2026-10-12_partida1"),
-            icono=self.datos.icono(131),
-            lp={"lp": 53, "nivel": "emerald", "rank": "I", "cambio": -19},
-        )
-        for m in self.ejemplo["muertes"][:3]:
-            m["clip"] = "maqueta.mp4"
-
-    def duelo_maqueta(self):
-        """Tu duelo de la maqueta. Si ese duelo aún tiene pocas partidas, para diseñar se usan las de tu
-        campeón contra cualquier rival de su posición (solo en la maqueta)."""
-        p = self.base["panel"]
-        por_nombre = {v["nombre"]: k for k, v in self.datos.campeones.items()}
-        yo = next(f for f in p["equipos"]["aliado"] if f["soy_yo"])
-        rival = next((f for f in p["equipos"]["rival"] if f["rol"] == yo["rol"]), None)
-        a, b = por_nombre.get(yo["campeon"]), por_nombre.get(rival["campeon"]) if rival else None
-        d = self.real.duelo(a, yo["rol"], b)
-        if d and d["poco"] and "--duelo-real" not in sys.argv:
-            base = self.real.duelos
-            todos = [r for rb in base.cuantos(a, yo["rol"]) for r in base.duelo(a, yo["rol"], rb, excluir=set(self.real.cuentas))]
-            d = dict(
-                d,
-                **du.analizar(
-                    todos,
-                    base.de(set(self.real.cuentas), a, yo["rol"]),
-                    yo["campeon"],
-                    rival["campeon"],
-                    yo["rol"],
-                    self.datos.objeto,
-                    self.datos.runa,
-                ),
-            )
-        return d
-
-    def revisiones(self):
-        r = self.real.revisiones()
-        claves = ("id", "fecha", "cola", "duracion", "gana", "campeon", "campeon_id", "kda", "icono")
-        r["lista"] = [dict({k: self.ejemplo[k] for k in claves}, lp=-19)] + r["lista"]
-        r["muertes"] = rv.mapa_muertes([self.ejemplo]) + r["muertes"]
-        return r
-
-    def revision(self, id_):
-        return self.ejemplo if id_ == self.ejemplo["id"] else self.real.revision(id_)
-
-    def ajustes(self):
-        return self.real.ajustes()
-
-    def guardar_ajustes(self, cambios):
-        return {"ok": True}
-
-    def abrir_carpeta(self, id_):
-        return {"ok": False, "error": "Maqueta: no abre carpetas"}
-
-    def mapa_jungla(self):
-        """La maqueta se guardó antes del mapa del jungla rival: se calcula con sus partidas de la caché (una vez)."""
-        if hasattr(self, "_mapa"):
-            return self._mapa
-        self._mapa = {}
-        try:
-            p = self.base["panel"]
-            jr = next(f for f in p["equipos"]["rival"] if f["rol"] == "JUNGLE")
-            puuid = self.real.cliente.cuenta_por_riot_id(jr["nombre"], jr["tag"])["puuid"]
-            partidas = self.real.cache.partidas_de(puuid)
-            lineas = {m["id"]: self.real.cache.linea(m["id"]) for m in partidas if self.real.cache.linea(m["id"])}
-            campeon = {v["nombre"]: k for k, v in self.datos.campeones.items()}[jr["campeon"]]
-            self._mapa = an.perfil_jungla(puuid, partidas, lineas, campeon, 200).get("mapa") or {}
-        except Exception as e:  # noqa: BLE001 - la maqueta sigue sin mapa
-            print(f"Maqueta sin mapa del jungla: {e!r}")
-        return self._mapa
-
-    def seleccion(self):
-        """Selección de campeón a partir de la maqueta: tú con tu campeón y el rival de tu posición ya elegido."""
-        p = self.base["panel"]
-        por_nombre = {v["nombre"]: k for k, v in self.datos.campeones.items()}
-        yo = next(f for f in p["equipos"]["aliado"] if f["soy_yo"])
-        rival = next(f for f in p["equipos"]["rival"] if f["rol"] == yo["rol"])
-        a, b = por_nombre[yo["campeon"]], por_nombre[rival["campeon"]]
-        return {
-            "duelo": self.duelo_maqueta(),
-            "pool": self.real.pool_contra(yo["rol"], b, 420),
-            "pos": an.NOMBRE_POS[yo["rol"]],
-            "mio": {"nombre": yo["campeon"], "icono": self.datos.icono(a), "splash": ""},
-            "historial": p["historial"],
-            "notas": [],
-        }
-
-    def estado(self, contar=True):
-        if self.modo == "seleccion":
-            return dict(
-                self.base,
-                modo="previa",
-                fase="ChampSelect",
-                fase_txt="Selección de campeón",
-                panel=None,
-                seleccion=self.seleccion(),
-            )
-        e = dict(self.base, modo=self.modo)
-        if "--novedades" in sys.argv:
-            # Cómo lo ven los amigos: una versión nueva ya descargada y las novedades de la que acaban de instalar.
-            e["version"] = {"version": "1.0.0", "nueva": "1.0.1", "lista": True, "error": ""}
-            e["novedades"] = {
-                "version": "1.0.0",
-                "notas": "Interfaz nueva y más datos para jugar mejor.\n"
-                "- Tu pool contra el rival en la selección de campeón\n"
-                "- Mapa de dónde está el jungla rival en sus primeros minutos\n"
-                "- Clips de cada muerte en la revisión",
-            }
-        if e.get("panel"):
-            jungla = e["panel"].get("jungla")
-            if jungla and "mapa" not in jungla:
-                jungla = dict(jungla, mapa=self.mapa_jungla())
-            e["panel"] = dict(e["panel"], duelo=self.duelo_maqueta(), jungla=jungla)
-            e["panel"] = App._para_el_modo(self, e["panel"])
-        return e
-
-    def buscar(self, rid):
-        return {"ok": False, "error": "Maqueta: sin búsquedas"}
-
-    def volver(self):
-        return {"ok": True}
-
-    def poner_clave(self, clave):
-        return {"ok": False, "error": "Maqueta"}
+def archivo_de_estado():
+    valores = {opcion("--escena"), opcion("--modo"), opcion("--puerto")}
+    libres = [a for a in sys.argv[1:] if not a.startswith("--") and a not in valores]
+    if not libres:
+        return None
+    archivo = Path(libres[0])
+    if not archivo.is_absolute() and not archivo.exists():
+        archivo = AQUI / archivo
+    return archivo
 
 
 def main():
-    libres = [a for a in sys.argv[1:] if not a.startswith("--") and a not in (opcion("--modo", ""), opcion("--puerto", ""))]
-    archivo = Path(libres[0]) if libres else AQUI / "maquetas" / "partida.json"
-    if not archivo.is_absolute() and not archivo.exists():
-        archivo = AQUI / archivo
-    estado = json.loads(archivo.read_text(encoding="utf-8"))
+    carpeta = Path(tempfile.mkdtemp(prefix="deepprep-maqueta-"))
+    # Antes de importar deepprep: así sus datos (las imágenes de Data Dragon) también van a la carpeta temporal.
+    os.environ["DEEPPREP_DATOS"] = str(carpeta)
+    from deepprep import __version__, servidor
+    from deepprep.demo import ESCENA_INICIAL, AppDemo
+
+    archivo = archivo_de_estado()
+    panel = json.loads(archivo.read_text(encoding="utf-8"))["panel"] if archivo else None
+    novedades = version = None
+    if "--novedades" in sys.argv:
+        novedades = {"version": __version__, "notas": NOTAS}
+        *resto, ultimo = __version__.split(".")
+        nueva = ".".join([*resto, str(int(ultimo) + 1)])
+        version = {"version": __version__, "nueva": nueva, "lista": True, "error": ""}
+    escena = opcion("--escena") or opcion("--modo") or ESCENA_INICIAL  # --modo: el nombre de antes
+    app = AppDemo(carpeta, escena=escena, panel=panel, novedades=novedades, version=version)
     puerto = int(opcion("--puerto", "5252"))
-    app = AppMaqueta(estado, opcion("--modo", estado.get("modo") or "carga"))
-    srv = servidor.crear(app, puerto)
-    print(f"Maqueta en http://127.0.0.1:{puerto}/ (modo {app.modo})", flush=True)
-    srv.serve_forever()
+    srv = servidor.crear(app, puerto, post=app.rutas())
+    print(f"Maqueta en http://127.0.0.1:{puerto}/ (escena {app.escena}); Ctrl+C para cerrarla", flush=True)
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        srv.server_close()
+        shutil.rmtree(carpeta, ignore_errors=True)
 
 
 if __name__ == "__main__":
