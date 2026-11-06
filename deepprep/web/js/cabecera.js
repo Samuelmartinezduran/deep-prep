@@ -36,6 +36,7 @@ export const ARMAZON = `
             <button type="submit">Ver</button>
           </form>
         </header>
+        <div id="demo"></div>
         <div id="banda"></div>
         <div id="novedades"></div>
         <main id="principal"></main>

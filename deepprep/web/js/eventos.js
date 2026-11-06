@@ -2,6 +2,7 @@
 // documento: así vale también para lo que se pinta después.
 import { filaNota, filaReferencia, guardarAjustes, salirApp } from "./ajustes.js";
 import { enviar } from "./api.js";
+import { elegirEscena } from "./demo.js";
 import { estado } from "./estado.js";
 import { cerrarNovedades } from "./novedades.js";
 import { elegirMinuto } from "./panel.js";
@@ -32,6 +33,9 @@ export function activarEventos() {
       refrescar();
     } else if (b.dataset.vista) {
       cambiarVista(b.dataset.vista);
+    } else if (b.dataset.escena) {
+      const vista = await elegirEscena(b.dataset.escena);
+      if (vista) cambiarVista(vista);
     } else if (b.id === "revision-lista") {
       estado.revisionAvisada = estado.actual && estado.actual.ultima_revision;
       estado.revisionVista = estado.revisionAvisada;

@@ -2,6 +2,7 @@
 import { pedirTexto, SIN_CONEXION } from "./api.js";
 import { pintarAjustes } from "./ajustes.js";
 import { chip, pintarCabecera } from "./cabecera.js";
+import { pintarDemo } from "./demo.js";
 import { pintarEspera } from "./espera.js";
 import { estado } from "./estado.js";
 import { pintarOverlay } from "./overlay.js";
@@ -14,6 +15,7 @@ export function cambiarVista(v) {
   estado.vista = v;
   document.querySelectorAll("#pestanas button").forEach((b) => b.classList.toggle("activa", b.dataset.vista === v));
   $("titulo-vista").textContent = TITULOS[v];
+  pintarDemo(estado.actual);
   estado.ultimo = "";
   if (v === "revisiones") pintarRevisiones();
   else if (v === "ajustes") pintarAjustes();
@@ -30,6 +32,7 @@ function pintar(e) {
     $("principal").innerHTML = pintarOverlay(e);
   } else {
     pintarCabecera(e);
+    pintarDemo(e);
     if (estado.vista === "partida") {
       $("principal").innerHTML = p && (!e.seleccion || !p.terminada) ? pintarPanel(e) : e.seleccion ? pintarSeleccion(e.seleccion) : pintarEspera(e);
     } else if (estado.vista === "revisiones" && e.ultima_revision && e.ultima_revision !== (anterior || {}).ultima_revision) {

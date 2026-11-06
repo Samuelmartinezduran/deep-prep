@@ -144,6 +144,20 @@ form.buscar input { width: 280px; padding-left: 34px; background: var(--panel); 
 .banda a { color: var(--acento); }
 main { width: 100%; max-width: 1680px; padding: 32px 32px 48px; margin: 0 auto; }
 
+/* Modo demo (py -m deepprep --demo): la barra de escenas, debajo de la cabecera y fija como ella. */
+.demo {
+  position: sticky; top: 56px; z-index: 4;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px;
+  padding: 10px 32px; background: var(--panel); border-bottom: 1px solid var(--linea);
+}
+.demo-marca { display: inline-flex; align-items: center; gap: 8px; font: 500 11px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--acento2); white-space: nowrap; }
+.demo-marca .punto { background: var(--acento); }
+.demo .selector { margin: 0; }
+.demo .selector button { padding: 0 12px; font: 500 12.5px var(--sans); }
+.demo-txt { flex: 1 1 320px; min-width: 0; margin: 0; font-size: 13px; line-height: 1.45; color: var(--texto2); text-wrap: balance; }
+.demo-overlay { font-size: 13px; color: var(--acento); text-decoration: none; white-space: nowrap; }
+.demo-overlay:hover { color: var(--acento2); text-decoration: underline; }
+
 /* Tooltip de los gráficos. */
 .tip {
   position: fixed; left: 0; top: 0; z-index: 50; max-width: 280px; pointer-events: none;
