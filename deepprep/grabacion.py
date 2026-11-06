@@ -210,6 +210,29 @@ def ventana_juego():
     return ctypes.windll.user32.FindWindowW(CLASE_JUEGO, None)
 
 
+class _DescSalida(ctypes.Structure):
+    """DXGI_OUTPUT_DESC: el nombre, el rectángulo y el monitor de una salida de la gráfica."""
+
+    _fields_ = [
+        ("nombre", ctypes.c_wchar * 32),
+        ("rect", wt.RECT),
+        ("unida", wt.BOOL),
+        ("giro", ctypes.c_int),
+        ("monitor", wt.HMONITOR),
+    ]
+
+
+def _metodo(obj, indice, *tipos):
+    """El método número indice de la tabla de un objeto COM (DXGI no tiene otra forma de llamarse desde ctypes)."""
+    tabla = ctypes.cast(obj, ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p)))[0]
+    return ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, *tipos)(tabla[indice])
+
+
+def _soltar(obj):
+    if obj:
+        _metodo(obj, 2)(obj)  # Release
+
+
 def salida_del_juego():
     """Número de pantalla (salida DXGI de la gráfica principal) en la que está el juego; 0 si no se sabe.
 
@@ -223,48 +246,31 @@ def salida_del_juego():
     class GUID(ctypes.Structure):
         _fields_ = [("a", ctypes.c_ulong), ("b", ctypes.c_ushort), ("c", ctypes.c_ushort), ("d", ctypes.c_ubyte * 8)]
 
-    class DESC(ctypes.Structure):
-        _fields_ = [
-            ("nombre", ctypes.c_wchar * 32),
-            ("rect", wt.RECT),
-            ("unida", wt.BOOL),
-            ("giro", ctypes.c_int),
-            ("monitor", wt.HMONITOR),
-        ]
-
-    def metodo(obj, indice, *tipos):
-        tabla = ctypes.cast(obj, ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p)))[0]
-        return ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, *tipos)(tabla[indice])
-
-    def soltar(obj):
-        if obj:
-            metodo(obj, 2)(obj)
-
     iid = GUID(0x770AAE78, 0xF26F, 0x4DBA, (ctypes.c_ubyte * 8)(0xA8, 0x29, 0x25, 0x3C, 0x83, 0xD1, 0xB3, 0x87))  # IDXGIFactory1
     fabrica, adaptador = ctypes.c_void_p(), ctypes.c_void_p()
     try:
         if ctypes.windll.dxgi.CreateDXGIFactory1(ctypes.byref(iid), ctypes.byref(fabrica)) != 0:
             return 0
         if (
-            metodo(fabrica, 12, ctypes.c_uint, ctypes.POINTER(ctypes.c_void_p))(fabrica, 0, ctypes.byref(adaptador)) != 0
+            _metodo(fabrica, 12, ctypes.c_uint, ctypes.POINTER(ctypes.c_void_p))(fabrica, 0, ctypes.byref(adaptador)) != 0
         ):  # EnumAdapters1
             return 0
         for i in range(8):
             salida = ctypes.c_void_p()
             if (
-                metodo(adaptador, 7, ctypes.c_uint, ctypes.POINTER(ctypes.c_void_p))(adaptador, i, ctypes.byref(salida)) != 0
+                _metodo(adaptador, 7, ctypes.c_uint, ctypes.POINTER(ctypes.c_void_p))(adaptador, i, ctypes.byref(salida)) != 0
             ):  # EnumOutputs
                 break
-            desc = DESC()
-            metodo(salida, 7, ctypes.POINTER(DESC))(salida, ctypes.byref(desc))  # GetDesc
-            soltar(salida)
+            desc = _DescSalida()
+            _metodo(salida, 7, ctypes.POINTER(_DescSalida))(salida, ctypes.byref(desc))  # GetDesc
+            _soltar(salida)
             if desc.monitor == monitor:
                 return i
     except OSError:
         return 0
     finally:
-        soltar(adaptador)
-        soltar(fabrica)
+        _soltar(adaptador)
+        _soltar(fabrica)
     return 0
 
 
@@ -350,22 +356,10 @@ def _grabar(cfg, espera_min, max_min, prueba_seg):
         if not ffmpeg:
             log.write("No encuentro ffmpeg; no se graba.\n")
             return
-        inicio = time.time()
-        while not prueba_seg and not ventana_juego():
-            if time.time() - inicio > espera_min * 60:
-                log.write(f"No ha empezado ninguna partida en {espera_min} min; no se ha grabado nada.\n")
-                return
-            time.sleep(2)
-
-        base = carpeta_videos() / "LoL-coach"
-        base.mkdir(parents=True, exist_ok=True)
-        hoy = datetime.date.today().isoformat()
-        n = 1
-        while (base / f"{hoy}_partida{n}").exists():
-            n += 1
-        carpeta = base / (f"{hoy}_prueba" if prueba_seg else f"{hoy}_partida{n}")
-        carpeta.mkdir(exist_ok=True)
-        (carpeta / SERIES).unlink(missing_ok=True)  # la de prueba se reutiliza: fuera las series de la vez anterior
+        if not prueba_seg and not _esperar_al_juego(espera_min):
+            log.write(f"No ha empezado ninguna partida en {espera_min} min; no se ha grabado nada.\n")
+            return
+        base, carpeta = _carpeta_nueva(prueba_seg)
         stop = base / "STOP"
         stop.unlink(missing_ok=True)
         nombre, args = elegir_codificador(ffmpeg, cfg.get("grabacion_codificador", "auto"))
@@ -384,50 +378,83 @@ def _grabar(cfg, espera_min, max_min, prueba_seg):
         for arranque in range(1, 200):
             if not seguir():
                 break
-            orden = [
-                ffmpeg,
-                "-hide_banner",
-                "-v",
-                "error",
-                "-y",
-                "-f",
-                "lavfi",
-                "-i",
-                f"ddagrab=output_idx={salida}:framerate=30,hwdownload,format=bgra",
-                "-t",
-                "6000",
-                *args,
-                "-g",
-                "60",
-                "-f",
-                "segment",
-                "-segment_time",
-                "300",
-                "-reset_timestamps",
-                "1",
-                str(carpeta / f"r{arranque:02d}_seg_%03d.mkv"),
-            ]
-            cuando = time.time()
-            p = subprocess.Popen(orden, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log, creationflags=SIN_VENTANA)
-            # Con esto la revisión sabe en qué serie y en qué trozo cae cada momento de la partida.
-            try:
-                apuntar_serie(carpeta, arranque, cuando)
-            except OSError as e:
-                log.write(f"No se pudo apuntar cuándo empieza la serie {arranque}: {e}\n")
-            try:
-                ctypes.windll.kernel32.SetPriorityClass(int(p._handle), 0x4000)  # por debajo de lo normal
-            except (OSError, AttributeError):
-                pass
-            while p.poll() is None:
-                if not seguir():
-                    try:
-                        p.communicate(b"q", timeout=10)  # cierre limpio del vídeo
-                    except (subprocess.TimeoutExpired, OSError, ValueError):
-                        p.kill()
-                    break
-                time.sleep(2)
-            time.sleep(3)
+            _grabar_serie(_orden_grabacion(ffmpeg, salida, args, carpeta, arranque), carpeta, arranque, log, seguir)
         borradas = [] if prueba_seg else limpiar(base, cfg.get("grabacion_max_gb", 0), actual=carpeta)
         if borradas:
             log.write(f"Borradas por espacio: {', '.join(borradas)}\n")
         log.write(f"TERMINADO: {round((time.time() - empezo) / 60, 1)} min\n")
+
+
+def _esperar_al_juego(espera_min):
+    """Espera a que se abra la ventana del juego. False si en espera_min minutos no ha empezado ninguna partida."""
+    inicio = time.time()
+    while not ventana_juego():
+        if time.time() - inicio > espera_min * 60:
+            return False
+        time.sleep(2)
+    return True
+
+
+def _carpeta_nueva(prueba_seg):
+    """(Vídeos\\LoL-coach, la carpeta de esta grabación): AAAA-MM-DD_partidaN, o AAAA-MM-DD_prueba en una prueba."""
+    base = carpeta_videos() / "LoL-coach"
+    base.mkdir(parents=True, exist_ok=True)
+    hoy = datetime.date.today().isoformat()
+    n = 1
+    while (base / f"{hoy}_partida{n}").exists():
+        n += 1
+    carpeta = base / (f"{hoy}_prueba" if prueba_seg else f"{hoy}_partida{n}")
+    carpeta.mkdir(exist_ok=True)
+    (carpeta / SERIES).unlink(missing_ok=True)  # la de prueba se reutiliza: fuera las series de la vez anterior
+    return base, carpeta
+
+
+def _orden_grabacion(ffmpeg, salida, args, carpeta, arranque):
+    """ffmpeg grabando la pantalla salida en trozos de 5 minutos: rNN_seg_000.mkv, rNN_seg_001.mkv..."""
+    return [
+        ffmpeg,
+        "-hide_banner",
+        "-v",
+        "error",
+        "-y",
+        "-f",
+        "lavfi",
+        "-i",
+        f"ddagrab=output_idx={salida}:framerate=30,hwdownload,format=bgra",
+        "-t",
+        "6000",
+        *args,
+        "-g",
+        "60",
+        "-f",
+        "segment",
+        "-segment_time",
+        "300",
+        "-reset_timestamps",
+        "1",
+        str(carpeta / f"r{arranque:02d}_seg_%03d.mkv"),
+    ]
+
+
+def _grabar_serie(orden, carpeta, arranque, log, seguir):
+    """Graba una serie de trozos hasta que ffmpeg se corte o ya no haya que seguir (y entonces lo cierra bien)."""
+    cuando = time.time()
+    p = subprocess.Popen(orden, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log, creationflags=SIN_VENTANA)
+    # Con esto la revisión sabe en qué serie y en qué trozo cae cada momento de la partida.
+    try:
+        apuntar_serie(carpeta, arranque, cuando)
+    except OSError as e:
+        log.write(f"No se pudo apuntar cuándo empieza la serie {arranque}: {e}\n")
+    try:
+        ctypes.windll.kernel32.SetPriorityClass(int(p._handle), 0x4000)  # por debajo de lo normal
+    except (OSError, AttributeError):
+        pass
+    while p.poll() is None:
+        if not seguir():
+            try:
+                p.communicate(b"q", timeout=10)  # cierre limpio del vídeo
+            except (subprocess.TimeoutExpired, OSError, ValueError):
+                p.kill()
+            break
+        time.sleep(2)
+    time.sleep(3)

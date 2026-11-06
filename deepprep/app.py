@@ -69,6 +69,18 @@ class App:
         self.cola = Cola(al_fallar=self._fallo_tarea)
         self.recolector = None
         self.actualizador = actualizador.Actualizador(self)
+        self._crear_piezas(arranque_windows)
+        self.ultima_consulta = time.time()  # última vez que el panel pidió el estado
+        self.al_mostrar = None  # lo pone la ventana principal: otra copia arrancada pide enseñarla
+        self.al_salir = None  # lo ponen las ventanas: cierra la app del todo
+        self.ventana_visible = None  # lo ponen las ventanas: ¿está la principal a la vista?
+        self._resumen_duelos = (0.0, None)
+        self._ventana_juego = (0.0, None)  # (cuándo se leyó, WindowMode del juego)
+        self._arranco = False  # arrancar() ya se llamó (las pruebas usan la app sin arrancarla)
+
+    def _crear_piezas(self, arranque_windows):
+        """Las piezas de la app, cada una con lo que necesita de las demás."""
+        configuracion, cache, datos, cliente, duelos = self.configuracion, self.cache, self.datos, self.cliente, self.duelos
         self.mis_cuentas = Cuentas(configuracion, cache, cliente, al_recuperar_clave=lambda: self.sesiones.reabrir())
         self.partidas = Partidas(cache, cliente, self.cuentas, self.cfg["inicio_temporada"])
         self.comparador = Comparador(self.cfg, duelos, cliente, datos, self.cuentas, self.partidas)
@@ -81,9 +93,9 @@ class App:
         self.sesiones = Sesiones(
             lambda juego, yo, origen: Sesion(self, juego, yo, origen), cliente, self.mis_cuentas, self._partida_terminada
         )
-        self._seleccion = Seleccion(cliente_lol, datos, self.cuentas, self.partidas, self.comparador, self.notas_de)
+        self._seleccion = Seleccion(self.lcu, datos, self.cuentas, self.partidas, self.comparador, self.notas_de)
         self.vigia = Vigia(
-            cliente_lol,
+            self.lcu,
             cliente,
             configuracion,
             self.mis_cuentas,
@@ -92,13 +104,6 @@ class App:
             grabador=lambda: self.grabador,
             al_ver_cliente=self._al_ver_cliente,
         )
-        self.ultima_consulta = time.time()  # última vez que el panel pidió el estado
-        self.al_mostrar = None  # lo pone la ventana principal: otra copia arrancada pide enseñarla
-        self.al_salir = None  # lo ponen las ventanas: cierra la app del todo
-        self.ventana_visible = None  # lo ponen las ventanas: ¿está la principal a la vista?
-        self._resumen_duelos = (0.0, None)
-        self._ventana_juego = (0.0, None)  # (cuándo se leyó, WindowMode del juego)
-        self._arranco = False  # arrancar() ya se llamó (las pruebas usan la app sin arrancarla)
 
     # --- lo que llevan las piezas ---------------------------------------------------------------
     @property

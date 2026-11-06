@@ -138,25 +138,10 @@ class Vigia:
         ahora = time.time()
         if self.cuentas.error_clave and not self.cuentas.reprobar_clave(ahora):
             return
-
         est = self.lcu.estado()
         if not est:
-            self._plataforma_vista = False
-            self.fase = None
-            self.seleccion.cerrar()
-            self.actualizar_modo()
-            self.cliente.limitador.tope_fondo = FONDO_SIN_CLIENTE
-            # Sin cliente a la vista (p. ej. instalado en otra ruta) se pregunta a Riot de vez en cuando.
-            if not self.sesiones.fijada and ahora - self.ultimo_sondeo >= SONDEO_SIN_CLIENTE_S:
-                self.ultimo_sondeo = ahora
-                for puuid in list(self.cuentas.propias):
-                    juego = self.cliente.partida_activa(puuid)
-                    if juego:
-                        self.sesiones.abrir(juego, puuid, "propia")
-                        return
-                self.sesiones.terminar()
+            self._sin_cliente(ahora)
             return
-
         if not self._plataforma_vista:
             self._plataforma_vista = True
             self.ajustar_plataforma(self.lcu.plataforma())
@@ -170,23 +155,45 @@ class Vigia:
         else:
             self.seleccion.cerrar()
         self.actualizar_modo()
-
         if self.fase in EN_JUEGO:
-            if anterior not in EN_JUEGO:
-                self.sesiones.fijada = False  # partida nueva: manda la propia
-                # Si no se sabe el mapa se graba igual: mejor una grabación de más que una de menos.
-                grabador = self._grabador()
-                if grabador and self.lcu.mapa() in (0, GRIETA):
-                    grabador.armar()
-            s = self.sesiones.actual
-            viva = s and s.origen == "propia" and not s.terminada
-            if not viva and not self.sesiones.fijada and self.cuenta_activa and ahora - self.ultimo_sondeo >= SONDEO_EN_PARTIDA_S:
-                self.ultimo_sondeo = ahora
-                juego = self.cliente.partida_activa(self.cuenta_activa)
-                if juego:
-                    self.sesiones.abrir(juego, self.cuenta_activa, "propia")
+            self._en_partida(anterior, ahora)
         else:
             self.sesiones.terminar()
+
+    def _sin_cliente(self, ahora):
+        """Cliente cerrado: todo a cero y, de vez en cuando, se pregunta a Riot si alguna cuenta tuya está en partida
+        (p. ej. con el LoL instalado en otra ruta)."""
+        self._plataforma_vista = False
+        self.fase = None
+        self.seleccion.cerrar()
+        self.actualizar_modo()
+        self.cliente.limitador.tope_fondo = FONDO_SIN_CLIENTE
+        if self.sesiones.fijada or ahora - self.ultimo_sondeo < SONDEO_SIN_CLIENTE_S:
+            return
+        self.ultimo_sondeo = ahora
+        for puuid in list(self.cuentas.propias):
+            juego = self.cliente.partida_activa(puuid)
+            if juego:
+                self.sesiones.abrir(juego, puuid, "propia")
+                return
+        self.sesiones.terminar()
+
+    def _en_partida(self, anterior, ahora):
+        """Ya en partida: al empezar se arma el grabador, y tu sesión se abre en cuanto Riot da la partida en vivo."""
+        if anterior not in EN_JUEGO:
+            self.sesiones.fijada = False  # partida nueva: manda la propia
+            # Si no se sabe el mapa se graba igual: mejor una grabación de más que una de menos.
+            grabador = self._grabador()
+            if grabador and self.lcu.mapa() in (0, GRIETA):
+                grabador.armar()
+        s = self.sesiones.actual
+        viva = s and s.origen == "propia" and not s.terminada
+        if viva or self.sesiones.fijada or not self.cuenta_activa or ahora - self.ultimo_sondeo < SONDEO_EN_PARTIDA_S:
+            return
+        self.ultimo_sondeo = ahora
+        juego = self.cliente.partida_activa(self.cuenta_activa)
+        if juego:
+            self.sesiones.abrir(juego, self.cuenta_activa, "propia")
 
     def ajustar_plataforma(self, plataforma):
         """La región de la API sale del cliente del LoL (para quien no juega en EUW)."""

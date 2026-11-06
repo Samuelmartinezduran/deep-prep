@@ -47,26 +47,16 @@ def pedir_que_se_muestre(url):
 
 def main():
     if "--grabar" in sys.argv:
-        # Proceso aparte que graba una partida (lo lanza la app al empezar cada partida en la Grieta).
-        from . import grabacion
-
-        prueba = int(sys.argv[sys.argv.index("--prueba") + 1]) if "--prueba" in sys.argv else 0
-        grabacion.grabar(config.cargar(), prueba_seg=prueba)
+        _grabar()
         return
-    if sys.stderr is None:  # lanzado con pyw: no hay consola, los errores van a un archivo
-        ruta = config.DATOS / "deepprep.log"
-        registro = open(ruta, "a", encoding="utf-8", buffering=1)  # noqa: SIM115  el registro dura lo que la app
-        sys.stdout = sys.stderr = registro
+    _abrir_registro()
     for aviso in config.AVISOS:  # la mudanza de los datos de Porofesor, si la ha habido
         print(aviso)
 
     from . import actualizador
 
     if "--actualizar" in sys.argv:
-        # Versión nueva recién descargada: espera a que se cierre la vieja y se instala encima.
-        i = sys.argv.index("--actualizar")
-        modo = sys.argv[i + 3] if len(sys.argv) > i + 3 else None  # la 1.0.0 y la 1.0.1 no lo pasan
-        actualizador.terminar_actualizacion(sys.argv[i + 1], sys.argv[i + 2], modo)
+        _terminar_actualizacion(actualizador)
         return
     # App empaquetada abierta desde la carpeta descomprimida: se instala y arranca la copia instalada.
     if actualizador.instalar_si_hace_falta():
@@ -84,28 +74,62 @@ def main():
     except OSError:
         # El puerto está ocupado: ya hay otra copia en marcha, basta con enseñar su panel
         # (salvo si esta es la del arranque con Windows, que no tiene que enseñar nada).
-        if "--oculta" in sys.argv:
-            return
-        if con_ventana and not pedir_que_se_muestre(url):
+        if "--oculta" not in sys.argv and con_ventana and not pedir_que_se_muestre(url):
             abrir_ventana(url)
         return
     app.arrancar()
     threading.Thread(target=srv.serve_forever, name="servidor", daemon=True).start()
     print(f"Deep Prep en {url}")
+    if con_ventana and _ventanas(app, url):
+        return
+    _seguir_mientras_haga_falta(app)
 
-    if con_ventana:
-        try:
-            import ctypes
 
-            # Así la barra de tareas usa el icono de Deep Prep y no el de Python.
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Samuel.DeepPrep")
-            from .ventanas import Ventanas
+def _grabar():
+    """Proceso aparte que graba una partida (lo lanza la app al empezar cada partida en la Grieta)."""
+    from . import grabacion
 
-            Ventanas(app, url).arrancar(oculta="--oculta" in sys.argv)
-            return
-        except Exception as e:  # noqa: BLE001  sin pywebview, sin WebView2 o un fallo de .NET: panel en Chrome, sin overlay
-            print(f"Sin ventanas propias ({e!r}); abro el panel en el navegador y no habrá overlay")
-            abrir_ventana(url)
+    prueba = int(sys.argv[sys.argv.index("--prueba") + 1]) if "--prueba" in sys.argv else 0
+    grabacion.grabar(config.cargar(), prueba_seg=prueba)
+
+
+def _abrir_registro():
+    if sys.stderr is None:  # lanzado con pyw: no hay consola, los errores van a un archivo
+        ruta = config.DATOS / "deepprep.log"
+        registro = open(ruta, "a", encoding="utf-8", buffering=1)  # noqa: SIM115  el registro dura lo que la app
+        sys.stdout = sys.stderr = registro
+
+
+def _terminar_actualizacion(actualizador):
+    """Versión nueva recién descargada: espera a que se cierre la vieja y se instala encima."""
+    i = sys.argv.index("--actualizar")
+    modo = sys.argv[i + 3] if len(sys.argv) > i + 3 else None  # la 1.0.0 y la 1.0.1 no lo pasan
+    actualizador.terminar_actualizacion(sys.argv[i + 1], sys.argv[i + 2], modo)
+
+
+def _ventanas(app, url):
+    """Abre las ventanas propias (bloquea hasta que la app se cierra) y devuelve True.
+
+    Sin pywebview, sin WebView2 o con un fallo de .NET abre el panel en el navegador y devuelve False: no hay overlay.
+    """
+    try:
+        import ctypes
+
+        # Así la barra de tareas usa el icono de Deep Prep y no el de Python.
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Samuel.DeepPrep")
+        from .ventanas import Ventanas
+
+        Ventanas(app, url).arrancar(oculta="--oculta" in sys.argv)
+        return True
+    except Exception as e:  # noqa: BLE001  sin pywebview, sin WebView2 o un fallo de .NET: panel en Chrome, sin overlay
+        print(f"Sin ventanas propias ({e!r}); abro el panel en el navegador y no habrá overlay")
+        abrir_ventana(url)
+        return False
+
+
+def _seguir_mientras_haga_falta(app):
+    """Sin ventanas propias, la app sigue mientras alguien mire el panel, el cliente del LoL esté abierto o esté
+    'siempre en marcha'."""
     try:
         while (
             app.cfg.get("siempre_en_marcha") or time.time() - app.ultima_consulta < MINUTOS_SIN_PANEL * 60 or app.fase is not None

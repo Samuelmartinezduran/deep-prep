@@ -23,6 +23,52 @@ EDITABLES = (
 )
 
 
+class _Rechazo(Exception):
+    """Un ajuste que no vale; el texto es lo que se le dice a quien lo ha escrito."""
+
+
+# --- cómo se comprueba y se limpia cada ajuste (lanzan _Rechazo, o TypeError/ValueError con un formato raro) -----
+def _cuentas(valor):
+    cuentas = [str(c).strip() for c in valor if str(c).strip()]
+    if not cuentas or any("#" not in c for c in cuentas):
+        raise _Rechazo("Las cuentas van como Nombre#TAG, y al menos una.")
+    return cuentas
+
+
+def _recordatorios(valor):
+    return [str(r).strip()[:160] for r in valor if str(r).strip()][:8]
+
+
+def _notas(valor):
+    return {str(int(k)): str(v).strip()[:300] for k, v in dict(valor).items() if str(v).strip()}
+
+
+def _comparar_con(valor):
+    if valor not in COMPARAR_CON:
+        raise _Rechazo("Esa referencia no existe.")
+    return valor
+
+
+def _codificador(valor):
+    if valor not in ("auto", "cpu"):
+        raise _Rechazo("Codificador desconocido.")
+    return valor
+
+
+def _max_gb(valor):
+    return max(0, int(float(valor or 0)))
+
+
+def _atajo(valor):
+    if not parsear_atajo(str(valor)):
+        raise _Rechazo("No entiendo ese atajo. Ejemplos: ctrl+tab, alt+x, f9.")
+    return str(valor).strip().lower()
+
+
+def _opacidad(valor):
+    return min(1.0, max(0.4, float(valor)))
+
+
 class Ajustes:
     """Lee y guarda los ajustes del panel.
 
@@ -52,57 +98,10 @@ class Ajustes:
         }
 
     def guardar(self, cambios):
-        nuevo: dict[str, Any] = {}
         try:
-            if "cuentas" in cambios:
-                cuentas = [str(c).strip() for c in cambios["cuentas"] if str(c).strip()]
-                if not cuentas or any("#" not in c for c in cuentas):
-                    return {"ok": False, "error": "Las cuentas van como Nombre#TAG, y al menos una."}
-                nuevo["cuentas"] = cuentas
-            if "recordatorios" in cambios:
-                nuevo["recordatorios"] = [str(r).strip()[:160] for r in cambios["recordatorios"] if str(r).strip()][:8]
-            if "notas" in cambios:
-                nuevo["notas"] = {str(int(k)): str(v).strip()[:300] for k, v in dict(cambios["notas"]).items() if str(v).strip()}
-            for k in ("grabar", "overlay", "siempre_en_marcha"):
-                if k in cambios:
-                    nuevo[k] = bool(cambios[k])
-            if "comparar_con" in cambios:
-                if cambios["comparar_con"] not in COMPARAR_CON:
-                    return {"ok": False, "error": "Esa referencia no existe."}
-                nuevo["comparar_con"] = cambios["comparar_con"]
-            if "perfil_base" in cambios:
-                nuevo["perfil_base"] = str(cambios["perfil_base"]).strip()
-                if nuevo["perfil_base"]:
-                    error = self.comparador.resolver_referencia(nuevo["perfil_base"])
-                    if error:
-                        return {"ok": False, "error": error}
-            if (nuevo.get("comparar_con") or self.cfg.get("comparar_con")) == "perfil" and not nuevo.get(
-                "perfil_base", self.cfg.get("perfil_base")
-            ):
-                return {"ok": False, "error": "Para compararte con un jugador, escribe su Nombre#TAG en el perfil de referencia."}
-            if "referencias" in cambios:
-                refs = {}
-                for campeon, rid in dict(cambios["referencias"]).items():
-                    rid = str(rid).strip()
-                    if not rid:
-                        continue
-                    error = self.comparador.resolver_referencia(rid)
-                    if error:
-                        return {"ok": False, "error": error}
-                    refs[str(int(campeon))] = rid
-                nuevo["referencias"] = refs
-            if "grabacion_codificador" in cambios:
-                if cambios["grabacion_codificador"] not in ("auto", "cpu"):
-                    return {"ok": False, "error": "Codificador desconocido."}
-                nuevo["grabacion_codificador"] = cambios["grabacion_codificador"]
-            if "grabacion_max_gb" in cambios:
-                nuevo["grabacion_max_gb"] = max(0, int(float(cambios["grabacion_max_gb"] or 0)))
-            if "atajo_overlay" in cambios:
-                if not parsear_atajo(str(cambios["atajo_overlay"])):
-                    return {"ok": False, "error": "No entiendo ese atajo. Ejemplos: ctrl+tab, alt+x, f9."}
-                nuevo["atajo_overlay"] = str(cambios["atajo_overlay"]).strip().lower()
-            if "overlay_opacidad" in cambios:
-                nuevo["overlay_opacidad"] = min(1.0, max(0.4, float(cambios["overlay_opacidad"])))
+            nuevo = self._validar(cambios)
+        except _Rechazo as e:
+            return {"ok": False, "error": str(e)}
         except (TypeError, ValueError):
             return {"ok": False, "error": "Algún valor no tiene el formato esperado."}
         if "siempre_en_marcha" in nuevo and nuevo["siempre_en_marcha"] != self.cfg.get("siempre_en_marcha"):
@@ -113,6 +112,61 @@ class Ajustes:
         self.configuracion.guardar()
         self._al_guardar(nuevo)
         return {"ok": True}
+
+    def _validar(self, cambios):
+        """Lo que cambia, ya comprobado y limpio. Se mira en este orden y el primer ajuste que no vale es el que se dice."""
+        primero = (
+            ("cuentas", _cuentas),
+            ("recordatorios", _recordatorios),
+            ("notas", _notas),
+            ("grabar", bool),
+            ("overlay", bool),
+            ("siempre_en_marcha", bool),
+            ("comparar_con", _comparar_con),
+            ("perfil_base", self._perfil_base),
+        )
+        despues = (
+            ("referencias", self._referencias),
+            ("grabacion_codificador", _codificador),
+            ("grabacion_max_gb", _max_gb),
+            ("atajo_overlay", _atajo),
+            ("overlay_opacidad", _opacidad),
+        )
+        nuevo: dict[str, Any] = {}
+        for clave, validar in primero:
+            if clave in cambios:
+                nuevo[clave] = validar(cambios[clave])
+        # Antes de buscar las referencias: sin el jugador con quien compararte no hace falta buscar nada.
+        if (nuevo.get("comparar_con") or self.cfg.get("comparar_con")) == "perfil" and not nuevo.get(
+            "perfil_base", self.cfg.get("perfil_base")
+        ):
+            raise _Rechazo("Para compararte con un jugador, escribe su Nombre#TAG en el perfil de referencia.")
+        for clave, validar in despues:
+            if clave in cambios:
+                nuevo[clave] = validar(cambios[clave])
+        return nuevo
+
+    def _perfil_base(self, valor):
+        perfil = str(valor).strip()
+        if perfil:
+            self._buscar_referencia(perfil)
+        return perfil
+
+    def _referencias(self, valor):
+        refs = {}
+        for campeon, rid in dict(valor).items():
+            rid = str(rid).strip()
+            if not rid:
+                continue
+            self._buscar_referencia(rid)
+            refs[str(int(campeon))] = rid
+        return refs
+
+    def _buscar_referencia(self, rid):
+        """Busca la cuenta de referencia (y su servidor) y la apunta; si no se puede, ese ajuste no vale."""
+        error = self.comparador.resolver_referencia(rid)
+        if error:
+            raise _Rechazo(error)
 
     def notas_de(self, campeones, rivales=()):
         """Tus notas de los campeones que hay en la partida (las escribiste tú antes de jugar)."""

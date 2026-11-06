@@ -539,7 +539,31 @@ def perfil_jungla(puuid, partidas, lineas, campeon, equipo_ahora):
         return perfil
     perfil["mapa"] = mapa_posiciones(con_linea, equipo_ahora)
 
-    # Inicio del primer clear.
+    tarjeta, inicio = _inicio_del_clear(con_linea, equipo_ahora)
+    if tarjeta:
+        tarjetas.append(tarjeta)
+        perfil["inicio"] = inicio
+    if con_linea:
+        tarjeta, perfil["ganks"] = _primer_gank_con_premio(con_linea)
+        tarjetas.append(tarjeta)
+    lados, pisa = _early(con_linea)
+    tarjeta = _lado_del_early(lados)
+    if tarjeta:
+        tarjetas.append(tarjeta)
+    if con_linea:
+        tarjeta, perfil["invade"] = _invades(juegos, con_linea, pisa)
+        tarjetas.append(tarjeta)
+    tarjetas.append(_objetivos(juegos))
+    tarjeta, perfil["snowball"] = _si_se_adelanta(juegos, con_campeon, con_linea)
+    tarjetas.append(tarjeta)
+    tarjeta = _muertes_tempranas(con_linea)
+    if tarjeta:
+        tarjetas.append(tarjeta)
+    return perfil
+
+
+def _inicio_del_clear(con_linea, equipo_ahora):
+    """Por qué buff empieza y si al 3:00 ya ha cruzado de lado: (tarjeta, resumen), o (None, None) sin datos."""
     inicios = Counter()
     cruza = []  # ¿al 3:00 está en el lado contrario al de su primer buff?
     for _, j, l in con_linea:
@@ -552,57 +576,55 @@ def perfil_jungla(puuid, partidas, lineas, campeon, equipo_ahora):
             cruza.append(al_tres != lado_del_buff(buff, equipo_de_pid(j["pid"])))
     total_inicios = sum(inicios.values())
     buff, veces = max(((b, inicios[b]) for b in ("rojo", "azul")), key=lambda x: x[1])
-    if total_inicios >= 2 and veces:
-        lado = lado_del_buff(buff, equipo_ahora)
-        nombre = {"sup": "superior", "inf": "inferior"}
-        marcado = veces / total_inicios >= 0.7
-        detalle = f"Hoy su {buff} cae en el lado {nombre[lado]}."
-        if len(cruza) >= 2:
-            if sum(cruza) / len(cruza) >= 0.6:
-                otro = "inf" if lado == "sup" else "sup"
-                detalle += f" Al 3:00 ya ha cruzado al lado {nombre[otro]} en {sum(cruza)} de {len(cruza)}."
-            else:
-                detalle += f" Al 3:00 sigue en el lado de su primer buff en {len(cruza) - sum(cruza)} de {len(cruza)}."
-        if inicios["invade"]:
-            detalle += f" Empezó en jungla rival en {inicios['invade']}."
-        tarjetas.append(
-            {
-                "titulo": "Inicio",
-                "valor": f"{buff.capitalize()} en {veces} de {total_inicios}",
-                "detalle": detalle if marcado else "Sin patrón claro. " + detalle,
-                "tono": "neutro",
-            }
-        )
-        perfil["inicio"] = {"buff": buff, "veces": veces, "n": total_inicios, "lado": lado, "marcado": marcado}
-
-    # Primer gank con premio.
-    ganks = [g for g in (primer_gank(l, j["pid"]) for _, j, l in con_linea) if g]
-    if con_linea:
-        por_linea = Counter(g[1] for g in ganks)
-        perfil["ganks"] = dict(por_linea)
-        if ganks:
-            mediana = statistics.median(g[0] for g in ganks)
-            reparto = " · ".join(f"{l} {por_linea[l]}" for l in ("top", "mid", "bot") if por_linea[l])
-            tarjetas.append(
-                {
-                    "titulo": "Primer gank",
-                    "valor": f"min {mmss(mediana)} · {reparto}",
-                    "detalle": f"Primera kill o asistencia en una línea antes del 10, en {len(ganks)} de "
-                    f"{len(con_linea)} partidas.",
-                    "tono": "ojo" if mediana < 4.5 * MIN else "neutro",
-                }
-            )
+    if total_inicios < 2 or not veces:
+        return None, None
+    lado = lado_del_buff(buff, equipo_ahora)
+    nombre = {"sup": "superior", "inf": "inferior"}
+    marcado = veces / total_inicios >= 0.7
+    detalle = f"Hoy su {buff} cae en el lado {nombre[lado]}."
+    if len(cruza) >= 2:
+        if sum(cruza) / len(cruza) >= 0.6:
+            otro = "inf" if lado == "sup" else "sup"
+            detalle += f" Al 3:00 ya ha cruzado al lado {nombre[otro]} en {sum(cruza)} de {len(cruza)}."
         else:
-            tarjetas.append(
-                {
-                    "titulo": "Primer gank",
-                    "valor": "Ninguno antes del 10",
-                    "detalle": f"En {len(con_linea)} partidas no sacó kill ni asistencia en línea antes del 10.",
-                    "tono": "bien",
-                }
-            )
+            detalle += f" Al 3:00 sigue en el lado de su primer buff en {len(cruza) - sum(cruza)} de {len(cruza)}."
+    if inicios["invade"]:
+        detalle += f" Empezó en jungla rival en {inicios['invade']}."
+    tarjeta = {
+        "titulo": "Inicio",
+        "valor": f"{buff.capitalize()} en {veces} de {total_inicios}",
+        "detalle": detalle if marcado else "Sin patrón claro. " + detalle,
+        "tono": "neutro",
+    }
+    return tarjeta, {"buff": buff, "veces": veces, "n": total_inicios, "lado": lado, "marcado": marcado}
 
-    # Dónde pasa el early y cuánto pisa la jungla contraria.
+
+def _primer_gank_con_premio(con_linea):
+    """(tarjeta, {línea: veces}) de la primera kill o asistencia en una línea antes del 10, en cada partida."""
+    ganks = [g for g in (primer_gank(l, j["pid"]) for _, j, l in con_linea) if g]
+    por_linea = Counter(g[1] for g in ganks)
+    if not ganks:
+        tarjeta = {
+            "titulo": "Primer gank",
+            "valor": "Ninguno antes del 10",
+            "detalle": f"En {len(con_linea)} partidas no sacó kill ni asistencia en línea antes del 10.",
+            "tono": "bien",
+        }
+        return tarjeta, dict(por_linea)
+    mediana = statistics.median(g[0] for g in ganks)
+    reparto = " · ".join(f"{l} {por_linea[l]}" for l in ("top", "mid", "bot") if por_linea[l])
+    tarjeta = {
+        "titulo": "Primer gank",
+        "valor": f"min {mmss(mediana)} · {reparto}",
+        "detalle": f"Primera kill o asistencia en una línea antes del 10, en {len(ganks)} de {len(con_linea)} partidas.",
+        "tono": "ojo" if mediana < 4.5 * MIN else "neutro",
+    }
+    return tarjeta, dict(por_linea)
+
+
+def _early(con_linea):
+    """Dónde pasa el early: (Counter de los minutos 3 a 8 por lado del mapa, en cuántas partidas pisa la jungla
+    contraria entre el 2 y el 7)."""
     lados = Counter()
     pisa = 0
     for _, j, l in con_linea:
@@ -616,53 +638,58 @@ def perfil_jungla(puuid, partidas, lineas, campeon, equipo_ahora):
             if 2 <= minuto <= 7 and tipo == "jungla" and mitad != equipo:
                 dentro = True
         pisa += dentro
-    if sum(lados.values()) >= 10:
-        lado, veces = lados.most_common(1)[0]
-        pct = round(100 * veces / sum(lados.values()))
-        if pct >= 58:
-            nombre = "superior (top y larvas)" if lado == "sup" else "inferior (bot y dragón)"
-            tarjetas.append(
-                {
-                    "titulo": "Lado del early",
-                    "valor": f"{pct}% en el lado {nombre.split(' ')[0]}",
-                    "detalle": f"Del minuto 3 al 8 suele estar en el lado {nombre}.",
-                    "tono": "neutro",
-                }
-            )
-    if con_linea:
-        # En Diamante-Master la mediana es de 10 monstruos rivales por partida y el cuartil alto, 18.
-        robados = media(j["ch"].get("enemyJungleMonsterKills", 0) for _, j in juegos)
-        pronto = pisa / len(con_linea)
-        tarjetas.append(
-            {
-                "titulo": "Invades",
-                "valor": f"Roba {num(robados)} monstruos por partida",
-                "detalle": (
-                    f"Pisa la jungla rival antes del 8 en {pisa} de {len(con_linea)}. "
-                    "Referencia en Diamante-Master: 10 por partida."
-                ),
-                "tono": "ojo" if robados >= 18 or pronto >= 0.5 else ("bien" if robados <= 5 and pisa == 0 else "neutro"),
-            }
-        )
-        perfil["invade"] = {"veces": pisa, "n": len(con_linea), "robados": robados}
+    return lados, pisa
 
-    # Objetivos.
+
+def _lado_del_early(lados):
+    if sum(lados.values()) < 10:
+        return None
+    lado, veces = lados.most_common(1)[0]
+    pct = round(100 * veces / sum(lados.values()))
+    if pct < 58:
+        return None
+    nombre = "superior (top y larvas)" if lado == "sup" else "inferior (bot y dragón)"
+    return {
+        "titulo": "Lado del early",
+        "valor": f"{pct}% en el lado {nombre.split(' ')[0]}",
+        "detalle": f"Del minuto 3 al 8 suele estar en el lado {nombre}.",
+        "tono": "neutro",
+    }
+
+
+def _invades(juegos, con_linea, pisa):
+    """(tarjeta, resumen) de cuánto pisa y roba de la jungla contraria."""
+    # En Diamante-Master la mediana es de 10 monstruos rivales por partida y el cuartil alto, 18.
+    robados = media(j["ch"].get("enemyJungleMonsterKills", 0) for _, j in juegos)
+    pronto = pisa / len(con_linea)
+    tarjeta = {
+        "titulo": "Invades",
+        "valor": f"Roba {num(robados)} monstruos por partida",
+        "detalle": (
+            f"Pisa la jungla rival antes del 8 en {pisa} de {len(con_linea)}. Referencia en Diamante-Master: 10 por partida."
+        ),
+        "tono": "ojo" if robados >= 18 or pronto >= 0.5 else ("bien" if robados <= 5 and pisa == 0 else "neutro"),
+    }
+    return tarjeta, {"veces": pisa, "n": len(con_linea), "robados": robados}
+
+
+def _objetivos(juegos):
     primer_dragon = [j["ch"]["earliestDragonTakedown"] for _, j in juegos if j["ch"].get("earliestDragonTakedown")]
     primero = sum(1 for m, j in juegos if (m["equipos"].get(str(j["equipo"]), {}).get("obj", {}).get("dragon") or [0])[0])
     larvas = media(j["ch"].get("voidMonsterKill", 0) for _, j in juegos)
     valor = f"Primer dragón en {primero} de {len(juegos)}"
     if primer_dragon:
         valor += f" (min {mmss(statistics.median(primer_dragon) * 1000)})"
-    tarjetas.append(
-        {
-            "titulo": "Objetivos",
-            "valor": valor,
-            "detalle": f"Larvas: {num(larvas)} por partida.",
-            "tono": "ojo" if primero / len(juegos) >= 0.65 else "neutro",
-        }
-    )
+    return {
+        "titulo": "Objetivos",
+        "valor": valor,
+        "detalle": f"Larvas: {num(larvas)} por partida.",
+        "tono": "ojo" if primero / len(juegos) >= 0.65 else "neutro",
+    }
 
-    # Qué pasa cuando se adelanta.
+
+def _si_se_adelanta(juegos, con_campeon, con_linea):
+    """(tarjeta, snowball): qué pasa cuando va por delante o por detrás al 10, y cómo rinde."""
     delante, detras = [], []
     for m, j, l in con_linea:
         rival = next((r for r in m["jug"] if r["pos"] == "JUNGLE" and r["equipo"] != j["equipo"]), None)
@@ -679,50 +706,47 @@ def perfil_jungla(puuid, partidas, lineas, campeon, equipo_ahora):
     k, d, a = (media(j[c] for _, j in base) for c in ("k", "d", "a"))
     con_que = "con este campeón" if base is con_campeon else "de jungla"
     dano = media(j["ch"].get("teamDamagePercentage", 0) for _, j in base)
-    perfil["snowball"] = {
+    snowball = {
         "delante": [sum(delante), len(delante)],
         "detras": [sum(detras), len(detras)],
         "kda": [k, d, a],
         "dano_pct": dano,
         "solo": media(j["ch"].get("soloKills", 0) for _, j in base),
     }
-    if delante or detras:
-        partes = []
-        if delante:
-            partes.append(f"por delante al 10 gana {sum(delante)} de {len(delante)}")
-        if detras:
-            partes.append(f"por detrás {sum(detras)} de {len(detras)}")
-        peligro = len(delante) >= 3 and sum(delante) / len(delante) >= 0.75
-        tarjetas.append(
-            {
-                "titulo": "Si se adelanta",
-                "valor": "; ".join(partes).capitalize(),
-                "detalle": f"{num(k)}/{num(d)}/{num(a)} de media {con_que}, {round(dano * 100)}% del daño de su equipo.",
-                "tono": "ojo" if peligro else "neutro",
-            }
-        )
-    else:
-        tarjetas.append(
-            {
-                "titulo": "Rendimiento",
-                "valor": f"{num(k)}/{num(d)}/{num(a)} de media {con_que}",
-                "detalle": f"{round(dano * 100)}% del daño de su equipo.",
-                "tono": "neutro",
-            }
-        )
+    if not (delante or detras):
+        tarjeta = {
+            "titulo": "Rendimiento",
+            "valor": f"{num(k)}/{num(d)}/{num(a)} de media {con_que}",
+            "detalle": f"{round(dano * 100)}% del daño de su equipo.",
+            "tono": "neutro",
+        }
+        return tarjeta, snowball
+    partes = []
+    if delante:
+        partes.append(f"por delante al 10 gana {sum(delante)} de {len(delante)}")
+    if detras:
+        partes.append(f"por detrás {sum(detras)} de {len(detras)}")
+    peligro = len(delante) >= 3 and sum(delante) / len(delante) >= 0.75
+    tarjeta = {
+        "titulo": "Si se adelanta",
+        "valor": "; ".join(partes).capitalize(),
+        "detalle": f"{num(k)}/{num(d)}/{num(a)} de media {con_que}, {round(dano * 100)}% del daño de su equipo.",
+        "tono": "ojo" if peligro else "neutro",
+    }
+    return tarjeta, snowball
 
+
+def _muertes_tempranas(con_linea):
     tempranas = [muertes_antes(l, j["pid"], 10) for _, j, l in con_linea]
-    if tempranas:
-        m10 = media(tempranas)
-        tarjetas.append(
-            {
-                "titulo": "Muertes tempranas",
-                "valor": f"{num(m10)} antes del 10",
-                "detalle": f"Media de {len(tempranas)} partidas con línea de tiempo.",
-                "tono": "bien" if m10 >= 2 else "neutro",
-            }
-        )
-    return perfil
+    if not tempranas:
+        return None
+    m10 = media(tempranas)
+    return {
+        "titulo": "Muertes tempranas",
+        "valor": f"{num(m10)} antes del 10",
+        "detalle": f"Media de {len(tempranas)} partidas con línea de tiempo.",
+        "tono": "bien" if m10 >= 2 else "neutro",
+    }
 
 
 # --- dónde va a haber errores -----------------------------------------------------------------
@@ -827,51 +851,64 @@ def mi_historial(mis_puuids, mis_partidas, mi_campeon, rivales, presentes, ahora
         return out
 
     con = [(m, yo) for m, yo in juegos if yo["campeon"] == mi_campeon]
-    out["campeon"] = {
-        "n": len(con),
-        "v": sum(1 for _, yo in con if yo["gana"]),
-        "racha": [yo["gana"] for _, yo in con[:10]],
-    }
-
+    out["campeon"] = {"n": len(con), "v": _victorias(con), "racha": [yo["gana"] for _, yo in con[:10]]}
     for r in rivales:
         contra = [
             (m, yo) for m, yo in juegos if any(j["campeon"] == r["campeon"] and j["equipo"] != yo["equipo"] for j in m["jug"])
         ]
-        mio = [(m, yo) for m, yo in contra if yo["campeon"] == mi_campeon]
-        fila = {
-            "campeon": r["campeon"],
-            "nombre": r["nombre_campeon"],
-            "pos": r["pos"],
-            "n": len(contra),
-            "v": sum(1 for _, yo in contra if yo["gana"]),
-            "n_mio": len(mio),
-            "v_mio": sum(1 for _, yo in mio if yo["gana"]),
-        }
-        out["vs"].append(fila)
+        out["vs"].append(_contra(r, contra, mi_campeon))
         if mi_pos and r["pos"] == mi_pos:
-            # Solo cuentan las partidas en las que los dos ibais en esa posición.
-            duelo = [
-                (m, yo)
-                for m, yo in contra
-                if yo["pos"] == mi_pos
-                and any(j["campeon"] == r["campeon"] and j["pos"] == mi_pos and j["equipo"] != yo["equipo"] for j in m["jug"])
-            ]
-            duelo_mio = [(m, yo) for m, yo in duelo if yo["campeon"] == mi_campeon]
-            out["vs_directo"] = {
-                "nombre": r["nombre_campeon"],
-                "pos": NOMBRE_POS.get(mi_pos, ""),
-                "n": len(duelo),
-                "v": sum(1 for _, yo in duelo if yo["gana"]),
-                "n_mio": len(duelo_mio),
-                "v_mio": sum(1 for _, yo in duelo_mio if yo["gana"]),
-            }
+            out["vs_directo"] = _duelo_directo(r, contra, mi_campeon, mi_pos)
     out["vs"].sort(key=lambda f: (f["n"] == 0, (f["v"] / f["n"]) if f["n"] else 0))
+    out["conocidos"] = _conocidos(juegos, presentes, ahora_ms)
+    return out
 
+
+def _victorias(juegos):
+    return sum(1 for _, yo in juegos if yo["gana"])
+
+
+def _contra(r, contra, mi_campeon):
+    """Tus partidas contra ese campeón rival (en cualquier posición) y, de ellas, las de tu campeón de hoy."""
+    mio = [(m, yo) for m, yo in contra if yo["campeon"] == mi_campeon]
+    return {
+        "campeon": r["campeon"],
+        "nombre": r["nombre_campeon"],
+        "pos": r["pos"],
+        "n": len(contra),
+        "v": _victorias(contra),
+        "n_mio": len(mio),
+        "v_mio": _victorias(mio),
+    }
+
+
+def _duelo_directo(r, contra, mi_campeon, mi_pos):
+    """Tu duelo directo: solo cuentan las partidas en las que los dos ibais en esa posición."""
+    duelo = [
+        (m, yo)
+        for m, yo in contra
+        if yo["pos"] == mi_pos
+        and any(j["campeon"] == r["campeon"] and j["pos"] == mi_pos and j["equipo"] != yo["equipo"] for j in m["jug"])
+    ]
+    duelo_mio = [(m, yo) for m, yo in duelo if yo["campeon"] == mi_campeon]
+    return {
+        "nombre": r["nombre_campeon"],
+        "pos": NOMBRE_POS.get(mi_pos, ""),
+        "n": len(duelo),
+        "v": _victorias(duelo),
+        "n_mio": len(duelo_mio),
+        "v_mio": _victorias(duelo_mio),
+    }
+
+
+def _conocidos(juegos, presentes, ahora_ms):
+    """Los de hoy con los que ya has jugado: la última vez (contigo o contra ti, y si ganaste) y cuántas veces."""
+    conocidos = []
     for puuid, nombre in presentes.items():
         for m, yo in juegos:
             otro = jugador_en(m, puuid)
             if otro:
-                out["conocidos"].append(
+                conocidos.append(
                     {
                         "nombre": nombre,
                         "contigo": otro["equipo"] == yo["equipo"],
@@ -881,7 +918,7 @@ def mi_historial(mis_puuids, mis_partidas, mi_campeon, rivales, presentes, ahora
                     }
                 )
                 break
-    return out
+    return conocidos
 
 
 def pool_contra(pool, pos, rival, registros, partidas, mias, minimo):

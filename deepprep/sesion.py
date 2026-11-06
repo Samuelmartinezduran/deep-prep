@@ -267,113 +267,19 @@ class Sesion:
         datos = app.datos
         ahora_ms = int(time.time() * 1000)
         muestras = {j["puuid"]: self._muestra(j) for j in self.jugadores if j["puuid"]}
-        lineas = {}
-        for j in self.jugadores:
-            for id_ in j["lineas"]:
-                linea = app.cache.linea(id_)
-                if linea:
-                    lineas[id_] = linea
-
-        # Grupos que vienen juntos, deducidos del historial público (como Porofessor, Blitz y compañía).
-        grupos = {}
-        for equipo in (100, 200):
-            grupos.update(an.premades([j["puuid"] for j in self.jugadores if j["equipo"] == equipo and j["puuid"]], muestras))
-        letra = {}  # número de grupo por equipo -> A, B... para distinguir dos grupos en el mismo equipo
-        for j in self.jugadores:
-            g = grupos.get(j["puuid"])
-            if g and (j["equipo"], g) not in letra:
-                letra[(j["equipo"], g)] = "ABCDE"[sum(1 for e, _ in letra if e == j["equipo"])]
-
-        filas = {}  # puuid -> datos de trabajo (resumen, etiquetas...) para las secciones de abajo
-        equipos = {"aliado": [], "rival": []}
-        for j in self.jugadores:
-            res = an.resumen_jugador(j["puuid"], muestras.get(j["puuid"], []), j["campeon"], lineas)
-            etiquetas = an.etiquetas(res, j["rol"], j["maestria"], ahora_ms) if res["n"] else []
-            grupo = letra.get((j["equipo"], grupos.get(j["puuid"])), "")
-            if grupo and j["puuid"] != self.yo:
-                etiquetas.insert(
-                    0,
-                    {
-                        "t": f"Premade {grupo}",
-                        "tono": "neutro",
-                        "d": "ha jugado en el mismo equipo que otro jugador de esta partida en 2 o más partidas recientes",
-                    },
-                )
-            primera_vez = any(e["t"] in ("Primera vez", "Poco rodado") for e in etiquetas)
-            lado = "aliado" if j["equipo"] == self.mi_equipo else "rival"
-            filas[j["puuid"] or id(j)] = {"j": j, "res": res, "etiquetas": etiquetas, "primera_vez": primera_vez, "lado": lado}
-            maestria = j["maestria"]
-            equipos[lado].append(
-                {
-                    "nombre": j["nombre"],
-                    "tag": j["tag"],
-                    "campeon": datos.nombre(j["campeon"]),
-                    "icono": datos.icono(j["campeon"]),
-                    "rol": j["rol"],
-                    "rol_txt": an.NOMBRE_POS.get(j["rol"], ""),
-                    "soy_yo": j["puuid"] == self.yo,
-                    "oculto": not j["puuid"],
-                    "liga": self._liga_ui(j["liga"]),
-                    "maestria": None if maestria is None else maestria.get("championPoints", 0),
-                    "mains": (maestria or {}).get("mains", []),
-                    "muestra": {"n": res["n"], "v": res["v"]},
-                    "camp": res["camp"],
-                    "kda": res["kda"],
-                    "racha": res["racha"],
-                    "etiquetas": etiquetas,
-                    "grupo": grupo,
-                    "cargando": bool(j["puuid"]) and (j["ids"] is None or len(j["cargadas"]) < min(5, len(j["ids"]))),
-                }
-            )
-        for lista in equipos.values():
-            lista.sort(key=lambda f: ORDEN_POS.get(f["rol"], 9))
-
-        por_pos = {"aliado": {}, "rival": {}}
-        for f in filas.values():
-            j = f["j"]
-            por_pos[f["lado"]][j["rol"]] = {
-                "nombre": j["nombre"],
-                "campeon": datos.nombre(j["campeon"]),
-                "res": f["res"],
-                "primera_vez": f["primera_vez"],
-                "j": j,
-            }
-
-        # Jungla rival.
-        jungla = None
-        perfil = None
+        lineas = self._lineas_cargadas()
+        grupos, letra = self._grupos(muestras)
+        filas, equipos = self._jugadores(muestras, lineas, grupos, letra, ahora_ms)
+        por_pos = self._por_posicion(filas)
         jr = por_pos["rival"].get("JUNGLE")
-        if jr and jr["j"]["puuid"]:
-            j = jr["j"]
-            perfil = an.perfil_jungla(j["puuid"], muestras.get(j["puuid"], []), lineas, j["campeon"], j["equipo"])
-            jungla = {
-                "nombre": j["nombre"],
-                "campeon": jr["campeon"],
-                "icono": datos.icono(j["campeon"]),
-                "n": perfil["n"],
-                "n_campeon": perfil["n_campeon"],
-                "n_lineas": perfil["n_lineas"],
-                "tarjetas": perfil["tarjetas"],
-                "mapa": perfil.get("mapa") or {},
-                "cargando": j["ids"] is None or len(j["lineas"]) < len(j["lineas_pedidas"]),
-            }
-
+        jungla, perfil = self._jungla_rival(jr, muestras, lineas)
         lineas_juego = an.lineas_de_juego(por_pos["aliado"], por_pos["rival"])
-        gank = None
-        if perfil and perfil["ganks"]:
-            total = sum(perfil["ganks"].values())
-            linea, veces = max(perfil["ganks"].items(), key=lambda x: x[1])
-            if total >= 4 and veces / total >= 0.5:
-                gank = {"linea": linea, "veces": veces, "n": total}
-
+        gank = _gank(perfil)
         historial = self._historial(muestras, por_pos, ahora_ms)
         avisos = self._avisos(filas, perfil, jr, historial, grupos)
-
         yo = next((j for j in self.jugadores if j["puuid"] == self.yo), None)
-        rival_directo = por_pos["rival"].get(yo["rol"]) if yo and yo["rol"] else None
-        duelo = app.duelo(yo["campeon"], yo["rol"], rival_directo["j"]["campeon"]) if rival_directo else None
         return {
-            "duelo": duelo,
+            "duelo": self._duelo(yo, por_pos),
             "id": self.id,
             "cola": COLAS.get(self.cola, f"Cola {self.cola}"),
             "yo": {"campeon": datos.nombre(yo["campeon"]), "splash": datos.splash(yo["campeon"])} if yo else None,
@@ -389,12 +295,131 @@ class Sesion:
             "plan": self._plan(lineas_juego, perfil, gank),
             "bans": [{"nombre": datos.nombre(b), "icono": datos.icono(b)} for b in self.bans],
             "recordatorios": app.cfg.get("recordatorios", []) if self.origen == "propia" else [],
-            "notas": app.notas_de(
-                [j["campeon"] for j in self.jugadores], {j["campeon"] for j in self.jugadores if j["equipo"] != self.mi_equipo}
-            )
-            if self.origen == "propia"
-            else [],
+            "notas": self._notas(),
         }
+
+    def _lineas_cargadas(self):
+        """Las líneas de tiempo ya bajadas de las partidas de los diez: {id: línea}."""
+        lineas = {}
+        for j in self.jugadores:
+            for id_ in j["lineas"]:
+                linea = self.app.cache.linea(id_)
+                if linea:
+                    lineas[id_] = linea
+        return lineas
+
+    def _grupos(self, muestras):
+        """Grupos que vienen juntos, deducidos del historial público (como Porofessor, Blitz y compañía).
+
+        Devuelve ({puuid: número de grupo}, {(equipo, grupo): letra}): la letra distingue dos grupos del mismo equipo.
+        """
+        grupos = {}
+        for equipo in (100, 200):
+            grupos.update(an.premades([j["puuid"] for j in self.jugadores if j["equipo"] == equipo and j["puuid"]], muestras))
+        letra = {}
+        for j in self.jugadores:
+            g = grupos.get(j["puuid"])
+            if g and (j["equipo"], g) not in letra:
+                letra[(j["equipo"], g)] = "ABCDE"[sum(1 for e, _ in letra if e == j["equipo"])]
+        return grupos, letra
+
+    def _jugadores(self, muestras, lineas, grupos, letra, ahora_ms):
+        """(datos de trabajo de cada jugador para las secciones de abajo, los dos equipos tal y como salen en el panel)."""
+        filas = {}  # puuid -> resumen, etiquetas... del jugador
+        equipos = {"aliado": [], "rival": []}
+        for j in self.jugadores:
+            res = an.resumen_jugador(j["puuid"], muestras.get(j["puuid"], []), j["campeon"], lineas)
+            grupo = letra.get((j["equipo"], grupos.get(j["puuid"])), "")
+            etiquetas = self._etiquetas(j, res, grupo, ahora_ms)
+            primera_vez = any(e["t"] in ("Primera vez", "Poco rodado") for e in etiquetas)
+            lado = "aliado" if j["equipo"] == self.mi_equipo else "rival"
+            filas[j["puuid"] or id(j)] = {"j": j, "res": res, "etiquetas": etiquetas, "primera_vez": primera_vez, "lado": lado}
+            equipos[lado].append(self._fila_del_panel(j, res, etiquetas, grupo))
+        for lista in equipos.values():
+            lista.sort(key=lambda f: ORDEN_POS.get(f["rol"], 9))
+        return filas, equipos
+
+    def _etiquetas(self, j, res, grupo, ahora_ms):
+        etiquetas = an.etiquetas(res, j["rol"], j["maestria"], ahora_ms) if res["n"] else []
+        if grupo and j["puuid"] != self.yo:
+            etiquetas.insert(
+                0,
+                {
+                    "t": f"Premade {grupo}",
+                    "tono": "neutro",
+                    "d": "ha jugado en el mismo equipo que otro jugador de esta partida en 2 o más partidas recientes",
+                },
+            )
+        return etiquetas
+
+    def _fila_del_panel(self, j, res, etiquetas, grupo):
+        datos = self.app.datos
+        maestria = j["maestria"]
+        return {
+            "nombre": j["nombre"],
+            "tag": j["tag"],
+            "campeon": datos.nombre(j["campeon"]),
+            "icono": datos.icono(j["campeon"]),
+            "rol": j["rol"],
+            "rol_txt": an.NOMBRE_POS.get(j["rol"], ""),
+            "soy_yo": j["puuid"] == self.yo,
+            "oculto": not j["puuid"],
+            "liga": self._liga_ui(j["liga"]),
+            "maestria": None if maestria is None else maestria.get("championPoints", 0),
+            "mains": (maestria or {}).get("mains", []),
+            "muestra": {"n": res["n"], "v": res["v"]},
+            "camp": res["camp"],
+            "kda": res["kda"],
+            "racha": res["racha"],
+            "etiquetas": etiquetas,
+            "grupo": grupo,
+            "cargando": bool(j["puuid"]) and (j["ids"] is None or len(j["cargadas"]) < min(5, len(j["ids"]))),
+        }
+
+    def _por_posicion(self, filas):
+        """{'aliado'|'rival': {posición: jugador}} para comparar línea a línea."""
+        por_pos = {"aliado": {}, "rival": {}}
+        for f in filas.values():
+            j = f["j"]
+            por_pos[f["lado"]][j["rol"]] = {
+                "nombre": j["nombre"],
+                "campeon": self.app.datos.nombre(j["campeon"]),
+                "res": f["res"],
+                "primera_vez": f["primera_vez"],
+                "j": j,
+            }
+        return por_pos
+
+    def _jungla_rival(self, jr, muestras, lineas):
+        """(lo que enseña el panel del jungla rival, su perfil), o (None, None) si no se sabe quién es."""
+        if not (jr and jr["j"]["puuid"]):
+            return None, None
+        j = jr["j"]
+        perfil = an.perfil_jungla(j["puuid"], muestras.get(j["puuid"], []), lineas, j["campeon"], j["equipo"])
+        jungla = {
+            "nombre": j["nombre"],
+            "campeon": jr["campeon"],
+            "icono": self.app.datos.icono(j["campeon"]),
+            "n": perfil["n"],
+            "n_campeon": perfil["n_campeon"],
+            "n_lineas": perfil["n_lineas"],
+            "tarjetas": perfil["tarjetas"],
+            "mapa": perfil.get("mapa") or {},
+            "cargando": j["ids"] is None or len(j["lineas"]) < len(j["lineas_pedidas"]),
+        }
+        return jungla, perfil
+
+    def _duelo(self, yo, por_pos):
+        """Tu duelo contra el rival de tu posición, según las partidas de Master+."""
+        rival_directo = por_pos["rival"].get(yo["rol"]) if yo and yo["rol"] else None
+        return self.app.duelo(yo["campeon"], yo["rol"], rival_directo["j"]["campeon"]) if rival_directo else None
+
+    def _notas(self):
+        """Tus notas de los campeones de la partida (solo en la tuya)."""
+        if self.origen != "propia":
+            return []
+        rivales = {j["campeon"] for j in self.jugadores if j["equipo"] != self.mi_equipo}
+        return self.app.notas_de([j["campeon"] for j in self.jugadores], rivales)
 
     def _historial(self, muestras, por_pos, ahora_ms):
         app = self.app
@@ -424,32 +449,18 @@ class Sesion:
 
     def _avisos(self, filas, perfil, jr, historial, grupos):
         """Hechos destacados, con sus números. Nunca órdenes: Riot no permite apps que decidan por el jugador."""
-        avisos = []  # (peso, tono, texto)
+        avisos = [  # (peso, tono, texto)
+            *_aviso_de_tu_duelo(historial),
+            *_avisos_del_jungla(perfil, jr),
+            *self._avisos_de_jugadores(filas),
+            *self._avisos_de_premades(filas, grupos),
+        ]
+        avisos.sort(key=lambda a: a[0], reverse=True)
+        return [{"tono": tono, "texto": texto} for _, tono, texto in avisos[:7]]
 
-        vj = (historial or {}).get("vs_directo")
-        if vj and vj["n_mio"] >= 2:
-            d = vj["n_mio"] - vj["v_mio"]
-            tono = "ojo" if vj["v_mio"] < d else ("bien" if vj["v_mio"] > d else "neutro")
-            avisos.append(
-                (
-                    9 if tono == "ojo" else 4,
-                    tono,
-                    f"{historial['mi_campeon']} contra {vj['nombre']} en {vj['pos']}: {vj['v_mio']}V {d}D.",
-                )
-            )
-        elif vj and vj["n"] >= 3:
-            d = vj["n"] - vj["v"]
-            tono = "ojo" if vj["v"] < d else ("bien" if vj["v"] > d else "neutro")
-            avisos.append((6 if tono == "ojo" else 3, tono, f"Contra {vj['nombre']} en {vj['pos']} llevas {vj['v']}V {d}D."))
-
-        if perfil and perfil["snowball"] and jr:
-            s = perfil["snowball"]
-            gana, veces = s["delante"]
-            if veces >= 3 and gana / veces >= 0.75:
-                avisos.append((8, "ojo", f"{jr['campeon']} gana {gana} de {veces} cuando va por delante al minuto 10."))
-            if s["solo"] >= an.UMBRAL_SOLO["JUNGLE"] and perfil["n"] >= 4:
-                avisos.append((7, "ojo", f"{jr['campeon']} saca {an.num(s['solo'])} kills en solitario por partida."))
-
+    def _avisos_de_jugadores(self, filas):
+        """Rivales que destacan (kills en solitario, racha con su campeón) y quién va con poco rodaje o fuera de rol."""
+        avisos = []
         verdes = {"aliado": [], "rival": []}
         for f in filas.values():
             j, res = f["j"], f["res"]
@@ -466,21 +477,19 @@ class Sesion:
             if j["puuid"] != self.yo and (f["primera_vez"] or an.fuera_de_rol(res, j["rol"])):
                 motivo = "poco rodaje" if f["primera_vez"] else "fuera de rol"
                 verdes[f["lado"]].append(f"{campeon} ({rol}, {motivo})")
-
         # Una sola línea por equipo: en partidas con muchas cuentas secundarias salen varios a la vez.
         if verdes["rival"]:
             avisos.append((5, "neutro", "Rivales con poco rodaje o fuera de rol: " + ", ".join(verdes["rival"]) + "."))
         if verdes["aliado"]:
             avisos.append((4, "neutro", "Aliados con poco rodaje o fuera de rol: " + ", ".join(verdes["aliado"]) + "."))
+        return avisos
 
+    def _avisos_de_premades(self, filas, grupos):
         por_grupo = {}
         for f in filas.values():
             if f["lado"] == "rival" and f["j"]["puuid"] in grupos:
                 por_grupo.setdefault(grupos[f["j"]["puuid"]], []).append(self.app.datos.nombre(f["j"]["campeon"]))
-        avisos.extend((3, "neutro", f"Premade rival: {' + '.join(nombres)}.") for nombres in por_grupo.values())
-
-        avisos.sort(key=lambda a: a[0], reverse=True)
-        return [{"tono": tono, "texto": texto} for _, tono, texto in avisos[:7]]
+        return [(3, "neutro", f"Premade rival: {' + '.join(nombres)}.") for nombres in por_grupo.values()]
 
     def _plan(self, lineas_juego, perfil, gank):
         """Dos o tres frases para leer en la pantalla de carga."""
@@ -499,3 +508,43 @@ class Sesion:
         if gank:
             plan.append(f"Su primer gank va a {gank['linea']} en {gank['veces']} de {gank['n']}.")
         return plan[:3]
+
+
+def _gank(perfil):
+    """Si su primer gank va casi siempre a la misma línea (4 o más partidas, la mitad o más): {línea, veces, n}."""
+    if not (perfil and perfil["ganks"]):
+        return None
+    total = sum(perfil["ganks"].values())
+    linea, veces = max(perfil["ganks"].items(), key=lambda x: x[1])
+    if total >= 4 and veces / total >= 0.5:
+        return {"linea": linea, "veces": veces, "n": total}
+    return None
+
+
+def _aviso_de_tu_duelo(historial):
+    """Cómo te va contra el campeón de tu rival de posición: con tu campeón de hoy o, si no, con cualquiera."""
+    vj = (historial or {}).get("vs_directo")
+    if vj and vj["n_mio"] >= 2:
+        d = vj["n_mio"] - vj["v_mio"]
+        tono = "ojo" if vj["v_mio"] < d else ("bien" if vj["v_mio"] > d else "neutro")
+        texto = f"{historial['mi_campeon']} contra {vj['nombre']} en {vj['pos']}: {vj['v_mio']}V {d}D."
+        return [(9 if tono == "ojo" else 4, tono, texto)]
+    if vj and vj["n"] >= 3:
+        d = vj["n"] - vj["v"]
+        tono = "ojo" if vj["v"] < d else ("bien" if vj["v"] > d else "neutro")
+        return [(6 if tono == "ojo" else 3, tono, f"Contra {vj['nombre']} en {vj['pos']} llevas {vj['v']}V {d}D.")]
+    return []
+
+
+def _avisos_del_jungla(perfil, jr):
+    """Si el jungla rival gana casi siempre cuando va por delante o saca muchas kills en solitario."""
+    if not (perfil and perfil["snowball"] and jr):
+        return []
+    avisos = []
+    s = perfil["snowball"]
+    gana, veces = s["delante"]
+    if veces >= 3 and gana / veces >= 0.75:
+        avisos.append((8, "ojo", f"{jr['campeon']} gana {gana} de {veces} cuando va por delante al minuto 10."))
+    if s["solo"] >= an.UMBRAL_SOLO["JUNGLE"] and perfil["n"] >= 4:
+        avisos.append((7, "ojo", f"{jr['campeon']} saca {an.num(s['solo'])} kills en solitario por partida."))
+    return avisos

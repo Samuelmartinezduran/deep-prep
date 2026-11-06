@@ -131,13 +131,15 @@ def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None
         return None
     pid, equipo = yo["pid"], yo["equipo"]
     por_pid = {j["pid"]: j for j in partida["jug"]}
-    campeon = lambda p: nombre_campeon(por_pid[p]["campeon"]) if p in por_pid else "Torre o súbditos"  # noqa: E731
     minutos = max(1, partida["duracion"] / 60)
     jr = next((j for j in partida["jug"] if j["pos"] == "JUNGLE" and j["equipo"] != equipo), None)
     # Con quién compararte: tu rival de posición (en jungla, el jungla rival).
     directo = next((j for j in partida["jug"] if yo["pos"] and j["pos"] == yo["pos"] and j["equipo"] != equipo), None) or jr
 
-    out = {
+    def campeon(p):
+        return nombre_campeon(por_pid[p]["campeon"]) if p in por_pid else "Torre o súbditos"
+
+    return {
         "id": partida["id"],
         "fecha": partida["creacion"],
         "cola": partida["cola"],
@@ -156,13 +158,20 @@ def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None
         "vision": yo["vision"],
         "wards": yo["wards"],
         "control": yo["control"],
-        "muertes": [],
-        "comparacion": None,
-        "objetivos": [],
-        "prevision": [],
+        "muertes": _muertes(linea, pid, equipo, campeon, set(por_pid), desfase_s),
+        "comparacion": _comparacion(linea, pid, directo, nombre_campeon) if directo else None,
+        "objetivos": _objetivos(linea["monstruos"], pid, equipo),
+        "prevision": _prevision(panel, linea, partida, equipo, jr),
     }
 
+
+def _muertes(linea, pid, equipo, campeon, pids, desfase_s):
+    """Tus muertes: dónde, quién, si costaron un objetivo y en qué punto de la grabación caen.
+
+    campeon(pid): nombre del campeón de ese jugador. pids: los de los jugadores (lo demás es una torre o súbditos).
+    """
     monstruos = linea["monstruos"]
+    muertes = []
     for t, x, y, asesino, victima, ayudas in linea["kills"]:
         if victima != pid:
             continue
@@ -170,7 +179,7 @@ def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None
             (m for m in monstruos if t < m[0] <= t + VENTANA_OBJETIVO_MS and m[4] and m[4] != equipo),
             None,
         )
-        out["muertes"].append(
+        muertes.append(
             {
                 "t": an.mmss(t),
                 "ms": t,
@@ -179,39 +188,41 @@ def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None
                 "donde": donde(x, y, equipo),
                 "asesino": campeon(asesino),
                 "ayudas": [campeon(a) for a in ayudas],
-                "rivales": (1 if asesino in por_pid else 0) + len(ayudas),
+                "rivales": (1 if asesino in pids else 0) + len(ayudas),
                 "perdido": f"{nombre_monstruo(perdido[1], perdido[2])} rival {an.mmss(perdido[0] - t)} después"
                 if perdido
                 else "",
                 "video": en_video(t, desfase_s),
             }
         )
+    return muertes
 
-    for t, tipo, subtipo, asesino, equipo_m, ayudas in monstruos:
-        out["objetivos"].append(
-            {
-                "t": an.mmss(t),
-                "nombre": nombre_monstruo(tipo, subtipo),
-                "tuyo": equipo_m == equipo,
-                "participaste": pid == asesino or pid in ayudas,
+
+def _objetivos(monstruos, pid, equipo):
+    return [
+        {
+            "t": an.mmss(t),
+            "nombre": nombre_monstruo(tipo, subtipo),
+            "tuyo": equipo_m == equipo,
+            "participaste": pid == asesino or pid in ayudas,
+        }
+        for t, tipo, subtipo, asesino, equipo_m, ayudas in monstruos
+    ]
+
+
+def _comparacion(linea, pid, directo, nombre_campeon):
+    """Tu oro, experiencia, CS y nivel al 10 y al 15 al lado de los de tu rival directo, o None sin datos."""
+    filas = {}
+    for minuto in (10, 15):
+        mio, suyo = _al(linea, pid, minuto), _al(linea, directo["pid"], minuto)
+        if mio and suyo:
+            filas[str(minuto)] = {
+                "oro": [mio[0], suyo[0]],
+                "xp": [mio[1], suyo[1]],
+                "cs": [mio[2], suyo[2]],
+                "nivel": [mio[3], suyo[3]],
             }
-        )
-
-    if directo:
-        filas = {}
-        for minuto in (10, 15):
-            mio, suyo = _al(linea, pid, minuto), _al(linea, directo["pid"], minuto)
-            if mio and suyo:
-                filas[str(minuto)] = {
-                    "oro": [mio[0], suyo[0]],
-                    "xp": [mio[1], suyo[1]],
-                    "cs": [mio[2], suyo[2]],
-                    "nivel": [mio[3], suyo[3]],
-                }
-        out["comparacion"] = {"rival": nombre_campeon(directo["campeon"]), "minutos": filas} if filas else None
-
-    out["prevision"] = _prevision(panel, linea, partida, equipo, jr)
-    return out
+    return {"rival": nombre_campeon(directo["campeon"]), "minutos": filas} if filas else None
 
 
 def _prevision(panel, linea, partida, equipo, jr):
@@ -262,25 +273,12 @@ def tendencias(partidas, mis_puuids, nombre_campeon, hora_local):
             juegos.append((m, yo))
     if not juegos:
         return None
-    tras_derrota, tras_victoria, primera, resto = [], [], [], []
-    for i, (m, yo) in enumerate(juegos):
-        anterior = juegos[i - 1] if i else None
-        # Misma sesión: empezó menos de 2 horas después de acabar la anterior.
-        seguida = anterior and m["creacion"] - (anterior[0]["creacion"] + anterior[0]["duracion"] * 1000) < 2 * 3600 * 1000
-        if seguida:
-            (tras_victoria if anterior[1]["gana"] else tras_derrota).append(yo["gana"])
-            resto.append(yo["gana"])
-        else:
-            primera.append(yo["gana"])
+    primera, tras_victoria, tras_derrota = _por_sesion(juegos)
     franjas = {"Mañana (6-14 h)": [], "Tarde (14-20 h)": [], "Noche (20-24 h)": [], "Madrugada (0-6 h)": []}
     duraciones = {"Menos de 25 min": [], "25 a 35 min": [], "Más de 35 min": []}
     directos = {}  # (campeón rival, posición) -> resultados, contra tu rival de posición
     for m, yo in juegos:
-        h = hora_local(m["creacion"])
-        franja = (
-            "Madrugada (0-6 h)" if h < 6 else "Mañana (6-14 h)" if h < 14 else "Tarde (14-20 h)" if h < 20 else "Noche (20-24 h)"
-        )
-        franjas[franja].append(yo["gana"])
+        franjas[_franja(hora_local(m["creacion"]))].append(yo["gana"])
         minutos = m["duracion"] / 60
         duraciones["Menos de 25 min" if minutos < 25 else "25 a 35 min" if minutos <= 35 else "Más de 35 min"].append(yo["gana"])
         if yo["pos"]:
@@ -304,6 +302,24 @@ def tendencias(partidas, mis_puuids, nombre_campeon, hora_local):
             for (c, p), v in frecuentes
         ],
     }
+
+
+def _por_sesion(juegos):
+    """Resultados de la primera partida de cada sesión, de las de después de ganar y de las de después de perder."""
+    primera, tras_victoria, tras_derrota = [], [], []
+    for i, (m, yo) in enumerate(juegos):
+        anterior = juegos[i - 1] if i else None
+        # Misma sesión: empezó menos de 2 horas después de acabar la anterior.
+        seguida = anterior and m["creacion"] - (anterior[0]["creacion"] + anterior[0]["duracion"] * 1000) < 2 * 3600 * 1000
+        if seguida:
+            (tras_victoria if anterior[1]["gana"] else tras_derrota).append(yo["gana"])
+        else:
+            primera.append(yo["gana"])
+    return primera, tras_victoria, tras_derrota
+
+
+def _franja(h):
+    return "Madrugada (0-6 h)" if h < 6 else "Mañana (6-14 h)" if h < 14 else "Tarde (14-20 h)" if h < 20 else "Noche (20-24 h)"
 
 
 def mapa_muertes(revisiones):
