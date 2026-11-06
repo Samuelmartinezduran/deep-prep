@@ -6,7 +6,6 @@ import time
 from typing import Any
 
 from . import analisis as an
-from . import recolector as rec
 from .constantes import LIGA_COLA
 
 # Tus campeones por posición (el pool) se recalculan como mucho cada tanto.
@@ -105,7 +104,7 @@ class Partidas:
     def pool(self):
         """Tus campeones por posición (de tus clasificatorias de la temporada); se recalcula cada 10 min."""
         if time.time() - self._pool[0] > CADA_POOL_S:
-            self._pool = (time.time(), rec.pool_de(self.mis_partidas(), set(self.cuentas)))
+            self._pool = (time.time(), an.pool_de(self.mis_partidas(), set(self.cuentas)))
         return self._pool[1]
 
     def sincronizar(self, puuid, ocupada=lambda: False):

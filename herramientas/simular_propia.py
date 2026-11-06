@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from anonimizar import anonimizar
 from deepprep import config
 from deepprep.app import crear_app
-from deepprep.recolector import BaseDuelos
+from deepprep.base_duelos import BaseDuelos
 from deepprep.riot import Cliente
 
 SALIDA = Path(__file__).parent / "panel_simulado.json"  # volcado del panel para mirarlo con calma
@@ -65,7 +65,7 @@ def main():
     # A ciertas horas apenas hay Master jugando: se prueba desde arriba hacia abajo.
     entradas = []
     for liga in ("challengerleagues", "grandmasterleagues", "masterleagues"):
-        lista = cliente._get(cliente.plataforma, f"/lol/league/v4/{liga}/by-queue/RANKED_SOLO_5x5")["entries"]
+        lista = cliente.liga_de_elite(liga)["entries"]
         random.shuffle(lista)
         entradas += lista[:50]
     juego = None

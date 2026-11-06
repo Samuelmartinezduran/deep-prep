@@ -18,6 +18,7 @@ from . import actualizador, config, inicio_windows, lcu
 from . import analisis as an
 from . import recolector as rec
 from .ajustes import Ajustes
+from .base_duelos import BaseDuelos
 from .cache import Cache
 from .comparador import Comparador
 from .constantes import GRIETA
@@ -248,7 +249,7 @@ class App:
         for rid in nuevo.get("cuentas", []):
             threading.Thread(target=self.mis_cuentas.apuntar, args=(rid,), daemon=True).start()
         if self.sesion:
-            self.sesion._sucio = True  # las notas y las reglas nuevas salen ya en el panel
+            self.sesion.invalidar_panel()  # las notas y las reglas nuevas salen ya en el panel
 
     # --- lo que piden el panel y las sesiones -------------------------------------------------------
     def comprobar_clave(self):
@@ -397,7 +398,7 @@ def crear_app(configuracion=None, *, cliente=None, cliente_lol=None, duelos=None
         datos=Datos(cache),
         cliente=cliente or Cliente(cfg, config.leer_clave),
         cliente_lol=cliente_lol or lcu.Cliente(cfg["ruta_lol"]),
-        duelos=duelos or rec.BaseDuelos(),
+        duelos=duelos or BaseDuelos(),
         grabador=Grabador(cfg) if grabar and cfg.get("grabar") else None,
         arranque_windows=arranque_windows,
     )

@@ -14,8 +14,31 @@ import urllib.parse
 import urllib.request
 from collections import defaultdict, deque
 
+from .constantes import LIGA_COLA, SOLO_DUO
+
 # Sin User-Agent propio, Cloudflare rechaza el de urllib con "error code: 1010".
 USER_AGENT = "deep-prep/2.0"
+
+# Plataforma de una cuenta -> región de sus partidas (match-v5).
+REGION_DE = {
+    "euw1": "europe",
+    "eun1": "europe",
+    "tr1": "europe",
+    "ru": "europe",
+    "me1": "europe",
+    "kr": "asia",
+    "jp1": "asia",
+    "na1": "americas",
+    "br1": "americas",
+    "la1": "americas",
+    "la2": "americas",
+    "oc1": "sea",
+    "sg2": "sea",
+    "tw2": "sea",
+    "vn2": "sea",
+    "th2": "sea",
+    "ph2": "sea",
+}
 
 
 class ClaveInvalida(Exception):
@@ -157,6 +180,10 @@ class Cliente:
         q = urllib.parse.quote
         return self._get(self.region, f"/riot/account/v1/accounts/by-riot-id/{q(nombre, safe='')}/{q(tag, safe='')}")
 
+    def region_de_juego(self, puuid):
+        """En qué plataforma juega al LoL una cuenta: {'puuid', 'game', 'region': 'EUW1'}, o None."""
+        return self._get(self.region, f"/riot/account/v1/region/by-game/lol/by-puuid/{puuid}")
+
     # --- partida en vivo y datos del jugador (host de plataforma) --------------------
     def partida_activa(self, puuid):
         return self._get(self.plataforma, f"/lol/spectator/v5/active-games/by-summoner/{puuid}")
@@ -167,6 +194,10 @@ class Cliente:
     def maestrias(self, puuid, cancelada=None):
         """Maestría de todos los campeones de la cuenta, de más a menos puntos."""
         return self._get(self.plataforma, f"/lol/champion-mastery/v4/champion-masteries/by-puuid/{puuid}", cancelada=cancelada)
+
+    def liga_de_elite(self, liga, fondo=False, cancelada=None):
+        """Los jugadores de solo/dúo de una liga de la plataforma: challengerleagues, grandmasterleagues o masterleagues."""
+        return self._get(self.plataforma, f"/lol/league/v4/{liga}/by-queue/{LIGA_COLA[SOLO_DUO]}", fondo, cancelada)
 
     # --- historial (host regional) ---------------------------------------------------
     def ids_partidas(self, puuid, cola=None, tipo=None, inicio=0, n=20, desde=None, fondo=False, cancelada=None):

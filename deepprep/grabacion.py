@@ -32,6 +32,8 @@ SERIES = "series.json"
 # Si el vídeo lleva este tiempo sin crecer, algo va mal y el panel lo avisa.
 SEGUNDOS_SIN_CRECER = 20
 CLASE_JUEGO = "RiotWindowClass"
+# ffmpeg graba por debajo de la prioridad normal: el juego va primero.
+PRIORIDAD_BAJA = getattr(subprocess, "BELOW_NORMAL_PRIORITY_CLASS", 0)
 
 # Ajustes de cada codificador, de mejor a peor opción. El de procesador es el del script de coaching.
 CODIFICADORES = {
@@ -436,16 +438,14 @@ def _orden_grabacion(ffmpeg, salida, args, carpeta, arranque):
 def _grabar_serie(orden, carpeta, arranque, log, seguir):
     """Graba una serie de trozos hasta que ffmpeg se corte o ya no haya que seguir (y entonces lo cierra bien)."""
     cuando = time.time()
-    p = subprocess.Popen(orden, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log, creationflags=SIN_VENTANA)
+    p = subprocess.Popen(
+        orden, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log, creationflags=SIN_VENTANA | PRIORIDAD_BAJA
+    )
     # Con esto la revisión sabe en qué serie y en qué trozo cae cada momento de la partida.
     try:
         apuntar_serie(carpeta, arranque, cuando)
     except OSError as e:
         log.write(f"No se pudo apuntar cuándo empieza la serie {arranque}: {e}\n")
-    try:
-        ctypes.windll.kernel32.SetPriorityClass(int(p._handle), 0x4000)  # por debajo de lo normal
-    except (OSError, AttributeError):
-        pass
     while p.poll() is None:
         if not seguir():
             try:

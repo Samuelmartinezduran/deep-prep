@@ -216,6 +216,10 @@ class Sesion:
                     j["rol"] = rol
 
     # --- panel -------------------------------------------------------------------------
+    def invalidar_panel(self):
+        """Ha cambiado algo de fuera que sale en el panel (notas, ajustes): se vuelve a montar al pedirlo."""
+        self._sucio = True
+
     def panel(self):
         with self._lock:
             ahora = time.time()

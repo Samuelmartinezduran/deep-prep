@@ -933,6 +933,20 @@ def _conocidos(juegos, presentes, ahora_ms):
     return conocidos
 
 
+# Campeones como mucho en tu pool (los más jugados).
+MAX_POOL = 8
+
+
+def pool_de(partidas, puuids, minimo=5):
+    """Tus campeones por posición con al menos 'minimo' partidas: [(campeón, posición)], de más a menos jugado."""
+    c = Counter()
+    for m in partidas:
+        yo = next((j for j in m["jug"] if j["puuid"] in puuids), None)
+        if yo and yo["pos"] and not m.get("remake"):
+            c[(yo["campeon"], yo["pos"])] += 1
+    return [k for k, n in c.most_common(MAX_POOL) if n >= minimo]
+
+
 def pool_contra(pool, pos, rival, registros, partidas, mias, minimo):
     """Tus campeones de esa posición contra el campeón rival: opciones con datos, no una elección.
 

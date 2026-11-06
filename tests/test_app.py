@@ -9,8 +9,8 @@ from pathlib import Path
 
 from deepprep import config, servidor
 from deepprep.app import App
+from deepprep.base_duelos import BaseDuelos
 from deepprep.cache import Cache
-from deepprep.recolector import BaseDuelos
 from deepprep.riot import ClaveInvalida, Limitador
 
 DATOS = Path(__file__).parent / "datos"
@@ -290,7 +290,7 @@ class NormasDeRiot(unittest.TestCase):
             app.duelos.guardar(
                 f"KR_{i}", [dict(registro(i % 2), pos=yo["rol"], a=yo["campeon"], b=rival["campeon"], puuid=f"p{i}")]
             )
-        app.sesion._sucio = True
+        app.sesion.invalidar_panel()
         d = app.estado()["panel"]["duelo"]
         self.assertEqual((d["n"], d["wr"], d["poco"]), (12, 50, False))
         lol.segundos = 90.0

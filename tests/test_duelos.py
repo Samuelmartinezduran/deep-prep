@@ -7,7 +7,7 @@ from pathlib import Path
 
 from deepprep import analisis as an
 from deepprep import duelos as du
-from deepprep.recolector import BaseDuelos, pool_de
+from deepprep.base_duelos import BaseDuelos
 
 DATOS = Path(__file__).parent / "datos"
 
@@ -156,7 +156,7 @@ class Base(unittest.TestCase):
             return {"id": str(i), "remake": False, "jug": [{"puuid": "yo", "campeon": campeon, "pos": pos}]}
 
         partidas = [m(i, 131, "JUNGLE") for i in range(6)] + [m(10 + i, 11, "JUNGLE") for i in range(2)]
-        self.assertEqual(pool_de(partidas, {"yo"}), [(131, "JUNGLE")])
+        self.assertEqual(an.pool_de(partidas, {"yo"}), [(131, "JUNGLE")])
 
 
 if __name__ == "__main__":

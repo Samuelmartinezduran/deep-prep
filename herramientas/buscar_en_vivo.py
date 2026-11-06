@@ -18,7 +18,7 @@ def main():
     intentos = int(sys.argv[1]) if len(sys.argv) > 1 else 40
     cfg = config.cargar()
     cliente = Cliente(cfg, config.leer_clave)
-    liga = cliente._get(cliente.plataforma, "/lol/league/v4/masterleagues/by-queue/RANKED_SOLO_5x5")
+    liga = cliente.liga_de_elite("masterleagues")
     entradas = liga["entries"]
     random.shuffle(entradas)
     for e in entradas[:intentos]:

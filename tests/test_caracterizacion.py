@@ -23,7 +23,7 @@ from deepprep import config
 from deepprep import duelos as du
 from deepprep import revision as rv
 from deepprep.app import App
-from deepprep.recolector import BaseDuelos
+from deepprep.base_duelos import BaseDuelos
 from tests.test_app import DatosFalsos, GrabadorFalso, LolFalso, RiotFalso, crear, esperar, montar
 
 DATOS = Path(__file__).parent / "datos"

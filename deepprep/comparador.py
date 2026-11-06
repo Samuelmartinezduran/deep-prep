@@ -5,8 +5,7 @@ from typing import Any
 
 from . import analisis as an
 from . import duelos as du
-from . import recolector as rec
-from .riot import ErrorRiot
+from .riot import REGION_DE, ErrorRiot
 
 # Con quién se comparan tus números en el duelo y en la revisión (ajuste "comparar_con").
 COMPARAR_CON = {
@@ -99,12 +98,10 @@ class Comparador:
             cuenta = self.cliente.cuenta_por_riot_id(nombre.strip(), tag.strip())
             if not cuenta:
                 return f"No encuentro la cuenta {rid}."
-            plataforma = (
-                self.cliente._get(self.cliente.region, f"/riot/account/v1/region/by-game/lol/by-puuid/{cuenta['puuid']}") or {}
-            ).get("region", "")
+            plataforma = (self.cliente.region_de_juego(cuenta["puuid"]) or {}).get("region", "")
         except ErrorRiot as e:
             return f"No pude buscar {rid}: {e}"
-        if plataforma.lower() not in rec.REGION_DE:
+        if plataforma.lower() not in REGION_DE:
             return f"No sé en qué servidor juega {rid}."
         self.duelos.kv_set(
             f"ref:{rid.lower()}",
@@ -126,7 +123,7 @@ class Comparador:
         for campeon, rid in pares:
             info = self.duelos.kv_get(f"ref:{rid.lower()}")
             if info:
-                out.append({"puuid": info["puuid"], "region": rec.REGION_DE[info["plataforma"]], "campeon": campeon})
+                out.append({"puuid": info["puuid"], "region": REGION_DE[info["plataforma"]], "campeon": campeon})
         return out
 
     def partidas_de_referencias(self):

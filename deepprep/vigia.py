@@ -4,9 +4,8 @@ import threading
 import time
 from typing import Any
 
-from . import recolector as rec
 from .constantes import GRIETA
-from .riot import ClaveInvalida, ErrorRiot
+from .riot import REGION_DE, ClaveInvalida, ErrorRiot
 
 FASES = {
     "None": "Cliente abierto",
@@ -199,7 +198,7 @@ class Vigia:
         """La región de la API sale del cliente del LoL (para quien no juega en EUW)."""
         if not plataforma or plataforma == self.cfg.get("plataforma"):
             return
-        region = rec.REGION_DE.get(plataforma)
+        region = REGION_DE.get(plataforma)
         if not region:
             return
         print(f"El cliente es de {plataforma}: uso esa región")

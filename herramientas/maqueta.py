@@ -17,7 +17,7 @@ from deepprep import config, servidor
 from deepprep import duelos as du
 from deepprep import revision as rv
 from deepprep.app import App, crear_app
-from deepprep.recolector import BaseDuelos
+from deepprep.base_duelos import BaseDuelos
 
 AQUI = Path(__file__).parent
 DATOS_PRUEBA = AQUI.parent / "tests" / "datos"
