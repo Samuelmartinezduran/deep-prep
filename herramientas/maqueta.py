@@ -16,7 +16,7 @@ from deepprep import analisis as an
 from deepprep import config, servidor
 from deepprep import duelos as du
 from deepprep import revision as rv
-from deepprep.app import App
+from deepprep.app import App, crear_app
 from deepprep.recolector import BaseDuelos
 
 AQUI = Path(__file__).parent
@@ -38,8 +38,9 @@ class AppMaqueta:
     def __init__(self, estado, modo):
         self.base = estado
         self.modo = modo
-        self.real = App(cfg=config.cargar(), grabador=False, duelos=BaseDuelos())  # con cfg pasada no escribe config.json
-        self.real._comprobar_clave()
+        # Con la configuración en memoria no escribe config.json.
+        self.real = crear_app(config.Configuracion.en_memoria(config.cargar()), grabar=False, duelos=BaseDuelos())
+        self.real.comprobar_clave()
         self.datos = self.real.datos
         # Una revisión de ejemplo con la partida real de las pruebas (Diana contra Master Yi).
         partida = an.reducir_partida(_gz("partida.json.gz"))

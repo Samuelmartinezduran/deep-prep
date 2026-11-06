@@ -15,7 +15,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from anonimizar import anonimizar
 from deepprep import config
-from deepprep.app import App
+from deepprep.app import crear_app
+from deepprep.recolector import BaseDuelos
 from deepprep.riot import Cliente
 
 SALIDA = Path(__file__).parent / "panel_simulado.json"  # volcado del panel para mirarlo con calma
@@ -51,8 +52,14 @@ def main():
     espera = int(sys.argv[1]) if len(sys.argv) > 1 else 20
     cfg = config.cargar()
     cliente = ClienteTrucado(cfg, config.leer_clave)
-    app = App(cfg=cfg, cliente=cliente, cliente_lol=LolFalso(cfg["cuentas"][0]), grabador=False)
-    app._comprobar_clave()
+    app = crear_app(
+        config.Configuracion.en_memoria(cfg),
+        cliente=cliente,
+        cliente_lol=LolFalso(cfg["cuentas"][0]),
+        duelos=BaseDuelos(":memory:"),
+        grabar=False,
+    )
+    app.comprobar_clave()
     yo = next(iter(app.cuentas))
 
     # A ciertas horas apenas hay Master jugando: se prueba desde arriba hacia abajo.
@@ -74,7 +81,7 @@ def main():
     jungla.update(puuid=yo, riotId=app.cuentas[yo], championId=131)
     cliente.juego = juego
 
-    app._paso()
+    app.vigia.paso()
     s = app.sesion
     print("sesión:", s.origen, "| yo en equipo", s.mi_equipo, flush=True)
     if "--servir" in sys.argv:

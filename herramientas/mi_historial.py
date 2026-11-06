@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from deepprep import analisis as an
-from deepprep.app import App
+from deepprep.app import crear_app
 
 
 class SinRed:
@@ -23,7 +23,7 @@ class SinRed:
 
 
 def main():
-    app = App(cliente=SinRed(), cliente_lol=type("Cerrado", (), {"estado": lambda s: None})())
+    app = crear_app(cliente=SinRed(), cliente_lol=type("Cerrado", (), {"estado": lambda s: None})())
     nombres = {v["nombre"].lower(): k for k, v in app.datos.campeones.items()}
     for rid in app.cfg["cuentas"]:
         guardada = app.cache.kv_get(f"cuenta:{rid.lower()}")

@@ -10,6 +10,7 @@ from pathlib import Path
 from deepprep import config, servidor
 from deepprep.app import App
 from deepprep.cache import Cache
+from deepprep.recolector import BaseDuelos
 from deepprep.riot import ClaveInvalida, Limitador
 
 DATOS = Path(__file__).parent / "datos"
@@ -120,14 +121,20 @@ class LolFalso:
         return self.eleccion
 
 
-def montar():
+def crear(cfg, cliente, cliente_lol, **piezas):
+    """La app con piezas de mentira: configuración en memoria (no escribe config.json) y bases en memoria."""
+    piezas = {"cache": Cache(":memory:"), "datos": DatosFalsos(), "duelos": BaseDuelos(":memory:"), **piezas}
+    return App(config.Configuracion.en_memoria(cfg), cliente=cliente, cliente_lol=cliente_lol, **piezas)
+
+
+def montar(**piezas):
     juego = json.loads((DATOS / "activa.json").read_text(encoding="utf-8"))
     juego["participants"][0]["puuid"] = "puuid-yo"
     juego["participants"][5]["puuid"] = "puuid-otro"
     cfg = dict(config.POR_DEFECTO, cuentas=["Yo#EUW"], revisar=False)
     riot, lol = RiotFalso(juego), LolFalso()
-    app = App(cfg=cfg, cache=Cache(":memory:"), datos=DatosFalsos(), cliente=riot, cliente_lol=lol, grabador=GrabadorFalso())
-    app._comprobar_clave()
+    app = crear(cfg, riot, lol, **{"grabador": GrabadorFalso(), **piezas})
+    app.comprobar_clave()
     return app, riot, lol
 
 
@@ -142,12 +149,12 @@ class Deteccion(unittest.TestCase):
     def test_partida_propia_de_principio_a_fin(self):
         app, _, lol = montar()
         lol.fase = "Lobby"
-        app._paso()
+        app.vigia.paso()
         self.assertIsNone(app.sesion)
         self.assertEqual(app.estado()["cuenta"], "Yo#EUW")
 
         lol.fase = "InProgress"
-        app._paso()
+        app.vigia.paso()
         s = app.sesion
         self.assertEqual((s.origen, s.yo, s.mi_equipo), ("propia", "puuid-yo", 100))
         self.assertTrue(esperar(s))
@@ -164,31 +171,31 @@ class Deteccion(unittest.TestCase):
         self.assertFalse(p["terminada"])
 
         lol.fase = "EndOfGame"
-        app._paso()
+        app.vigia.paso()
         self.assertTrue(app.sesion.terminada)
         self.assertIs(app.sesion, s)  # el panel se queda a la vista hasta la siguiente partida
 
     def test_misma_partida_no_se_reabre(self):
         app, _, lol = montar()
         lol.fase = "InProgress"
-        app._paso()
+        app.vigia.paso()
         s = app.sesion
-        app._ultimo_sondeo = 0
-        app._paso()
+        app.vigia.ultimo_sondeo = 0
+        app.vigia.paso()
         self.assertIs(app.sesion, s)
 
     def test_sin_cliente_pregunta_a_riot(self):
         app, _, _ = montar()
-        app._paso()
+        app.vigia.paso()
         self.assertEqual(app.sesion.origen, "propia")
 
     def test_el_historial_se_pausa_con_la_partida_cerca(self):
         app, riot, lol = montar()
         lol.fase = "ChampSelect"
-        app._paso()
+        app.vigia.paso()
         self.assertEqual(riot.limitador.tope_fondo, 0)
         lol.fase = "InProgress"
-        app._paso()
+        app.vigia.paso()
         self.assertEqual(riot.limitador.tope_fondo, 85)
 
 
@@ -196,16 +203,16 @@ class Modo(unittest.TestCase):
     def test_previa_carga_y_juego(self):
         app, _, lol = montar()
         lol.fase = "ChampSelect"
-        app._paso()
+        app.vigia.paso()
         self.assertEqual(app.estado()["modo"], "previa")
         lol.fase = "InProgress"
-        app._paso()
+        app.vigia.paso()
         self.assertEqual((app.modo, app.reloj), ("carga", None))
         lol.segundos = 42.5
         app.actualizar_modo()
         self.assertEqual((app.estado()["modo"], app.estado()["reloj"]), ("juego", 42.5))
         lol.fase = "EndOfGame"
-        app._paso()
+        app.vigia.paso()
         self.assertEqual(app.modo, "previa")
 
     def test_el_overlay_no_cuenta_como_mirar_el_panel(self):
@@ -222,7 +229,7 @@ class NormasDeRiot(unittest.TestCase):
         app, riot, lol = montar()
         riot.juego["gameQueueConfigId"] = 440
         lol.fase = "InProgress"
-        app._paso()
+        app.vigia.paso()
         self.assertTrue(esperar(app.sesion))
         liga = app.estado()["panel"]["equipos"]["aliado"][0]["liga"]
         self.assertEqual((liga["solo"]["txt"], liga["flex"]["txt"]), ("Diamante IV", "Platino II"))
@@ -230,7 +237,7 @@ class NormasDeRiot(unittest.TestCase):
     def test_con_el_juego_empezado_solo_datos(self):
         app, _, lol = montar()
         lol.fase = "InProgress"
-        app._paso()
+        app.vigia.paso()
         self.assertTrue(esperar(app.sesion))
         app.sesion.panel()
         app.sesion._sucio = False
@@ -260,7 +267,7 @@ class NormasDeRiot(unittest.TestCase):
             return dict.fromkeys([x for x in equipo if x != "puuid-yo"][:2], 1)
 
         with mock.patch("deepprep.analisis.premades", side_effect=con_grupo):
-            app._paso()
+            app.vigia.paso()
             self.assertTrue(esperar(app.sesion))
             p = app.estado()["panel"]
         for lado in ("aliado", "rival"):
@@ -275,7 +282,7 @@ class NormasDeRiot(unittest.TestCase):
 
         app, _, lol = montar()
         lol.fase = "InProgress"
-        app._paso()
+        app.vigia.paso()
         self.assertTrue(esperar(app.sesion))
         yo = next(f for f in app.sesion.jugadores if f["puuid"] == "puuid-yo")
         rival = next(f for f in app.sesion.jugadores if f["equipo"] != yo["equipo"] and f["rol"] == yo["rol"])
@@ -299,23 +306,27 @@ class NormasDeRiot(unittest.TestCase):
             app.duelos.guardar(f"KR_{i}", [dict(registro(i % 3 == 0), puuid=f"p{i}")])
         lol.fase = "ChampSelect"
         lol.eleccion = {"mio": 131, "aliados": [], "rivales": [103, 64], "cola": 420, "pos": "JUNGLE"}
-        app._paso()
+        app.vigia.paso()
         s = app.estado()["seleccion"]
         self.assertEqual((s["pos"], s["duelo"]["n"], s["duelo"]["wr"]), ("jungla", 12, 33))
         lol.eleccion = dict(lol.eleccion, rivales=[103])  # aún no ha elegido nadie de jungla
-        app._paso()
+        app.vigia.paso()
         self.assertIsNone(app.estado()["seleccion"]["duelo"])
 
     def test_siempre_en_marcha_toca_el_arranque_con_windows(self):
-        app, _, _ = montar()
-        llamadas = []
-        app._arranque_windows = lambda encendido: llamadas.append(encendido) or ""
+        llamadas, error = [], [""]
+
+        def arranque_windows(encendido):
+            llamadas.append(encendido)
+            return error[0]
+
+        app, _, _ = montar(arranque_windows=arranque_windows)
         app.cfg["siempre_en_marcha"] = True
         self.assertTrue(app.guardar_ajustes({"siempre_en_marcha": True})["ok"])
         self.assertEqual(llamadas, [])  # sin cambio, no se toca
         self.assertTrue(app.guardar_ajustes({"siempre_en_marcha": False})["ok"])
         self.assertEqual((llamadas, app.cfg["siempre_en_marcha"]), ([False], False))
-        app._arranque_windows = lambda encendido: "falló"
+        error[0] = "falló"
         self.assertEqual(app.guardar_ajustes({"siempre_en_marcha": True}), {"ok": False, "error": "falló"})
         self.assertFalse(app.cfg["siempre_en_marcha"])
 
@@ -342,7 +353,7 @@ class NormasDeRiot(unittest.TestCase):
         self.assertEqual(
             muertes(), ("Otp contra Campeón 64", "1,0")
         )  # la referencia del campeón manda (y hay 5+ contra ese rival)
-        self.assertEqual(app._referencias(), [{"puuid": "otp", "region": "asia", "campeon": 131}])
+        self.assertEqual(app.comparador.para_el_recolector(), [{"puuid": "otp", "region": "asia", "campeon": 131}])
         self.assertFalse(app.guardar_ajustes({"comparar_con": "nadie"})["ok"])
 
     def test_perfil_de_base(self):
@@ -360,19 +371,19 @@ class NormasDeRiot(unittest.TestCase):
         self.assertEqual(app.duelo(131, "JUNGLE", 64)["tu"]["ref"], "Pro con Campeón 131")
         # Con un campeón que él no juega: sus partidas en tu posición.
         self.assertEqual(app.duelo(11, "JUNGLE", 64)["tu"]["ref"], "Pro de jungla")
-        self.assertIn({"puuid": "pro", "region": "europe", "campeon": None}, app._referencias())
+        self.assertIn({"puuid": "pro", "region": "europe", "campeon": None}, app.comparador.para_el_recolector())
         self.assertEqual(app.ajustes()["perfil_partidas"], 3)
 
     def test_region_del_cliente_y_primera_vez_sin_cuentas(self):
         app, riot, lol = montar()
         riot.poner_plataforma = lambda p, r: setattr(riot, "puesta", (p, r))
         lol.fase, lol.region = "Lobby", "na1"
-        app._paso()
+        app.vigia.paso()
         self.assertEqual((app.cfg["plataforma"], app.cfg["region"], riot.puesta), ("na1", "americas", ("na1", "americas")))
         # Sin cuentas apuntadas (app recién instalada) basta con que la clave valga.
         riot.comprobar = lambda: {"id": "EUW1"}
         app.cfg["cuentas"] = []
-        app._comprobar_clave()
+        app.comprobar_clave()
 
     def test_ningun_texto_da_ordenes(self):
         from deepprep import sesion
@@ -388,25 +399,25 @@ class Grabacion(unittest.TestCase):
         self.assertIsNone(app.estado()["grabacion"])
         for fase in ("ChampSelect", "GameStart", "InProgress", "InProgress"):
             lol.fase = fase
-            app._paso()
+            app.vigia.paso()
         self.assertEqual(app.grabador.armados, 1)
         self.assertEqual(app.estado()["grabacion"], {"carpeta": "", "parada": False})
 
         lol.fase = "EndOfGame"
-        app._paso()
+        app.vigia.paso()
         lol.fase, lol.mapa_id = "InProgress", 12  # ARAM
-        app._paso()
+        app.vigia.paso()
         self.assertEqual(app.grabador.armados, 1)
 
         lol.fase = "Lobby"
-        app._paso()
+        app.vigia.paso()
         lol.fase, lol.mapa_id = "InProgress", 0  # mapa desconocido: se graba por si acaso
-        app._paso()
+        app.vigia.paso()
         self.assertEqual(app.grabador.armados, 2)
 
     def test_apagada_en_la_configuracion(self):
         cfg = dict(config.POR_DEFECTO, cuentas=["Yo#EUW"], grabar=False)
-        app = App(cfg=cfg, cache=Cache(":memory:"), datos=DatosFalsos(), cliente=RiotFalso(None), cliente_lol=LolFalso())
+        app = crear(cfg, RiotFalso(None), LolFalso())
         self.assertIsNone(app.grabador)
         self.assertIsNone(app.estado()["grabacion"])
 
@@ -421,7 +432,7 @@ class RevisionYAjustes(unittest.TestCase):
         with gzip.open(DATOS / "linea.json.gz", "rt", encoding="utf-8") as f:
             riot.crudo_linea = json.load(f)
         diana = next(p for p in riot.crudo["info"]["participants"] if p["championId"] == 131)
-        rev = app._revisar(123, diana["puuid"], {"gank": None, "lineas": []}, None, intentos=1, pausa=0)
+        rev = app.revisor.revisar(123, diana["puuid"], {"gank": None, "lineas": []}, None, intentos=1, pausa=0)
         self.assertEqual(riot.pedida, "EUW1_123")
         self.assertTrue(app.duelos.vista(riot.crudo["metadata"]["matchId"]))  # la partida también entra en tus duelos
         self.assertEqual(len(rev["muertes"]), diana["deaths"])
@@ -434,7 +445,7 @@ class RevisionYAjustes(unittest.TestCase):
 
     def test_revision_sin_publicar(self):
         app, _, _ = montar()
-        self.assertIsNone(app._revisar(1, "puuid-yo", None, None, intentos=2, pausa=0))
+        self.assertIsNone(app.revisor.revisar(1, "puuid-yo", None, None, intentos=2, pausa=0))
 
     def test_ajustes(self):
         app, _, _ = montar()
@@ -458,9 +469,9 @@ class RevisionYAjustes(unittest.TestCase):
         app, _, lol = montar()
         lol.fase = "Lobby"
         lol.nombre = "Otro"
-        app._paso()
+        app.vigia.paso()
         self.assertEqual(app.cfg["cuentas"], ["Yo#EUW", "Otro#EUW"])
-        app._paso()
+        app.vigia.paso()
         self.assertEqual(len(app.cfg["cuentas"]), 2)
 
 
@@ -500,7 +511,7 @@ class SeleccionDeCampeon(unittest.TestCase):
             )
         lol.fase = "ChampSelect"
         lol.eleccion = {"mio": 131, "aliados": [], "rivales": [11], "cola": 420}
-        app._paso()
+        app.vigia.paso()
         sel = app.estado()["seleccion"]
         json.dumps(sel)
         self.assertEqual(sel["mio"]["nombre"], "Campeón 131")
@@ -509,7 +520,7 @@ class SeleccionDeCampeon(unittest.TestCase):
         self.assertEqual((h["n"], h["campeon"]["v"], h["cola_txt"]), (2, 1, " de solo/dúo"))
         self.assertEqual((h["vs"][0]["n"], h["vs"][0]["v"]), (2, 1))
         lol.fase = "Lobby"
-        app._paso()
+        app.vigia.paso()
         self.assertIsNone(app.estado()["seleccion"])
 
 
@@ -528,17 +539,17 @@ class BusquedaManual(unittest.TestCase):
     def test_la_busqueda_no_se_pisa_hasta_la_siguiente_partida(self):
         app, _, lol = montar()
         lol.fase = "InProgress"
-        app._paso()
+        app.vigia.paso()
         app.buscar("Otro#EUW")
         manual = app.sesion
-        app._ultimo_sondeo = 0
-        app._paso()
+        app.vigia.ultimo_sondeo = 0
+        app.vigia.paso()
         self.assertIs(app.sesion, manual)
         lol.fase = "Lobby"
-        app._paso()
+        app.vigia.paso()
         lol.fase = "InProgress"
-        app._ultimo_sondeo = 0
-        app._paso()
+        app.vigia.ultimo_sondeo = 0
+        app.vigia.paso()
         self.assertEqual(app.sesion.origen, "propia")
 
 
@@ -552,8 +563,8 @@ class Clave(unittest.TestCase):
             self.assertEqual(app.poner_clave("RGAPI-nueva"), {"ok": True, "pendiente": True})
             self.assertFalse(app.estado()["clave"]["ok"])
             riot.clave_mala = False
-            app._ultima_prueba_clave = 0
-            app._paso()
+            app.mis_cuentas.ultima_prueba = 0
+            app.vigia.paso()
             self.assertTrue(app.estado()["clave"]["ok"])
         finally:
             config.guardar_clave = guardar

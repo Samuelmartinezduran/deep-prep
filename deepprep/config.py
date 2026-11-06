@@ -286,6 +286,30 @@ def guardar(cfg):
         _copiar(texto)
 
 
+class Configuracion:
+    """La configuración en uso (valores) y dónde se guarda cuando cambia.
+
+    La de la app sale de config.json y se guarda ahí (de_archivo). La de las pruebas y las herramientas solo vive en
+    memoria (en_memoria): la app la usa igual, pero no escribe nada.
+    """
+
+    def __init__(self, valores, guardar=None):
+        self.valores = valores
+        self._guardar = guardar
+
+    @classmethod
+    def de_archivo(cls):
+        return cls(cargar(), guardar)
+
+    @classmethod
+    def en_memoria(cls, valores):
+        return cls(valores)
+
+    def guardar(self):
+        if self._guardar is not None:
+            self._guardar(self.valores)
+
+
 def leer_clave():
     try:
         with _lock:  # que no esté abierta justo cuando guardar_clave la cambia (Windows no lo dejaría)

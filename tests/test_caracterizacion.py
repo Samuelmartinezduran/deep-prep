@@ -23,9 +23,8 @@ from deepprep import config
 from deepprep import duelos as du
 from deepprep import revision as rv
 from deepprep.app import App
-from deepprep.cache import Cache
 from deepprep.recolector import BaseDuelos
-from tests.test_app import DatosFalsos, GrabadorFalso, LolFalso, RiotFalso, esperar, montar
+from tests.test_app import DatosFalsos, GrabadorFalso, LolFalso, RiotFalso, crear, esperar, montar
 
 DATOS = Path(__file__).parent / "datos"
 ESPERADO = DATOS / "esperado"
@@ -248,8 +247,8 @@ class AppEntera(Golden):
         lol: Any = LolFalso()
         datos = DatosFalsos()
         datos.roles = {421: {"TOP": 1.0}, 887: {"JUNGLE": 1.0}}
-        app = App(cfg=cfg, cache=Cache(":memory:"), datos=datos, cliente=riot, cliente_lol=lol, grabador=GrabadorFalso())
-        app._comprobar_clave()
+        app = crear(cfg, riot, lol, datos=datos, grabador=GrabadorFalso())
+        app.comprobar_clave()
         # Duelos de Master+ de tu campeón (40) contra cada rival, en cualquier posición, y tres partidas tuyas.
         registros = du.extraer(CRUDO, CRUDO_LINEA, LEGENDARIOS)
         mios = {r["pos"]: r for r in reversed(registros)}  # el primero de cada posición
@@ -265,7 +264,7 @@ class AppEntera(Golden):
         cls.salidas = {}
 
         lol.fase = "InProgress"
-        app._paso()
+        app.vigia.paso()
         assert esperar(app.sesion)
         cls.salidas["carga"] = instantanea(sin_lo_variable(con_la_hora_fija(app.estado)))
         lol.segundos = 90.0
@@ -273,16 +272,16 @@ class AppEntera(Golden):
         cls.salidas["juego"] = instantanea(sin_lo_variable(con_la_hora_fija(app.estado)))
 
         lol.fase, lol.segundos = "EndOfGame", None
-        app._paso()
+        app.vigia.paso()
         lol.fase = "ChampSelect"
         lol.eleccion = {"mio": 40, "aliados": [59], "rivales": [887, 421], "cola": 420, "pos": "TOP"}
-        con_la_hora_fija(app._paso)
+        con_la_hora_fija(app.vigia.paso)
         cls.salidas["seleccion"] = instantanea(sin_lo_variable(con_la_hora_fija(app.estado)))
 
         # La revisión de la partida de hoy, ya publicada (con una partida más en la liga: LP ganados).
         riot.jugadas = 1
         panel = cls.salidas["carga"]["panel"]
-        cls.salidas["revision"] = instantanea(app._revisar(7000000001, "puuid-yo", panel, None, intentos=1, pausa=0))
+        cls.salidas["revision"] = instantanea(app.revisor.revisar(7000000001, "puuid-yo", panel, None, intentos=1, pausa=0))
         revisiones = app.revisiones()
         # Las franjas horarias van con la hora local del PC (cambia de una máquina a otra): ya están en tendencias.json.
         revisiones["tendencias"] = {k: v for k, v in revisiones["tendencias"].items() if k != "franjas"}
@@ -293,7 +292,7 @@ class AppEntera(Golden):
         # Lo que montan las pruebas de tests/test_app.py, tal cual.
         app2, _, lol2 = montar()
         lol2.fase = "InProgress"
-        app2._paso()
+        app2.vigia.paso()
         assert esperar(app2.sesion)
         cls.salidas["montar"] = instantanea(sin_lo_variable(con_la_hora_fija(app2.estado)))
 

@@ -354,12 +354,12 @@ class Recolector:
 
 def main():
     """Recolector suelto, sin la app (p. ej. para llenar la base de noche)."""
-    from .app import App
+    from .app import crear_app
 
     minutos = float(sys.argv[sys.argv.index("--minutos") + 1]) if "--minutos" in sys.argv else None
-    app = App(grabador=False)
+    app = crear_app(grabar=False)
     try:
-        app._comprobar_clave()
+        app.comprobar_clave()
     except (ClaveInvalida, ErrorRiot) as e:
         print(f"No puedo usar la clave: {e}")
         return

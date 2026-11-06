@@ -76,9 +76,9 @@ def main():
     con_ventana = cfg.get("abrir_ventana", True) and "--sin-ventana" not in sys.argv
 
     from . import servidor
-    from .app import App
+    from .app import crear_app
 
-    app = App()
+    app = crear_app()
     try:
         srv = servidor.crear(app, cfg["puerto"])
     except OSError:

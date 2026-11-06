@@ -13,9 +13,9 @@ import warnings
 from pathlib import Path
 from unittest import mock
 
-from deepprep import app
 from deepprep import grabacion as g
 from deepprep import recolector as rec
+from deepprep import revisiones
 
 
 class Limpieza(unittest.TestCase):
@@ -146,9 +146,9 @@ class Series(unittest.TestCase):
         g.apuntar_serie(self.carpeta, 1, 1000.0)
         g.apuntar_serie(self.carpeta, 2, 1630.0)
         # La partida empezó (0:00) a los 30 s de grabar; la serie 2, a los 10:00 de partida.
-        self.assertEqual(app._desfase(self.carpeta, 1_030_000), {1: 30, 2: -600})
-        self.assertIsNone(app._desfase(self.carpeta / "no-existe", 1_030_000))
-        self.assertIsNone(app._desfase(None, 1_030_000))
+        self.assertEqual(revisiones.desfase(self.carpeta, 1_030_000), {1: 30, 2: -600})
+        self.assertIsNone(revisiones.desfase(self.carpeta / "no-existe", 1_030_000))
+        self.assertIsNone(revisiones.desfase(None, 1_030_000))
 
 
 if __name__ == "__main__":
