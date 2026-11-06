@@ -1,10 +1,46 @@
-"""Caché local en SQLite. Las partidas no cambian nunca, así que se guardan para siempre."""
+"""Caché local en SQLite. Las partidas no cambian nunca, así que se guardan para siempre.
+
+En memoria solo se quedan las últimas que se han usado: la app está siempre en marcha y, si no, crecería sin
+parar (cada partida que miras trae las de diez jugadores). Las demás se vuelven a leer de la base al pedirlas.
+"""
 
 import json
 import sqlite3
 import threading
 import time
 import zlib
+from collections import OrderedDict
+
+# Unos 18 KB por partida y 65 KB por línea de tiempo en memoria: caben de sobra tus partidas de la temporada y
+# las de varias partidas seguidas sin pasar de unos 55 MB.
+MAX_PARTIDAS = 2000
+MAX_LINEAS = 300
+
+
+class _Recientes:
+    """Diccionario que se queda con los `maximo` últimos usados. No es seguro entre hilos: lo protege el de Cache."""
+
+    def __init__(self, maximo):
+        self.maximo = maximo
+        self._datos = OrderedDict()
+
+    def __len__(self):
+        return len(self._datos)
+
+    def get(self, clave):
+        valor = self._datos.get(clave)
+        if valor is not None:
+            self._datos.move_to_end(clave)
+        return valor
+
+    def poner(self, clave, valor):
+        self._datos[clave] = valor
+        self._datos.move_to_end(clave)
+        while len(self._datos) > self.maximo:
+            self._datos.popitem(last=False)
+
+    def clear(self):
+        self._datos.clear()
 
 
 def _empaquetar(obj):
@@ -19,8 +55,8 @@ class Cache:
     def __init__(self, ruta):
         self._lock = threading.RLock()
         self._db = sqlite3.connect(str(ruta), check_same_thread=False)
-        self._partidas = {}
-        self._lineas = {}
+        self._partidas = _Recientes(MAX_PARTIDAS)
+        self._lineas = _Recientes(MAX_LINEAS)
         with self._lock:
             self._db.executescript(
                 """
@@ -56,18 +92,19 @@ class Cache:
     # --- partidas ------------------------------------------------------------------
     def partida(self, id_):
         with self._lock:
-            if id_ in self._partidas:
-                return self._partidas[id_]
+            red = self._partidas.get(id_)
+            if red is not None:
+                return red
             fila = self._db.execute("SELECT datos FROM partidas WHERE id=?", (id_,)).fetchone()
             if not fila:
                 return None
             red = _desempaquetar(fila[0])
-            self._partidas[id_] = red
+            self._partidas.poner(id_, red)
             return red
 
     def guardar_partida(self, red):
         with self._lock:
-            self._partidas[red["id"]] = red
+            self._partidas.poner(red["id"], red)
             self._db.execute(
                 "INSERT OR REPLACE INTO partidas (id, creacion, cola, datos) VALUES (?,?,?,?)",
                 (red["id"], red["creacion"], red["cola"], _empaquetar(red)),
@@ -93,18 +130,19 @@ class Cache:
     # --- líneas de tiempo ----------------------------------------------------------
     def linea(self, id_):
         with self._lock:
-            if id_ in self._lineas:
-                return self._lineas[id_]
+            red = self._lineas.get(id_)
+            if red is not None:
+                return red
             fila = self._db.execute("SELECT datos FROM lineas WHERE id=?", (id_,)).fetchone()
             if not fila:
                 return None
             red = _desempaquetar(fila[0])
-            self._lineas[id_] = red
+            self._lineas.poner(id_, red)
             return red
 
     def guardar_linea(self, red):
         with self._lock:
-            self._lineas[red["id"]] = red
+            self._lineas.poner(red["id"], red)
             self._db.execute("INSERT OR REPLACE INTO lineas (id, datos) VALUES (?,?)", (red["id"], _empaquetar(red)))
             self._db.commit()
 
