@@ -47,7 +47,10 @@ def crear_acceso_directo(
 def pedir_a_la_copia_en_marcha(url: str, ruta: str, espera: float = 5) -> bytes:
     """POST vacío a la API de la copia de la app que ya está en marcha (en url); devuelve el cuerpo de la respuesta.
 
-    Lleva el Origin de su propio panel: es lo único que acepta. Lanza OSError si no hay ninguna escuchando.
+    Va al Host de su panel (127.0.0.1:puerto) y lleva su Origin, como las peticiones del propio panel. El servidor
+    (servidor._Respuestas._ajena) mira siempre el Host y, si la petición trae Origin, que sea el suyo; una sin Origin
+    también la aceptaría (los navegadores lo ponen en todo POST, así que otra web no puede hacerse pasar por el panel).
+    Lanza OSError si no hay ninguna escuchando.
     """
     pet = urllib.request.Request(url + ruta, data=b"{}", headers={"Origin": url.rstrip("/"), "Content-Type": "application/json"})
     with urllib.request.urlopen(pet, timeout=espera) as r:

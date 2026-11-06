@@ -1,8 +1,10 @@
 """Ventanas de la app con WebView2 (pywebview): la principal y la que va encima del juego.
 
 Cerrar la principal solo la esconde: la app sigue viva mientras el cliente del LoL esté abierto, para
-enseñar el overlay y grabar la siguiente partida. Se cierra sola a los 5 minutos de cerrar el cliente,
-salvo con "siempre en marcha" (entonces solo se cierra desde Ajustes o al apagar el PC).
+enseñar el overlay y grabar la siguiente partida. Se cierra sola cuando la ventana lleva al menos 5 minutos
+escondida y el cliente está cerrado (los 5 minutos cuentan desde que se escondió la ventana, no desde que se cerró
+el cliente: si este se cierra más tarde, la app se cierra al poco), salvo con "siempre en marcha" (entonces solo se
+cierra desde Ajustes o al apagar el PC).
 En la demo no hay ventana encima del juego y cerrar la principal cierra la app.
 """
 
