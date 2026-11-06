@@ -56,7 +56,7 @@ def main():
         hoja = Image.new("RGBA", (ancho, 2 * 256 + 48), (8, 9, 10, 255))
         ImageDraw.Draw(hoja).rectangle([0, 256 + 24, ancho, 2 * 256 + 48], fill=(240, 240, 240, 255))
         x = 16
-        for t, im in zip(TAMANOS, imagenes):
+        for t, im in zip(TAMANOS, imagenes, strict=True):
             hoja.alpha_composite(im, (x, 8 + (256 - t) // 2))
             hoja.alpha_composite(im, (x, 256 + 32 + (256 - t) // 2))
             x += t + 16

@@ -1,6 +1,7 @@
 """Pruebas del análisis. Los datos reales son una clasificatoria del 12/10/2026 (Diana contra Master Yi)."""
 
 import gzip
+import itertools
 import json
 import unittest
 from collections import Counter
@@ -103,7 +104,7 @@ class DatosReales(unittest.TestCase):
         l = self.linea
         self.assertEqual(len(l["pos"]["7"]), 16)
         self.assertEqual(l["pids"][self.diana["puuid"]], 7)
-        self.assertTrue(all(a[0] <= b[0] for a, b in zip(l["kills"], l["kills"][1:])))
+        self.assertTrue(all(a[0] <= b[0] for a, b in itertools.pairwise(l["kills"])))
         self.assertIn("DRAGON", {m[1] for m in l["monstruos"]})
         self.assertLess(len(json.dumps(l)), 15000)
 

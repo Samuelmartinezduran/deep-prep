@@ -16,6 +16,7 @@ import types
 import unittest
 import zipfile
 from pathlib import Path
+from typing import Any
 from unittest import mock
 
 from deepprep import __version__, config, inicio_windows
@@ -131,7 +132,7 @@ class QuienMudaLosDatos(ConCarpetaTemporal):
         super().setUp()
         self.viejos, self.nuevos = self.tmp / "Porofesor", self.tmp / "DeepPrep"
         self.programa = self.tmp / "Programs" / "DeepPrep"
-        self.parches = [
+        self.parches: list[Any] = [
             mock.patch.object(config, "CONGELADA", True),
             mock.patch.object(config, "PROGRAMA", self.programa),
             mock.patch.object(config, "RAIZ", self.programa),
@@ -198,7 +199,7 @@ class ConInstalaciones(ConCarpetaTemporal):
         self.escritorio, self.inicio = self.tmp / "Desktop", self.tmp / "Startup"
         acceso_de_mentira(self.escritorio / "Porofesor.lnk", self.vieja)
         acceso_de_mentira(self.inicio / "Porofesor.lnk", self.vieja)
-        self.creados = []
+        self.creados: list[tuple[Path, Path, str]] = []
 
         def crear(destino, objetivo, argumentos="", descripcion="Deep Prep"):
             self.creados.append((Path(destino), Path(objetivo), argumentos))
@@ -206,7 +207,7 @@ class ConInstalaciones(ConCarpetaTemporal):
 
         self.popen = mock.MagicMock()
         self.cfg = {"siempre_en_marcha": True}
-        self.parches = [
+        self.parches: list[Any] = [
             mock.patch.object(act, "CARPETA_PROGRAMA", self.nueva),
             mock.patch.object(act, "CARPETA_PROGRAMA_VIEJA", self.vieja),
             mock.patch.object(act, "ESCRITORIO", self.escritorio / "Deep Prep.lnk"),
@@ -351,6 +352,8 @@ class ProgramaEnMarcha(unittest.TestCase):
 
 def cargar_publicar():
     spec = importlib.util.spec_from_file_location("publicar", RAIZ / "herramientas" / "publicar.py")
+    if spec is None or spec.loader is None:
+        raise ImportError("no se puede cargar herramientas/publicar.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -430,7 +433,7 @@ class ZipPuente(ConInstalaciones):
             with (
                 mock.patch.object(act, "CARPETA_DESCARGA", descargas),
                 mock.patch.object(act, "NOVEDADES", descargas / "novedades.json"),
-                mock.patch.object(act, "_get", lambda url, binario=False: bajar(url, binario)),
+                mock.patch.object(act, "_get", lambda url, binario=False, bajar=bajar: bajar(url, binario)),
                 contextlib.redirect_stdout(io.StringIO()),
             ):
                 a = act.Actualizador(app=None)

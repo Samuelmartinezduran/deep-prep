@@ -350,7 +350,7 @@ def rival_probable(rivales, pos, roles_campeon):
         return None
     if len(rivales) == 5:
         reparto = asignar_roles([{"campeon": c} for c in rivales], roles_campeon)
-        return next((c for c, p in zip(rivales, reparto) if p == pos), None)
+        return next((c for c, p in zip(rivales, reparto, strict=True) if p == pos), None)
 
     def cuota(c):
         tasas = roles_campeon.get(c) or {}
@@ -637,7 +637,10 @@ def perfil_jungla(puuid, partidas, lineas, campeon, equipo_ahora):
             {
                 "titulo": "Invades",
                 "valor": f"Roba {num(robados)} monstruos por partida",
-                "detalle": f"Pisa la jungla rival antes del 8 en {pisa} de {len(con_linea)}. Referencia en Diamante-Master: 10 por partida.",
+                "detalle": (
+                    f"Pisa la jungla rival antes del 8 en {pisa} de {len(con_linea)}. "
+                    "Referencia en Diamante-Master: 10 por partida."
+                ),
                 "tono": "ojo" if robados >= 18 or pronto >= 0.5 else ("bien" if robados <= 5 and pisa == 0 else "neutro"),
             }
         )

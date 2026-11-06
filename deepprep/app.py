@@ -306,7 +306,7 @@ class App:
                 self.error_clave = str(e)
             except ErrorRiot as e:
                 print(e)
-            except Exception:
+            except Exception:  # noqa: BLE001  el vigía y el bucle de fondo no pueden morir por un fallo suelto
                 traceback.print_exc()
             time.sleep(pausa)
 
@@ -542,15 +542,15 @@ class App:
         except ErrorRiot as e:
             print(f"No se pudo leer la liga tras la partida: {e}")
             return None
-        e = next((x for x in entradas if x.get("queueType") == tipo), None)
-        if not e:
+        liga = next((x for x in entradas if x.get("queueType") == tipo), None)
+        if not liga:
             return None
         despues = {
-            "nivel": e.get("tier", ""),
-            "rank": e.get("rank", ""),
-            "lp": e.get("leaguePoints", 0),
-            "v": e.get("wins", 0),
-            "d": e.get("losses", 0),
+            "nivel": liga.get("tier", ""),
+            "rank": liga.get("rank", ""),
+            "lp": liga.get("leaguePoints", 0),
+            "v": liga.get("wins", 0),
+            "d": liga.get("losses", 0),
         }
         out = {"lp": despues["lp"], "nivel": despues["nivel"].lower(), "rank": despues["rank"]}
         yo = next((f for f in ((panel or {}).get("equipos") or {}).get("aliado", []) if f.get("soy_yo")), None)
@@ -995,7 +995,10 @@ class App:
             self._ventana_juego = (time.time(), modo)
         aviso = ""
         if modo is not None and modo != MODO_SIN_BORDES:
-            aviso = "El juego no está en ventana sin bordes: el panel no puede salir encima. Cámbialo en Opciones > Vídeo > Modo de ventana."
+            aviso = (
+                "El juego no está en ventana sin bordes: el panel no puede salir encima. "
+                "Cámbialo en Opciones > Vídeo > Modo de ventana."
+            )
         return {"activo": True, "atajo": self.cfg.get("atajo_overlay", ""), "aviso": aviso}
 
     def estado(self, contar=True):

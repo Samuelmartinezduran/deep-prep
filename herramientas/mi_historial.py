@@ -42,7 +42,8 @@ def main():
     print("duelo directo:", h["vs_directo"])
     for f in h["vs"]:
         print(
-            f"  contra {f['nombre']}: {f['v']}V {f['n'] - f['v']}D | con {app.datos.nombre(mio)}: {f['v_mio']}V {f['n_mio'] - f['v_mio']}D"
+            f"  contra {f['nombre']}: {f['v']}V {f['n'] - f['v']}D |",
+            f"con {app.datos.nombre(mio)}: {f['v_mio']}V {f['n_mio'] - f['v_mio']}D",
         )
 
 

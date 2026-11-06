@@ -107,7 +107,8 @@ class Cliente:
         clave = self._leer_clave()
         if not clave:
             raise ClaveInvalida(
-                "Falta tu clave de la API de Riot. Entra en developer.riotgames.com con tu cuenta del LoL, copia la clave y pégala aquí."
+                "Falta tu clave de la API de Riot. Entra en developer.riotgames.com con tu cuenta del LoL, "
+                "copia la clave y pégala aquí."
             )
         url = f"https://{host}{ruta}"
         for intento in range(4):

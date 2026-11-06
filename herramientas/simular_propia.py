@@ -1,6 +1,7 @@
 """Simula una partida propia: coge una partida real en vivo y sustituye a un jungla por la cuenta principal con Diana.
 
-Sirve para ver el panel con el historial propio sin tener que jugar. Cierra antes la app normal (usan el mismo puerto y la misma cuota).
+Sirve para ver el panel con el historial propio sin tener que jugar. Cierra antes la app normal (usan el mismo
+puerto y la misma cuota).
 Uso: py herramientas/simular_propia.py [segundos] [--servir]   (con --servir el panel se ve en el navegador mientras dura)
 """
 

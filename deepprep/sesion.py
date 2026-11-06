@@ -223,7 +223,7 @@ class Sesion:
                             posiciones[en["pos"]] += 1
                     if posiciones:
                         historiales[j["puuid"]] = posiciones
-                for j, rol in zip(grupo, an.asignar_roles(grupo, self.app.datos.roles, historiales)):
+                for j, rol in zip(grupo, an.asignar_roles(grupo, self.app.datos.roles, historiales), strict=True):
                     j["rol"] = rol
 
     # --- panel -------------------------------------------------------------------------
@@ -477,8 +477,7 @@ class Sesion:
         for f in filas.values():
             if f["lado"] == "rival" and f["j"]["puuid"] in grupos:
                 por_grupo.setdefault(grupos[f["j"]["puuid"]], []).append(self.app.datos.nombre(f["j"]["campeon"]))
-        for nombres in por_grupo.values():
-            avisos.append((3, "neutro", f"Premade rival: {' + '.join(nombres)}."))
+        avisos.extend((3, "neutro", f"Premade rival: {' + '.join(nombres)}.") for nombres in por_grupo.values())
 
         avisos.sort(key=lambda a: a[0], reverse=True)
         return [{"tono": tono, "texto": texto} for _, tono, texto in avisos[:7]]

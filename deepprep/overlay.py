@@ -121,7 +121,7 @@ class Controlador:
         while True:
             try:
                 self.paso()
-            except Exception:
+            except Exception:  # noqa: BLE001  el hilo del overlay no puede morir por un fallo suelto
                 traceback.print_exc()
                 time.sleep(1)
             time.sleep(pausa)

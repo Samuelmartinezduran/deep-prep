@@ -165,7 +165,7 @@ def anonimizar(rutas: list[Path], anon: Anonimizador | None = None) -> Anonimiza
         anon.recoger(c)
     for c in contenidos:  # los id de partida y PUUID se apuntan antes de tocar textos sueltos
         anon.cambiar(c)
-    for ruta, c in zip(rutas, contenidos):
+    for ruta, c in zip(rutas, contenidos, strict=True):
         _escribir(ruta, anon.cambiar(c))
     return anon
 

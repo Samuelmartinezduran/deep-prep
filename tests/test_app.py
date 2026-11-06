@@ -17,7 +17,7 @@ DATOS = Path(__file__).parent / "datos"
 
 class DatosFalsos:
     version = "0"
-    roles = {}
+    roles: dict[int, dict[str, float]] = {}
     campeones = {131: {"nombre": "Diana", "clave": "Diana"}, 11: {"nombre": "Maestro Yi", "clave": "MasterYi"}}
 
     def nombre(self, id_):
@@ -29,7 +29,7 @@ class DatosFalsos:
     def splash(self, id_):
         return ""
 
-    legendarios = set()
+    legendarios: set[int] = set()
 
     def objeto(self, id_):
         return f"Objeto {id_}"

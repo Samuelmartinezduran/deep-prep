@@ -22,7 +22,7 @@ class Cola:
             _, _, fn, args = self._q.get()
             try:
                 fn(*args)
-            except Exception as e:  # una tarea rota no debe tumbar el hilo
+            except Exception as e:  # noqa: BLE001  una tarea rota no debe tumbar el hilo
                 if self._al_fallar:
                     self._al_fallar(e)
                 else:

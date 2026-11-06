@@ -54,7 +54,9 @@ def main():
         grabacion.grabar(config.cargar(), prueba_seg=prueba)
         return
     if sys.stderr is None:  # lanzado con pyw: no hay consola, los errores van a un archivo
-        sys.stdout = sys.stderr = open(config.DATOS / "deepprep.log", "a", encoding="utf-8", buffering=1)
+        ruta = config.DATOS / "deepprep.log"
+        registro = open(ruta, "a", encoding="utf-8", buffering=1)  # noqa: SIM115  el registro dura lo que la app
+        sys.stdout = sys.stderr = registro
     for aviso in config.AVISOS:  # la mudanza de los datos de Porofesor, si la ha habido
         print(aviso)
 
@@ -101,7 +103,7 @@ def main():
 
             Ventanas(app, url).arrancar(oculta="--oculta" in sys.argv)
             return
-        except Exception as e:  # sin pywebview o sin WebView2: panel en Chrome y sin overlay
+        except Exception as e:  # noqa: BLE001  sin pywebview, sin WebView2 o un fallo de .NET: panel en Chrome, sin overlay
             print(f"Sin ventanas propias ({e!r}); abro el panel en el navegador y no habrá overlay")
             abrir_ventana(url)
     try:

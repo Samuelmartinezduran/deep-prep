@@ -27,7 +27,7 @@ PROGRAMA = Path(
     or Path(os.environ.get("LOCALAPPDATA", Path.home())) / "Programs" / "DeepPrep"
 )
 # Lo que pasa al mudar los datos de Porofesor. Aún no hay registro abierto: __main__ lo apunta al abrirlo.
-AVISOS = []
+AVISOS: list[str] = []
 
 
 def falta_mudar(viejos, nuevos):

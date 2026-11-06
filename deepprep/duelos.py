@@ -271,9 +271,15 @@ def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre
     for d, nombre, fn, dec in sorted(candidatos, reverse=True)[:2]:
         mg, mp = _media(fn(r) for r in ganan), _media(fn(r) for r in pierden)
         if dec is None:
-            texto = f"Primer dragón para tu equipo: {round(100 * mg)}% en las que gana {nombre_a}, {round(100 * mp)}% en las que pierde."
+            texto = (
+                f"Primer dragón para tu equipo: {round(100 * mg)}% en las que gana {nombre_a}, "
+                f"{round(100 * mp)}% en las que pierde."
+            )
         else:
-            texto = f"{nombre[0].upper() + nombre[1:]}: {_num(mg, dec)} en las que gana {nombre_a}, {_num(mp, dec)} en las que pierde."
+            texto = (
+                f"{nombre[0].upper() + nombre[1:]}: {_num(mg, dec)} en las que gana {nombre_a}, "
+                f"{_num(mp, dec)} en las que pierde."
+            )
         datos.append((25 * d, texto, f"{len(ganan)} victorias y {len(pierden)} derrotas", "habito"))
 
     # 5. Dónde muere a contra b.
@@ -287,7 +293,8 @@ def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre
             datos.append(
                 (
                     100 * veces / len(muertes) - 15,
-                    f"El {_pct(veces, len(muertes))}% de las muertes de {nombre_a} con {nombre_b} de por medio antes del 15 son en {zona}.",
+                    f"El {_pct(veces, len(muertes))}% de las muertes de {nombre_a} con {nombre_b} de por medio "
+                    f"antes del 15 son en {zona}.",
                     f"{len(muertes)} muertes",
                 )
             )

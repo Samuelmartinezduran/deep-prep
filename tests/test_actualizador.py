@@ -67,9 +67,11 @@ class Actualizador(unittest.TestCase):
 
     def test_no_instala_si_la_huella_no_cuadra(self):
         a = act.Actualizador(AppFalsa())
-        with mock.patch.object(act, "_get", self.github("v9.9.9", zip_con_exe(), huella="0" * 64)):
-            with self.assertRaises(RuntimeError):
-                a.comprobar()
+        with (
+            mock.patch.object(act, "_get", self.github("v9.9.9", zip_con_exe(), huella="0" * 64)),
+            self.assertRaises(RuntimeError),
+        ):
+            a.comprobar()
         self.assertFalse(a.estado["lista"])
 
     def test_misma_version_no_hace_nada(self):

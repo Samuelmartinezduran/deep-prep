@@ -77,7 +77,7 @@ class Ventanas:
             if nativa is not None:
                 try:
                     return nativa.Handle.ToInt64()
-                except Exception:
+                except Exception:  # noqa: BLE001  mientras se crea la ventana .NET (pythonnet) falla con las suyas; se reintenta
                     pass
             time.sleep(0.2)
         return None
