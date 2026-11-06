@@ -1,9 +1,11 @@
 """Cola de tareas con prioridad: lo que más informa (el jungla rival) se pide antes."""
 
 import itertools
+import logging
 import queue
 import threading
-import traceback
+
+logger = logging.getLogger(__name__)
 
 
 class Cola:
@@ -22,8 +24,8 @@ class Cola:
             _, _, fn, args = self._q.get()
             try:
                 fn(*args)
-            except Exception as e:  # noqa: BLE001  una tarea rota no debe tumbar el hilo
+            except Exception as e:  # una tarea rota no debe tumbar el hilo
                 if self._al_fallar:
                     self._al_fallar(e)
                 else:
-                    traceback.print_exc()
+                    logger.exception("Tarea rota")

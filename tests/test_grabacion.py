@@ -1,8 +1,6 @@
 """Pruebas del grabador integrado (lo que no necesita juego ni pantalla)."""
 
-import contextlib
 import gc
-import io
 import json
 import msvcrt
 import os
@@ -16,6 +14,7 @@ from unittest import mock
 from deepprep import grabacion as g
 from deepprep import recolector as rec
 from deepprep import revisiones
+from tests import registro_de
 
 
 class Limpieza(unittest.TestCase):
@@ -90,9 +89,10 @@ class Cerrojo(unittest.TestCase):
         ruta = self.ruta.with_name("recolector.lock")
         with mock.patch.object(rec, "RUTA_CERROJO", ruta), mock.patch.object(rec.config, "cargar", dict):
             r = rec.Recolector(None, str, set(), list, regiones=())
-            with open(ruta, "a") as otro, contextlib.redirect_stdout(io.StringIO()):
+            with open(ruta, "a") as otro, registro_de("deepprep.recolector") as registro:
                 msvcrt.locking(otro.fileno(), msvcrt.LK_NBLCK, 1)
                 self.assertFalse(r.arrancar())
+                self.assertIn("Ya hay otro recolector en marcha", registro.getvalue())
                 msvcrt.locking(otro.fileno(), msvcrt.LK_UNLCK, 1)
         self.assertIsNone(r._cerrojo)
         ruta.unlink()  # sin un archivo abierto por medio

@@ -7,6 +7,7 @@ y empieza por tus propias partidas (para comparar tus números con los de Master
 Uso suelto (sin la app): py -m deepprep.recolector [--minutos 60] [--sin-europa]
 """
 
+import logging
 import msvcrt
 import random
 import sys
@@ -20,6 +21,8 @@ from . import duelos as du
 from .base_duelos import BaseDuelos
 from .constantes import DURACION_MINIMA_S, SOLO_DUO
 from .riot import ClaveInvalida, Cliente, ErrorRiot
+
+logger = logging.getLogger(__name__)
 
 RUTA_CERROJO = config.DATOS / "recolector.lock"
 NIVEL_LIGA = {"challengerleagues": "CHALLENGER", "grandmasterleagues": "GRANDMASTER", "masterleagues": "MASTER"}
@@ -70,7 +73,7 @@ class Recolector:
         except OSError:
             if cerrojo:
                 cerrojo.close()
-            print("Ya hay otro recolector en marcha; este no arranca")
+            logger.info("Ya hay otro recolector en marcha; este no arranca")
             return False
         self._cerrojo = cerrojo
         for c in self.clientes:
@@ -92,10 +95,10 @@ class Recolector:
                 self.estado["error"] = str(e)
                 self.parar.wait(300)
             except ErrorRiot as e:
-                print(f"Recolector {cliente.region}: {e}")
+                logger.warning("Recolector %s: %s", cliente.region, e)
                 self.parar.wait(30)
-            except Exception as e:  # noqa: BLE001  un fallo raro no debe parar la recogida para siempre
-                print(f"Recolector {cliente.region}: {e!r}")
+            except Exception as e:  # un fallo raro no debe parar la recogida para siempre
+                logger.exception("Recolector %s: %r", cliente.region, e)
                 self.parar.wait(60)
 
     def _cancelada(self, europa):
@@ -196,7 +199,7 @@ class Recolector:
         try:
             registros = du.extraer(partida, linea, self.legendarios)
         except (KeyError, TypeError, IndexError) as e:
-            print(f"Partida {id_} con formato inesperado: {e!r}")
+            logger.warning("Partida %s con formato inesperado: %r", id_, e)
             registros = []
         if registros:
             self.base.guardar(id_, registros)
@@ -209,12 +212,13 @@ def main():
     """Recolector suelto, sin la app (p. ej. para llenar la base de noche)."""
     from .app import crear_app
 
+    config.configurar_registro()
     minutos = float(sys.argv[sys.argv.index("--minutos") + 1]) if "--minutos" in sys.argv else None
     app = crear_app(grabar=False)
     try:
         app.comprobar_clave()
     except (ClaveInvalida, ErrorRiot) as e:
-        print(f"No puedo usar la clave: {e}")
+        logger.error("No puedo usar la clave: %s", e)
         return
     base = BaseDuelos()
     mias = app.mis_partidas
@@ -228,14 +232,14 @@ def main():
         cliente_europa=None if "--sin-europa" in sys.argv else app.cliente,
         puede_europa=lambda: True,
     )
-    print("Pool:", [(app.datos.nombre(c), p) for c, p in rec.pool()])
+    logger.info("Pool: %s", [(app.datos.nombre(c), p) for c, p in rec.pool()])
     if not rec.arrancar():
         return
     inicio = time.time()
     try:
         while minutos is None or time.time() - inicio < minutos * 60:
             time.sleep(60)
-            print(time.strftime("%H:%M"), base.resumen(), "nuevas:", rec.estado["nuevas"], flush=True)
+            logger.info("%s nuevas: %s", base.resumen(), rec.estado["nuevas"])
     except KeyboardInterrupt:
         pass
     rec.parar.set()

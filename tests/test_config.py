@@ -1,7 +1,5 @@
 """config.json y clave.txt: se escriben de golpe (nunca a medias) y un config.json roto no se lleva tus datos."""
 
-import contextlib
-import io
 import json
 import tempfile
 import threading
@@ -10,6 +8,7 @@ from pathlib import Path
 from unittest import mock
 
 from deepprep import config
+from tests import registro_de
 
 
 class Configuracion(unittest.TestCase):
@@ -26,7 +25,7 @@ class Configuracion(unittest.TestCase):
             mock.patch.object(config, "_no_pisar", ""),
         ):
             self.enterContext(p)
-        self.salida = self.enterContext(contextlib.redirect_stdout(io.StringIO()))
+        self.salida = self.enterContext(registro_de("deepprep.config"))
 
     def sobrantes(self):
         """Temporales que hayan quedado en la carpeta."""

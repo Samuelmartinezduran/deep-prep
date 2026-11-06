@@ -5,11 +5,14 @@ Si ffmpeg se relanzó a media partida, lo de después está en otra serie (r02_s
 Se codifica con prioridad mínima y pocos hilos para no molestar si ya estás en otra partida.
 """
 
+import logging
 import subprocess
 from pathlib import Path
 
 from .revision import TROZO_S, en_grabacion, nombre_trozo
 from .sistema import SIN_VENTANA
+
+logger = logging.getLogger(__name__)
 
 ANTES_S = 20  # lo que lleva a la muerte
 DESPUES_S = 4
@@ -106,7 +109,7 @@ def recortar(ffmpeg, carpeta, i, muerte, desfase_s):
             creationflags=SIN_VENTANA | PRIORIDAD_MINIMA,
         )
     except (subprocess.SubprocessError, OSError) as e:
-        print(f"No se pudo recortar la muerte {muerte['t']}: {e}")
+        logger.warning("No se pudo recortar la muerte %s: %s", muerte["t"], e)
         destino.unlink(missing_ok=True)
         return None
     finally:

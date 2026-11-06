@@ -21,6 +21,7 @@ from unittest import mock
 
 from deepprep import __version__, config, inicio_windows
 from deepprep import actualizador as act
+from tests import registro_de
 
 RAIZ = Path(__file__).resolve().parent.parent
 NOTAS = "- Porofesor ahora se llama Deep Prep"
@@ -246,7 +247,7 @@ class ConInstalaciones(ConCarpetaTemporal):
 
 class InstalacionDesdePorofesor(ConInstalaciones):
     def test_se_instala_en_la_carpeta_nueva(self):
-        with contextlib.redirect_stdout(io.StringIO()):
+        with registro_de("deepprep.actualizador"):
             self.assertTrue(act.terminar_actualizacion("0", str(self.vieja), "--oculta"))
         self.assertEqual((self.nueva / "DeepPrep.exe").read_bytes(), b"MZ deep prep")
         self.assertTrue((self.nueva / "_internal" / "base_library.zip").is_file())
@@ -257,7 +258,7 @@ class InstalacionDesdePorofesor(ConInstalaciones):
         self.assertEqual(self.lanzado(), ([str(self.nueva / "DeepPrep.exe"), "--oculta"], str(self.nueva)))
 
     def test_cambia_los_accesos_directos(self):
-        with contextlib.redirect_stdout(io.StringIO()):
+        with registro_de("deepprep.actualizador"):
             act.terminar_actualizacion("0", str(self.vieja), "--oculta")
         self.assertFalse((self.escritorio / "Porofesor.lnk").exists())
         self.assertFalse((self.inicio / "Porofesor.lnk").exists())
@@ -268,7 +269,7 @@ class InstalacionDesdePorofesor(ConInstalaciones):
 
     def test_sin_siempre_en_marcha_no_arranca_con_windows(self):
         self.cfg["siempre_en_marcha"] = False
-        with contextlib.redirect_stdout(io.StringIO()):
+        with registro_de("deepprep.actualizador"):
             act.terminar_actualizacion("0", str(self.vieja), "--oculta")
         self.assertEqual([c[0] for c in self.creados], [self.escritorio / "Deep Prep.lnk"])
         self.assertFalse((self.inicio / "Porofesor.lnk").exists())
@@ -276,13 +277,13 @@ class InstalacionDesdePorofesor(ConInstalaciones):
     def test_deja_los_accesos_directos_que_no_son_de_la_instalada(self):
         # Quien usa Porofesor desde el código tiene su acceso de Inicio apuntando a su carpeta: ese no se toca.
         acceso_de_mentira(self.inicio / "Porofesor.lnk", self.tmp / "codigo" / "porofesor")
-        with contextlib.redirect_stdout(io.StringIO()):
+        with registro_de("deepprep.actualizador"):
             act.terminar_actualizacion("0", str(self.vieja), "--oculta")
         self.assertTrue((self.inicio / "Porofesor.lnk").exists())
         self.assertFalse((self.escritorio / "Porofesor.lnk").exists())
 
     def test_no_borra_el_programa_viejo_si_aun_corre_algo(self):
-        with mock.patch.object(act, "_en_uso", return_value=True), contextlib.redirect_stdout(io.StringIO()):
+        with mock.patch.object(act, "_en_uso", return_value=True), registro_de("deepprep.actualizador"):
             self.assertTrue(act.terminar_actualizacion("0", str(self.vieja), "--oculta"))
         self.assertTrue((self.vieja / "Porofesor.exe").is_file())
         self.assertTrue((self.nueva / "DeepPrep.exe").is_file())
@@ -292,7 +293,7 @@ class InstalacionDesdePorofesor(ConInstalaciones):
         with (
             mock.patch.object(act.shutil, "copytree", side_effect=OSError("disco lleno")),
             mock.patch.object(act.time, "sleep"),
-            contextlib.redirect_stdout(io.StringIO()),
+            registro_de("deepprep.actualizador"),
         ):
             self.assertFalse(act.terminar_actualizacion("0", str(self.vieja), "--oculta"))
         self.assertEqual(self.lanzado(), ([str(self.vieja / "Porofesor.exe"), "--oculta"], str(self.vieja)))
@@ -301,13 +302,13 @@ class InstalacionDesdePorofesor(ConInstalaciones):
         self.assertEqual(self.creados, [])
 
     def test_la_1_0_0_no_dice_el_modo(self):
-        with mock.patch.object(act, "_segundos_encendido", return_value=0), contextlib.redirect_stdout(io.StringIO()):
+        with mock.patch.object(act, "_segundos_encendido", return_value=0), registro_de("deepprep.actualizador"):
             self.assertTrue(act.terminar_actualizacion("0", str(self.vieja)))
         self.assertEqual(self.lanzado()[0], [str(self.nueva / "DeepPrep.exe"), "--oculta"])
 
     def test_una_actualizacion_normal_no_toca_lo_de_porofesor(self):
         self.carpeta_de_mentira(self.nueva)
-        with contextlib.redirect_stdout(io.StringIO()):
+        with registro_de("deepprep.actualizador"):
             self.assertTrue(act.terminar_actualizacion("0", str(self.nueva), "--mostrar"))
         self.assertTrue((self.vieja / "Porofesor.exe").is_file())
         self.assertTrue((self.escritorio / "Porofesor.lnk").exists())
@@ -322,14 +323,14 @@ class InstalacionDesdePorofesor(ConInstalaciones):
             carpeta.mkdir(parents=True, exist_ok=True)
             (carpeta / "notas.txt").write_text("mío", encoding="utf-8")
             acceso_de_mentira(self.escritorio / "Porofesor.lnk", carpeta)
-            with contextlib.redirect_stdout(io.StringIO()):
+            with registro_de("deepprep.actualizador"):
                 act.quitar_restos_de_porofesor(carpeta)
             self.assertTrue((carpeta / "notas.txt").is_file())
             self.assertTrue((self.escritorio / "Porofesor.lnk").exists())  # ni lo que lleva a ella
 
     def test_quita_los_accesos_que_llevan_a_un_programa_ya_borrado(self):
         shutil.rmtree(self.vieja)
-        with contextlib.redirect_stdout(io.StringIO()):
+        with registro_de("deepprep.actualizador"):
             act.quitar_restos_de_porofesor()
         self.assertFalse((self.escritorio / "Porofesor.lnk").exists())
         self.assertFalse((self.inicio / "Porofesor.lnk").exists())
@@ -434,7 +435,7 @@ class ZipPuente(ConInstalaciones):
                 mock.patch.object(act, "CARPETA_DESCARGA", descargas),
                 mock.patch.object(act, "NOVEDADES", descargas / "novedades.json"),
                 mock.patch.object(act, "_get", lambda url, binario=False, bajar=bajar: bajar(url, binario)),
-                contextlib.redirect_stdout(io.StringIO()),
+                registro_de("deepprep.actualizador"),
             ):
                 a = act.Actualizador(app=None)
                 self.assertTrue(a.comprobar())
@@ -445,7 +446,7 @@ class ZipPuente(ConInstalaciones):
         (self.tmp / "bajada").mkdir()
         exe = actualizador_de_la_1_0_x(rel, bajar, self.tmp / "bajada")
         # La 1.0.x lanza: Porofesor.exe --actualizar PID ...\Programs\Porofesor --oculta
-        with mock.patch.object(act, "sys", types.SimpleNamespace(executable=str(exe))), contextlib.redirect_stdout(io.StringIO()):
+        with mock.patch.object(act, "sys", types.SimpleNamespace(executable=str(exe))), registro_de("deepprep.actualizador"):
             self.assertTrue(act.terminar_actualizacion("0", str(self.vieja), "--oculta"))
         self.assertEqual(
             sorted(p.name for p in self.nueva.iterdir()), ["DeepPrep.exe", "LEEME.txt", "_internal", "ffmpeg", "version.txt"]

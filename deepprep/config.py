@@ -10,6 +10,7 @@ instalada los muda a la carpeta nueva al arrancar, antes de que nada abra las ba
 """
 
 import json
+import logging
 import os
 import shutil
 import sys
@@ -17,6 +18,8 @@ import tempfile
 import threading
 import time
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 CONGELADA = getattr(sys, "frozen", False)  # app empaquetada (PyInstaller)
 RAIZ = Path(sys.executable).parent if CONGELADA else Path(__file__).resolve().parent.parent
@@ -113,6 +116,7 @@ RUTA_CLAVE = DATOS / "clave.txt"
 RUTA_CONFIG = DATOS / "config.json"
 RUTA_CACHE = DATOS / "cache.db"
 RUTA_WEB = Path(__file__).resolve().parent / "web"
+RUTA_REGISTRO = DATOS / "deepprep.log"
 
 POR_DEFECTO = {
     # Cuentas propias. La que esté abierta en el cliente del LoL se añade sola.
@@ -226,7 +230,7 @@ def _copiar(texto):
         if not copia.is_file() or copia.read_text(encoding="utf-8") != texto:
             escribir_atomico(copia, texto)
     except OSError as e:
-        print(f"No se pudo guardar la copia de config.json: {e!r}")
+        logger.warning("No se pudo guardar la copia de config.json: %r", e)
 
 
 def _recuperar(error):
@@ -236,26 +240,26 @@ def _recuperar(error):
     puede apartar, no se guarda nada en config.json hasta el siguiente arranque.
     """
     global _no_pisar
-    print(f"AVISO: config.json no se pudo leer ({error!r})")
+    logger.warning("AVISO: config.json no se pudo leer (%r)", error)
     try:
         os.replace(RUTA_CONFIG, _ruta_rota())
-        print(f"AVISO: el config.json que no se podía leer queda en {_ruta_rota()}")
+        logger.warning("AVISO: el config.json que no se podía leer queda en %s", _ruta_rota())
     except OSError as e:
         _no_pisar = f"al arrancar no se pudo leer ni apartar ({e!r}); se deja como está"
-        print(f"AVISO: config.json tampoco se pudo apartar ({e!r}); no se escribirá encima hasta reiniciar la app")
+        logger.error("AVISO: config.json tampoco se pudo apartar (%r); no se escribirá encima hasta reiniciar la app", e)
     try:
         texto = _ruta_copia().read_text(encoding="utf-8")
         recuperado = _objeto(texto)
     except (OSError, ValueError) as e:
-        print(f"AVISO: no hay copia buena de config.json ({e!r}); sigo con los valores por defecto")
+        logger.warning("AVISO: no hay copia buena de config.json (%r); sigo con los valores por defecto", e)
         texto, recuperado = _texto(POR_DEFECTO), {}
     else:
-        print(f"Configuración recuperada de la copia ({_ruta_copia()})")
+        logger.info("Configuración recuperada de la copia (%s)", _ruta_copia())
     if not _no_pisar:
         try:
             escribir_atomico(RUTA_CONFIG, texto)
         except OSError as e:
-            print(f"No se pudo rehacer config.json: {e!r}")
+            logger.error("No se pudo rehacer config.json: %r", e)
     return recuperado
 
 
@@ -280,10 +284,26 @@ def guardar(cfg):
     texto = _texto(cfg)
     with _lock:
         if _no_pisar:
-            print(f"No guardo config.json: {_no_pisar}")
+            logger.warning("No guardo config.json: %s", _no_pisar)
             return
         escribir_atomico(RUTA_CONFIG, texto)
         _copiar(texto)
+
+
+# El registro (logging): cada módulo apunta en su logger y esto dice adónde va y con qué forma.
+FORMATO_REGISTRO = "%(asctime)s %(levelname)s %(name)s: %(message)s"
+
+
+def configurar_registro():
+    """Configura el registro de la app una vez, al arrancar: fecha y hora, nivel, módulo y mensaje.
+
+    Lanzada con pyw no hay consola: todo va a deepprep.log, también lo que no pasa por logging (los errores de un
+    hilo que muere, los de pywebview...). Desde una consola sale por ella.
+    """
+    if sys.stderr is None:
+        registro = open(RUTA_REGISTRO, "a", encoding="utf-8", buffering=1)  # noqa: SIM115  el registro dura lo que la app
+        sys.stdout = sys.stderr = registro
+    logging.basicConfig(level=logging.INFO, format=FORMATO_REGISTRO, datefmt="%Y-%m-%d %H:%M:%S", stream=sys.stderr)
 
 
 class Configuracion:

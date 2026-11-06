@@ -1,9 +1,12 @@
 """Datos estáticos: campeones (Data Dragon) y en qué rol se juega cada uno (Meraki)."""
 
 import json
+import logging
 import urllib.request
 
 from .riot import USER_AGENT
+
+logger = logging.getLogger(__name__)
 
 URL_VERSIONES = "https://ddragon.leagueoflegends.com/api/versions.json"
 URL_CAMPEONES = "https://ddragon.leagueoflegends.com/cdn/{v}/data/es_ES/champion.json"
@@ -62,7 +65,7 @@ class Datos:
             except (OSError, ValueError, KeyError, IndexError) as e:
                 # Sin red se sigue con lo último que hubiera, aunque esté viejo.
                 guardado = cache.kv_get("ddragon") or {"version": "", "campeones": {}}
-                print(f"Data Dragon no responde ({e}); uso los datos guardados")
+                logger.warning("Data Dragon no responde (%s); uso los datos guardados", e)
         self.version = guardado["version"]
         self.campeones = {int(k): v for k, v in guardado["campeones"].items()}
         self.objetos = {int(k): v for k, v in guardado.get("objetos", {}).items()}
@@ -76,7 +79,7 @@ class Datos:
                 cache.kv_set("roles", roles)
             except (OSError, ValueError, KeyError) as e:
                 roles = cache.kv_get("roles") or {}
-                print(f"No hay datos de roles por campeón ({e}); los roles saldrán del historial")
+                logger.warning("No hay datos de roles por campeón (%s); los roles saldrán del historial", e)
         self.roles = {int(k): v for k, v in roles.items()}
 
     def nombre(self, id_):

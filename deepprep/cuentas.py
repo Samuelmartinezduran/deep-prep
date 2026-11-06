@@ -1,9 +1,12 @@
 """Tu clave de la API de Riot y tus cuentas: cuáles son, su PUUID y si la clave vale."""
 
+import logging
 import time
 
 from . import config
 from .riot import ClaveInvalida, ErrorRiot
+
+logger = logging.getLogger(__name__)
 
 # Con la clave rechazada, cada cuánto se vuelve a probar (Riot tarda un par de minutos en activar una nueva).
 REINTENTO_CLAVE_S = 20
@@ -39,7 +42,7 @@ class Cuentas:
         if cuenta:
             guardada = self.cache.kv_get(f"cuenta:{principal.lower()}")
             if guardada and guardada["puuid"] != cuenta["puuid"]:
-                print("La clave pertenece a otra aplicación: los PUUID han cambiado y se vacía la caché")
+                logger.warning("La clave pertenece a otra aplicación: los PUUID han cambiado y se vacía la caché")
                 self.cache.vaciar()
                 self.propias.clear()
             puuid, visible = self._registrar(principal, cuenta)

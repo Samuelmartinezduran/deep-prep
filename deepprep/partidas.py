@@ -1,12 +1,15 @@
 """Las partidas y líneas de tiempo que usa la app (de la caché o de Riot) y tus clasificatorias de la temporada."""
 
 import datetime
+import logging
 import threading
 import time
 from typing import Any
 
 from . import analisis as an
 from .constantes import LIGA_COLA
+
+logger = logging.getLogger(__name__)
 
 # Tus campeones por posición (el pool) se recalculan como mucho cada tanto.
 CADA_POOL_S = 600
@@ -56,7 +59,7 @@ class Partidas:
                 try:
                     self.cache.guardar_partida(an.reducir_partida(m))
                 except (KeyError, TypeError) as e:
-                    print(f"Partida {id_} con formato inesperado: {e!r}")
+                    logger.warning("Partida %s con formato inesperado: %r", id_, e)
 
         if not self.cache.partida(id_):
             self._una_vez(f"p:{id_}", pedir)
@@ -71,7 +74,7 @@ class Partidas:
                 try:
                     self.cache.guardar_linea(an.reducir_linea(t))
                 except (KeyError, TypeError) as e:
-                    print(f"Línea de tiempo {id_} con formato inesperado: {e!r}")
+                    logger.warning("Línea de tiempo %s con formato inesperado: %r", id_, e)
 
         if not self.cache.linea(id_):
             self._una_vez(f"l:{id_}", pedir)

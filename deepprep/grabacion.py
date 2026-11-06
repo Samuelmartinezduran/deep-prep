@@ -12,6 +12,7 @@ import ctypes
 import ctypes.wintypes as wt
 import datetime
 import json
+import logging
 import msvcrt
 import os
 import re
@@ -24,6 +25,8 @@ from pathlib import Path
 
 from . import config
 from .sistema import SIN_VENTANA
+
+logger = logging.getLogger(__name__)
 
 RUTA_LOG = config.DATOS / "grabacion.log"
 RUTA_CERROJO = config.DATOS / "grabacion.lock"
@@ -63,10 +66,10 @@ class Grabador:
     def _armar(self):
         with self._lock:
             if self.activa():
-                print("No lanzo otro grabador: ya hay uno en marcha")
+                logger.info("No lanzo otro grabador: ya hay uno en marcha")
                 return
             if not buscar_ffmpeg():
-                print("No se graba: no encuentro ffmpeg")
+                logger.warning("No se graba: no encuentro ffmpeg")
                 return
             if getattr(sys, "frozen", False):
                 orden = [sys.executable, "--grabar"]
@@ -82,11 +85,11 @@ class Grabador:
                     creationflags=SIN_VENTANA | subprocess.CREATE_NEW_PROCESS_GROUP,
                 )
             except OSError as e:
-                print(f"No se pudo lanzar el grabador: {e}")
+                logger.error("No se pudo lanzar el grabador: %s", e)
                 return
             self._medida = (0.0, -1)
             self._crecio = time.time()
-            print("Grabador lanzado")
+            logger.info("Grabador lanzado")
 
     def carpeta_reciente(self, horas=3):
         """Carpeta de la última grabación según el registro, si es de las últimas horas."""

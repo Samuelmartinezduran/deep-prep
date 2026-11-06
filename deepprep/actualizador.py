@@ -16,6 +16,7 @@ Desde el código (la copia de Samuel) no hace nada de esto.
 import ctypes
 import hashlib
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -28,6 +29,8 @@ from pathlib import Path
 
 from . import __version__, config, inicio_windows
 from .sistema import SIN_VENTANA, crear_acceso_directo, pedir_a_la_copia_en_marcha
+
+logger = logging.getLogger(__name__)
 
 REPO = "Samuelmartinezduran/deep-prep"
 EXE = "DeepPrep.exe"
@@ -159,23 +162,23 @@ def quitar_restos_de_porofesor(carpeta=None):
         for acceso in (ESCRITORIO_VIEJO, inicio_windows.ACCESO_VIEJO):
             if acceso.is_file() and _apunta_a(acceso, carpeta):
                 acceso.unlink()
-                print(f"Quitado el acceso directo de Porofesor {acceso}")
+                logger.info("Quitado el acceso directo de Porofesor %s", acceso)
         if not instalada:
             return
         if _en_uso(carpeta):
-            print(f"No borro {carpeta}: aún corre algo desde ahí; se intenta en el próximo arranque")
+            logger.warning("No borro %s: aún corre algo desde ahí; se intenta en el próximo arranque", carpeta)
             return
         for _intento in range(5):  # el antivirus puede tener algo abierto un momento
             try:
                 shutil.rmtree(carpeta)
-                print(f"Borrado el programa de Porofesor ({carpeta})")
+                logger.info("Borrado el programa de Porofesor (%s)", carpeta)
                 return
             except OSError as e:
                 error = e
                 time.sleep(1)
-        print(f"No se pudo borrar {carpeta}: {error!r}; se queda ahí")
-    except Exception as e:  # noqa: BLE001  la limpieza nunca puede tumbar la actualización
-        print(f"No se pudo quitar lo que dejó Porofesor ({carpeta}): {e!r}")
+        logger.warning("No se pudo borrar %s: %r; se queda ahí", carpeta, error)
+    except Exception as e:  # la limpieza nunca puede tumbar la actualización
+        logger.exception("No se pudo quitar lo que dejó Porofesor (%s): %r", carpeta, e)
 
 
 def _pasar_de_porofesor(exe, vieja):
@@ -187,8 +190,8 @@ def _pasar_de_porofesor(exe, vieja):
         # Porofesor, que es la que ve este proceso; los datos se mudan al abrirse la copia instalada).
         if config.cargar().get("siempre_en_marcha"):
             crear_acceso_directo(inicio_windows.ACCESO, exe, "--oculta", "Deep Prep (en segundo plano)")
-    except Exception as e:  # noqa: BLE001
-        print(f"No se pudieron crear los accesos directos de Deep Prep: {e!r}")
+    except Exception as e:  # los accesos directos tampoco pueden tumbarla
+        logger.exception("No se pudieron crear los accesos directos de Deep Prep: %r", e)
 
 
 # --- instalación ------------------------------------------------------------------------------------------
@@ -205,7 +208,7 @@ def instalar_si_hace_falta():
     # Abrir el .exe de un zip viejo no puede pisar una versión más nueva ya instalada (se actualizó sola).
     instalada = _version_instalada()
     if version(instalada) > version(__version__):
-        print(f"Ya está instalada la {instalada}, más nueva que esta {__version__}: abro esa")
+        logger.info("Ya está instalada la %s, más nueva que esta %s: abro esa", instalada, __version__)
         _abrir_la_instalada()
         return True
     _cerrar_la_instalada()
@@ -272,17 +275,17 @@ def terminar_actualizacion(pid, destino, modo=None):
         if vieja:
             _pasar_de_porofesor(destino / EXE, vieja)
     else:
-        print(f"No se pudo instalar la {__version__} en {destino}: {error!r}. Se abre la que había.")
+        logger.error("No se pudo instalar la %s en %s: %r. Se abre la que había.", __version__, destino, error)
         if vieja:  # la Porofesor de antes sigue entera: se abre esa, que ya lo volverá a intentar
             destino = vieja
     if modo not in ("--oculta", "--mostrar"):
         modo = "--oculta" if _segundos_encendido() < ARRANQUE_RECIENTE_S else "--mostrar"
     exe = destino / (EXE_VIEJO if destino == vieja else EXE)
     if not exe.is_file():
-        print(f"No está {exe}: hay que volver a descargar la app")
+        logger.error("No está %s: hay que volver a descargar la app", exe)
         return False
     subprocess.Popen([str(exe)] + (["--oculta"] if modo == "--oculta" else []), cwd=str(destino), creationflags=DESLIGADO)
-    print(f"Versión {__version__} instalada; se abre {'escondida' if modo == '--oculta' else 'a la vista'}")
+    logger.info("Versión %s instalada; se abre %s", __version__, "escondida" if modo == "--oculta" else "a la vista")
     return copiada
 
 
@@ -321,7 +324,7 @@ class Actualizador:
                 json.dumps({"version": __version__, "notas": rel.get("body") or ""}, ensure_ascii=False), encoding="utf-8"
             )
         except Exception as e:  # noqa: BLE001  sin red: se quedan sin novedades esta vez
-            print(f"No se pudieron leer las novedades de {__version__}: {e}")
+            logger.warning("No se pudieron leer las novedades de %s: %s", __version__, e)
 
     def _bucle(self):
         ultima = 0.0
@@ -370,7 +373,7 @@ class Actualizador:
         except OSError:
             pass
         self.estado.update(nueva=nueva.lstrip("vV"), lista=True, error="")
-        print(f"Versión {nueva} descargada; se instala en cuanto no estorbe")
+        logger.info("Versión %s descargada; se instala en cuanto no estorbe", nueva)
         return True
 
     def novedades(self):
@@ -412,7 +415,7 @@ class Actualizador:
             cwd=str(self._carpeta_nueva),
             creationflags=DESLIGADO,
         )
-        print(f"Instalando la versión {self.estado['nueva']}; la app se reabre sola")
+        logger.info("Instalando la versión %s; la app se reabre sola", self.estado["nueva"])
         if self.app.al_salir:
             self.app.al_salir()
         else:

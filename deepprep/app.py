@@ -10,9 +10,9 @@ Cada pieza hace una cosa y App las conecta:
 - ajustes.Ajustes: lo que se cambia desde el panel.
 """
 
+import logging
 import threading
 import time
-import traceback
 
 from . import actualizador, config, inicio_windows, lcu
 from . import analisis as an
@@ -33,6 +33,8 @@ from .seleccion import Seleccion
 from .sesion import Sesion
 from .trabajo import Cola
 from .vigia import EN_JUEGO, FASES, PARTIDA_CERCA, Sesiones, Vigia
+
+logger = logging.getLogger(__name__)
 
 
 def sin_arranque_windows(encendido):
@@ -161,7 +163,7 @@ class App:
         except ClaveInvalida as e:
             self.mis_cuentas.error_clave = str(e)
         except ErrorRiot as e:
-            print(f"No se pudo comprobar la clave: {e}")
+            logger.warning("No se pudo comprobar la clave: %s", e)
         threading.Thread(target=self._bucle, args=(self.vigia.paso, 2.5), name="vigia", daemon=True).start()
         threading.Thread(target=self._bucle, args=(self._fondo, 20), name="fondo", daemon=True).start()
         # Con cuentas ya conocidas la región también lo es; si no (app recién instalada), el recolector
@@ -212,18 +214,18 @@ class App:
             except ClaveInvalida as e:
                 self.mis_cuentas.error_clave = str(e)
             except ErrorRiot as e:
-                print(e)
-            except Exception:  # noqa: BLE001  el vigía y el bucle de fondo no pueden morir por un fallo suelto
-                traceback.print_exc()
+                logger.warning("%s", e)
+            except Exception:  # el vigía y el bucle de fondo no pueden morir por un fallo suelto
+                logger.exception("Fallo suelto en el hilo %s", threading.current_thread().name)
             time.sleep(pausa)
 
     def _fallo_tarea(self, e):
         if isinstance(e, ClaveInvalida):
             self.mis_cuentas.error_clave = str(e)
         elif isinstance(e, ErrorRiot):
-            print(e)
+            logger.warning("%s", e)
         else:
-            traceback.print_exception(e)
+            logger.error("Tarea rota", exc_info=e)
 
     def _fondo(self):
         """El historial propio en segundo plano (sin estorbar a una partida que se está cargando)."""

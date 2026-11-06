@@ -1,11 +1,14 @@
 """Vigila el cliente del LoL y decide qué partida enseña el panel: una sesión por partida."""
 
+import logging
 import threading
 import time
 from typing import Any
 
 from .constantes import GRIETA
 from .riot import REGION_DE, ClaveInvalida, ErrorRiot
+
+logger = logging.getLogger(__name__)
 
 FASES = {
     "None": "Cliente abierto",
@@ -201,7 +204,7 @@ class Vigia:
         region = REGION_DE.get(plataforma)
         if not region:
             return
-        print(f"El cliente es de {plataforma}: uso esa región")
+        logger.info("El cliente es de %s: uso esa región", plataforma)
         self.cfg.update(plataforma=plataforma, region=region)
         self.configuracion.guardar()
         self.cliente.poner_plataforma(plataforma, region)

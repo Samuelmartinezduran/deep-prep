@@ -9,9 +9,11 @@ Lo que Riot aprueba es superponer datos que ya existían antes de la partida. Po
 import configparser
 import ctypes
 import ctypes.wintypes as wt
+import logging
 import time
-import traceback
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Nombres de tecla que se aceptan en "atajo_overlay" (además de letras, números y F1-F12).
 TECLAS = {
@@ -121,8 +123,8 @@ class Controlador:
         while True:
             try:
                 self.paso()
-            except Exception:  # noqa: BLE001  el hilo del overlay no puede morir por un fallo suelto
-                traceback.print_exc()
+            except Exception:  # el hilo del overlay no puede morir por un fallo suelto
+                logger.exception("Fallo en el overlay")
                 time.sleep(1)
             time.sleep(pausa)
 

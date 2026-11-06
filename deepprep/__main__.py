@@ -1,6 +1,7 @@
 """Arranque: py -m deepprep  (--sin-ventana: solo el servidor, sin ventanas)"""
 
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -11,6 +12,8 @@ from pathlib import Path
 
 from . import config
 from .sistema import pedir_a_la_copia_en_marcha
+
+logger = logging.getLogger(__name__)
 
 # Sin ventanas (--sin-ventana o sin pywebview): sin panel abierto durante este tiempo la app se cierra sola,
 # salvo con el cliente del LoL abierto, porque tiene que seguir ahí para grabar la siguiente partida.
@@ -45,9 +48,9 @@ def main():
     if "--grabar" in sys.argv:
         _grabar()
         return
-    _abrir_registro()
+    config.configurar_registro()
     for aviso in config.AVISOS:  # la mudanza de los datos de Porofesor, si la ha habido
-        print(aviso)
+        logger.info("%s", aviso)
 
     from . import actualizador
 
@@ -75,7 +78,7 @@ def main():
         return
     app.arrancar()
     threading.Thread(target=srv.serve_forever, name="servidor", daemon=True).start()
-    print(f"Deep Prep en {url}")
+    logger.info("Deep Prep en %s", url)
     if con_ventana and _ventanas(app, url):
         return
     _seguir_mientras_haga_falta(app)
@@ -87,13 +90,6 @@ def _grabar():
 
     prueba = int(sys.argv[sys.argv.index("--prueba") + 1]) if "--prueba" in sys.argv else 0
     grabacion.grabar(config.cargar(), prueba_seg=prueba)
-
-
-def _abrir_registro():
-    if sys.stderr is None:  # lanzado con pyw: no hay consola, los errores van a un archivo
-        ruta = config.DATOS / "deepprep.log"
-        registro = open(ruta, "a", encoding="utf-8", buffering=1)  # noqa: SIM115  el registro dura lo que la app
-        sys.stdout = sys.stderr = registro
 
 
 def _terminar_actualizacion(actualizador):
@@ -118,7 +114,7 @@ def _ventanas(app, url):
         Ventanas(app, url).arrancar(oculta="--oculta" in sys.argv)
         return True
     except Exception as e:  # noqa: BLE001  sin pywebview, sin WebView2 o un fallo de .NET: panel en Chrome, sin overlay
-        print(f"Sin ventanas propias ({e!r}); abro el panel en el navegador y no habrá overlay")
+        logger.warning("Sin ventanas propias (%r); abro el panel en el navegador y no habrá overlay", e)
         abrir_ventana(url)
         return False
 
@@ -131,7 +127,7 @@ def _seguir_mientras_haga_falta(app):
             app.cfg.get("siempre_en_marcha") or time.time() - app.ultima_consulta < MINUTOS_SIN_PANEL * 60 or app.fase is not None
         ):
             time.sleep(5)
-        print("Nadie mira el panel y el cliente está cerrado; cierro.")
+        logger.info("Nadie mira el panel y el cliente está cerrado; cierro.")
     except KeyboardInterrupt:
         pass
 

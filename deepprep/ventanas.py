@@ -5,12 +5,15 @@ enseñar el overlay y grabar la siguiente partida. Se cierra sola a los 5 minuto
 salvo con "siempre en marcha" (entonces solo se cierra desde Ajustes o al apagar el PC).
 """
 
+import logging
 import threading
 import time
 
 import webview
 
 from . import config, overlay
+
+logger = logging.getLogger(__name__)
 
 ANCHO_OVERLAY, ALTO_OVERLAY = 1180, 580
 FONDO = "#0a0e15"
@@ -66,7 +69,7 @@ class Ventanas:
                 ctl = overlay.Controlador(self.app, ventana)
                 threading.Thread(target=ctl.bucle, name="overlay", daemon=True).start()
             else:
-                print("No se pudo preparar la ventana del overlay")
+                logger.warning("No se pudo preparar la ventana del overlay")
         self._vigilar_salida()
 
     @staticmethod
@@ -107,6 +110,6 @@ class Ventanas:
             if self.app.cfg.get("siempre_en_marcha"):
                 continue
             if oculta and self.app.fase is None and time.time() - oculta >= MINUTOS_PARA_SALIR * 60:
-                print("Ventana cerrada y cliente del LoL cerrado; cierro.")
+                logger.info("Ventana cerrada y cliente del LoL cerrado; cierro.")
                 self.salir()
                 return

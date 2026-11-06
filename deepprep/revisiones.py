@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import logging
 import os
 import threading
 import time
@@ -14,6 +15,8 @@ from . import revision as rv
 from .constantes import LIGA_COLA, SOLO_DUO
 from .grabacion import buscar_ffmpeg, inicio_de_series
 from .riot import ErrorRiot
+
+logger = logging.getLogger(__name__)
 
 # Revisiones que se guardan en el índice (las más recientes).
 MAX_REVISIONES = 100
@@ -72,7 +75,7 @@ class Revisor:
                 crudo = self.cliente.partida(id_, fondo=True)
                 linea = self.cliente.linea(id_, fondo=True) if crudo else None
             except ErrorRiot as e:
-                print(f"Revisión de {id_}: {e}")
+                logger.warning("Revisión de %s: %s", id_, e)
             if crudo and linea:
                 break
             if intento < intentos - 1:
@@ -98,9 +101,9 @@ class Revisor:
             try:
                 (carpeta / "panel.json").write_text(json.dumps(panel, ensure_ascii=False, indent=1), encoding="utf-8")
             except OSError as e:
-                print(f"No se pudo guardar el panel junto a la grabación: {e}")
+                logger.warning("No se pudo guardar el panel junto a la grabación: %s", e)
         self.ultima = id_
-        print(f"Revisión lista: {id_}")
+        logger.info("Revisión lista: %s", id_)
         if carpeta and desfase_s is not None and rev["muertes"]:
             threading.Thread(target=self.hacer_clips, args=(rev["id"], desfase_s), name="clips", daemon=True).start()
         return rev
@@ -119,7 +122,7 @@ class Revisor:
                     json.dumps(rev, ensure_ascii=False, indent=1), encoding="utf-8"
                 )
             except OSError as e:
-                print(f"No se pudo guardar la revisión junto a la grabación: {e}")
+                logger.warning("No se pudo guardar la revisión junto a la grabación: %s", e)
 
     def cambio_lp(self, puuid, panel, cola):
         """Tu liga después de la partida y, si la de antes es de justo una partida atrás, los LP ganados o perdidos."""
@@ -129,7 +132,7 @@ class Revisor:
         try:
             entradas = self.cliente.ligas(puuid) or []
         except ErrorRiot as e:
-            print(f"No se pudo leer la liga tras la partida: {e}")
+            logger.warning("No se pudo leer la liga tras la partida: %s", e)
             return None
         liga = next((x for x in entradas if x.get("queueType") == tipo), None)
         if not liga:
@@ -165,7 +168,7 @@ class Revisor:
                 m["clip"] = str(ruta)
         if rev and any(m.get("clip") for m in rev["muertes"]):
             self.guardar(rev)
-            print(f"Clips de las muertes de {id_} listos")
+            logger.info("Clips de las muertes de %s listos", id_)
 
     def abrir_clip(self, id_, i):
         rev = self.una(id_) or {}
@@ -199,7 +202,7 @@ class Revisor:
             try:
                 linea = self.cliente.linea(rev["id"], fondo=True)
             except ErrorRiot as e:
-                print(f"Relleno de {rev['id']}: {e}")
+                logger.warning("Relleno de %s: %s", rev["id"], e)
                 return
             if not linea:
                 continue
