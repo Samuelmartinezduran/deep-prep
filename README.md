@@ -157,7 +157,7 @@ La clave de Riot se pega en el panel la primera vez (se pide gratis en [develope
 
 ## Historia
 
-Empezó como **Porofesor**, una app que el autor hizo para él y unos amigos. La 1.0.0 (14 de octubre de 2026) traía el panel de partida, los duelos de Master+, las revisiones, la grabación y el actualizador; la 1.0.1 (29 de octubre) rehízo la interfaz y añadió tu pool en la selección de campeón, el mapa del jungla rival y los clips de cada muerte, y la 1.0.2 (el mismo día) arregló el actualizador. Para publicar el código pasó a llamarse **Deep Prep** (2.0.0, 6 de noviembre de 2026) y se rehízo por dentro sin cambiar lo que ve el jugador: de 99 pruebas a 200, tipos, registro con `logging`, el panel en módulos, CI y el modo demo. Las copias de Porofesor se actualizan solas a Deep Prep y se llevan sus datos. El detalle, en el [CHANGELOG](CHANGELOG.md).
+Empezó como **Porofesor**, una app que el autor hizo para uso propio y de unos amigos. La 1.0.0 (14 de octubre de 2026) traía el panel de partida, los duelos de Master+, las revisiones, la grabación y el actualizador; la 1.0.1 (29 de octubre) rehízo la interfaz y añadió tu pool en la selección de campeón, el mapa del jungla rival y los clips de cada muerte, y la 1.0.2 (el mismo día) arregló el actualizador. Para publicar el código pasó a llamarse **Deep Prep** (2.0.0, 6 de noviembre de 2026) y se rehízo por dentro sin cambiar lo que ve el jugador: de 99 pruebas a 200, tipos, registro con `logging`, el panel en módulos, CI y el modo demo. Las copias de Porofesor se actualizan solas a Deep Prep y se llevan sus datos. El detalle, en el [CHANGELOG](CHANGELOG.md).
 
 Hecho por Samuel Martínez Durán ([Samuelmartinezduran](https://github.com/Samuelmartinezduran) en GitHub).
 
