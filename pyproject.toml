@@ -1,0 +1,211 @@
+# Deep Prep: configuración del paquete y de las herramientas de desarrollo (ruff, mypy, coverage).
+#
+#   py -m pip install -e ".[dev]"                     entorno de desarrollo
+#   ruff check --fix . && ruff format .               lint (con arreglos seguros) y formato
+#   mypy                                              tipos (los archivos salen de [tool.mypy] files)
+#   coverage run -m unittest discover -s tests -t .   pruebas con cobertura
+#   coverage report                                   informe (falla por debajo de fail_under)
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deep-prep"
+# La versión vive en deepprep/__init__.py (__version__): es la que usa el actualizador para comparar
+# versiones y la que reescribe herramientas/publicar.py al publicar, así que aquí se lee de ahí.
+dynamic = ["version"]
+description = "Live League of Legends companion for Windows: pre-game scouting, in-game overlay and post-game review."
+readme = "README.md"
+requires-python = ">=3.14"
+# TODO(licencia): la decide el autor. Cuando la elija, p. ej.: license = "MIT" y license-files = ["LICENSE"]
+authors = [{ name = "Samuel Martínez Durán" }]
+keywords = ["league-of-legends", "riot-api", "overlay", "pywebview", "windows"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: Spanish",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Games/Entertainment",
+    # Se distribuye como .exe (PyInstaller) desde GitHub Releases: PyPI rechaza subir un paquete con esto.
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    # Ventanas nativas con WebView2. En Windows trae pythonnet 3.2.1 (y clr_loader).
+    "pywebview==6.2.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage==7.17.2",
+    "mypy==2.4.1",
+    "ruff==0.17.4",
+]
+# Solo para herramientas/publicar.py (no hace falta en CI).
+empaquetado = [
+    "pyinstaller==6.22.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/Samuelmartinezduran/deep-prep"
+Repository = "https://github.com/Samuelmartinezduran/deep-prep"
+Issues = "https://github.com/Samuelmartinezduran/deep-prep/issues"
+
+[project.gui-scripts]
+# gui-scripts: en Windows el lanzador usa pythonw (sin consola), como el .cmd de la raíz con pyw.
+deep-prep = "deepprep.__main__:main"
+
+[tool.setuptools]
+# Solo lo que dice package-data (sin esto setuptools toma las carpetas de web/ por paquetes y avisa).
+include-package-data = false
+
+[tool.setuptools.packages.find]
+# Solo el paquete (y subpaquetes con __init__.py, si algún día los hay); tests/ y herramientas/ no se instalan.
+# Sin namespaces, web/ no se toma por un paquete: va como datos, abajo.
+include = ["deepprep", "deepprep.*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+# El panel (HTML, JS, CSS, fuentes, iconos e imágenes) va dentro del paquete: config.RUTA_WEB lo busca ahí.
+deepprep = ["web/**/*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "deepprep.__version__" }
+
+# --- ruff ------------------------------------------------------------------------------------------
+
+[tool.ruff]
+# El código usa líneas largas: el 99 % mide menos de ~135 caracteres. Con 130, ruff format solo parte el ~1 %
+# que se pasa; con 100 o 120 reharía cientos de llamadas que hoy caben en una línea. E501 sigue activa para
+# los textos y comentarios que el formateador no puede partir.
+line-length = 130
+target-version = "py314"
+# herramientas/ como raíz para que `from anonimizar import ...` cuente como import propio al ordenar.
+src = [".", "herramientas"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle (errores)
+    "W",    # pycodestyle (avisos)
+    "F",    # pyflakes
+    "I",    # orden de imports (isort)
+    "B",    # flake8-bugbear: fallos probables
+    "UP",   # pyupgrade: sintaxis de la versión objetivo
+    "SIM",  # flake8-simplify
+    "RUF",  # reglas propias de ruff
+    "C4",   # comprensiones innecesarias
+    "PIE",  # flake8-pie: código redundante
+    "PERF", # perflint: bucles que se pueden simplificar
+    "PGH",  # nada de "# noqa" ni "# type: ignore" sin código de regla
+    "A",    # no tapar nombres de builtins
+    "BLE",  # `except Exception` solo con motivo (# noqa: BLE001 <por qué>), como ya hace el código
+    "T10",  # sin breakpoints olvidados
+    "LOG",  # uso correcto de logging
+    "PLE",  # pylint: errores
+]
+ignore = [
+    "E741",   # `l` es la convención del código para «línea» (de tiempo / de calle); renombrarla no aporta
+    "RUF012", # atributos de clase mutables: pide anotarlos con ClassVar; se activará al tipar el código
+    "SIM105", # contextlib.suppress en vez de try/except/pass: preferencia de estilo, no un fallo
+]
+# Reglas que aquí no tocan: PL/C90 (complejidad, funciones largas a propósito), S (subprocess y urlopen
+# son la app), ARG (firmas impuestas por pywebview, http.server y ctypes), N (nombres en español:
+# N818 exigiría acabar las excepciones en «Error»), DTZ (la app trabaja en hora local), PTH (ya usa pathlib
+# salvo en open()), PLC0415 (los imports dentro de funciones son a propósito: arranque rápido y pywebview
+# opcional), ANN y D (aún no hay tipos ni docstrings en todas las funciones).
+allowed-confusables = ["−"] # signo menos tipográfico (U+2212) en los textos para el jugador
+
+[tool.ruff.lint.isort]
+known-first-party = ["deepprep", "tests"]
+
+# --- mypy ------------------------------------------------------------------------------------------
+
+[tool.mypy]
+python_version = "3.14"
+platform = "win32" # ctypes.windll, msvcrt, CREATE_NO_WINDOW... solo existen en Windows
+files = ["deepprep", "tests"]
+# Punto de partida realista para un código aún sin anotaciones: se revisa el cuerpo de todas las funciones
+# (check_untyped_defs) aunque no tengan tipos, pero todavía no se exige ponerlos (disallow_untyped_defs).
+check_untyped_defs = true
+strict_equality = true
+extra_checks = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool", "possibly-undefined"]
+
+[[tool.mypy.overrides]]
+# Núcleo: hoy pasan check_untyped_defs sin errores y son los primeros que se van a anotar. Lo de abajo ya
+# está activo y se aplica a cada anotación que se añada (firmas completas, genéricos con parámetros...).
+# Cuando un módulo esté anotado del todo, se pasa a su propio bloque con disallow_untyped_defs = true.
+module = ["deepprep.riot", "deepprep.cache", "deepprep.config", "deepprep.servidor"]
+disallow_incomplete_defs = true
+disallow_any_generics = true
+disallow_untyped_decorators = true
+warn_return_any = true
+warn_unreachable = true
+# disallow_untyped_defs = true
+# disallow_untyped_calls = true
+
+[[tool.mypy.overrides]]
+# Pendientes: con check_untyped_defs dan errores (sobre todo `x = {}` sin tipo, atributos que las pruebas
+# crean en setUpClass y Optional sin comprobar). Se revisa lo que está fuera de las funciones y las llamadas
+# que les llegan desde módulos ya revisados. Se van quitando de la lista según se arreglan.
+module = [
+    "deepprep.actualizador",
+    "deepprep.analisis",
+    "deepprep.app",
+    "deepprep.duelos",
+    "deepprep.grabacion",
+    "deepprep.inicio_windows",
+    "deepprep.overlay",
+    "deepprep.recolector",
+    "deepprep.revision",
+    "deepprep.sesion",
+    "deepprep.trabajo",
+    "deepprep.ventanas",
+    "tests.test_actualizador",
+    "tests.test_analisis",
+    "tests.test_app",
+    "tests.test_revision",
+    "tests.test_riot",
+]
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+# pywebview trae tipos (py.typed), pero en un entorno sin él instalado no debe romper el análisis. pythonnet
+# (clr) no hace falta: solo lo importa pywebview por dentro; si algún módulo propio llega a hacer `import clr`,
+# se añade aquí (warn_unused_configs avisa de las entradas que no se usan).
+module = ["webview"]
+ignore_missing_imports = true
+
+# --- coverage --------------------------------------------------------------------------------------
+
+[tool.coverage.run]
+source = ["deepprep"]
+branch = true
+omit = [
+    "deepprep/__main__.py", # arranque: argumentos, consola, ventanas de pywebview/Chrome; no se prueba con unittest
+    "deepprep/web/*",       # el panel (HTML/JS/CSS): sus pruebas van aparte, con node --test
+]
+
+[tool.coverage.report]
+# Medido el 6/11/2026 con las 99 pruebas: 60,4 % (líneas + ramas). Subirlo según se añadan pruebas.
+fail_under = 60
+precision = 1
+show_missing = true
+skip_empty = true
+exclude_also = [
+    'if __name__ == "__main__":',
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
