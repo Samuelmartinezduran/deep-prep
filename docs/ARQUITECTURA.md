@@ -1,8 +1,8 @@
 # Arquitectura de Deep Prep
 
-Documento técnico de la versión 2.0.0 (rama `main`, commit `439b212`, 6 de noviembre de 2026). Explica cómo está hecha la app y por qué. Las cifras de la sección 5 están medidas sobre ese commit.
+Documento técnico de la versión 2.0.0 (rama `main`, 6 de noviembre de 2026). Explica cómo está hecha la app y por qué. Las cifras de la sección 5 están medidas ese día sobre la rama `main`.
 
-Deep Prep es una app de escritorio para Windows que acompaña al jugador de League of Legends antes, durante y después de cada partida. Es un paquete de Python 3.14 (`deepprep`, 33 módulos, unas 7 400 líneas) con la interfaz en HTML, CSS y JavaScript (`deepprep/web`, 18 módulos, unas 1 200 líneas). Tiene una sola dependencia de ejecución, `pywebview` 6.2.1. Lo demás es biblioteca estándar (`urllib`, `sqlite3`, `http.server`, `ctypes`) y un `ffmpeg` que va dentro del paquete para grabar. El código y los textos están en español.
+Deep Prep es una app de escritorio para Windows que acompaña al jugador de League of Legends antes, durante y después de cada partida. Es un paquete de Python 3.14 (`deepprep`, 34 módulos, unas 7 900 líneas) con la interfaz en HTML, CSS y JavaScript (`deepprep/web`, 19 módulos, unas 1 300 líneas). Tiene una sola dependencia de ejecución, `pywebview` 6.2.1. Lo demás es biblioteca estándar (`urllib`, `sqlite3`, `http.server`, `ctypes`) y un `ffmpeg` que va dentro del paquete para grabar. El código y los textos están en español.
 
 ## 1. Qué hace
 
@@ -173,9 +173,9 @@ Así el panel, que es denso en datos, se hace con HTML y CSS; si pywebview o Web
 
 ### 4.4 Módulos ES sin paso de compilación
 
-El panel eran 960 líneas en un `app.js`; desde `d6f6d67` son 18 módulos en `deepprep/web/js/`. `index.html` carga `/js/main.js` con `type="module"` y los archivos se sirven tal cual. `estado.js` es el único estado mutable compartido. No hay dependencias de npm: `node --test` importa los mismos módulos que usa el navegador, porque ninguno toca la página al cargarse salvo `main.js`.
+El panel eran 960 líneas en un `app.js`; desde `d6f6d67` son módulos en `deepprep/web/js/` (19 con el de la barra del modo demo). `index.html` carga `/js/main.js` con `type="module"` y los archivos se sirven tal cual. `estado.js` es el único estado mutable compartido. No hay dependencias de npm: `node --test` importa los mismos módulos que usa el navegador, porque ninguno toca la página al cargarse salvo `main.js`.
 
-**Alternativa:** un bundler con un framework. Para unas 1 200 líneas añadiría `node_modules`, una cadena de compilación y un paso más al empaquetar. **Coste:** sin tipos en JavaScript y con plantillas de texto, el escapado es manual (`esc()` en `util.js`). Hubo un fallo así: el tooltip volvía a meter como HTML un texto ya escapado, y un nombre con `<img onerror=...>` se ejecutaba. `13ff2e0` lo arregló pasando el contenido como JSON y pintándolo con `textContent`, con pruebas que lo cubren.
+**Alternativa:** un bundler con un framework. Para unas 1 300 líneas añadiría `node_modules`, una cadena de compilación y un paso más al empaquetar. **Coste:** sin tipos en JavaScript y con plantillas de texto, el escapado es manual (`esc()` en `util.js`). Hubo un fallo así: el tooltip volvía a meter como HTML un texto ya escapado, y un nombre con `<img onerror=...>` se ejecutaba. `13ff2e0` lo arregló pasando el contenido como JSON y pintándolo con `textContent`, con pruebas que lo cubren.
 
 ### 4.5 SQLite y JSON comprimido
 
@@ -197,7 +197,7 @@ Las tareas de fondo (`fondo=True`) tienen un tope dentro de la ventana de 2 minu
 
 El duelo de tu campeón contra el rival de tu posición se mide en partidas de Master o más de los últimos 45 días. De cada partida con su línea de tiempo salen diez registros, uno por jugador contra su rival de posición (`duelos.extraer`), y `duelos.analizar` calcula peleas por nivel, ventaja al minuto 10, si escala, qué hacen distinto los que ganan, dónde se muere y la build. Por debajo de unos mínimos (12 partidas, 10 peleas, 8 por grupo) un dato no se enseña.
 
-El recolector (`recolector.py`) parte de las ligas Challenger, Gran Maestro y Master de cada plataforma (guardadas 24 h), mira 4 partidas recientes de jugadores al azar y, cuando sale alguien con un campeón de tu pool en su posición, lo sigue y mira sus 20 últimas partidas. La tabla `vista` evita mirar dos veces la misma partida. Va un hilo por región (Europa, Corea, Norteamérica y Asia-Pacífico). Las que no son la tuya tienen cuota propia y van a toda velocidad sin quitarle nada al panel. La tuya comparte cuota con el panel: solo se usa con el cliente quieto (`App._europa_libre`: clave válida, sin partida cerca ni en curso, sin sesión cargando y con tu historial ya bajado), con `fondo=True` y cancelándose en cuanto el panel necesita la cuota. Un cerrojo (`recolector.lock`) impide dos recolectores a la vez, el de la app y el suelto (`py -m deepprep.recolector`).
+El recolector (`recolector.py`) parte de las ligas Challenger, Gran Maestro y Master de cada plataforma (guardadas 24 h), mira 4 partidas recientes de jugadores al azar y, cuando sale alguien con un campeón de tu pool en su posición, lo sigue y mira sus 20 últimas partidas. La tabla `vista` evita mirar dos veces la misma partida. Va un hilo por región (Europa, Corea, Norteamérica y Asia-Pacífico). Las que no son la tuya tienen cuota propia y van a toda velocidad sin quitarle nada al panel. La tuya comparte cuota con el panel: solo se usa con el cliente quieto (`App._cuota_libre`: clave válida, sin partida cerca ni en curso, sin sesión cargando y con tu historial ya bajado), con `fondo=True` y cancelándose en cuanto el panel necesita la cuota. Un cerrojo (`recolector.lock`) impide dos recolectores a la vez, el de la app y el suelto (`py -m deepprep.recolector`).
 
 **Alternativa:** un servidor propio que recogiera para todos los usuarios. Necesitaría una clave de producción de Riot e infraestructura; así, cada usuario recoge solo lo de su pool con su clave. **Coste:** la base crece despacio y depende de que la app esté abierta; por eso «siempre en marcha» viene activado y la app arranca con Windows con la ventana escondida.
 
@@ -211,7 +211,7 @@ Va aparte para que la grabación siga aunque la app se reinicie o se cierre a me
 
 ### 4.9 Actualizador propio y paso de Porofesor a Deep Prep
 
-`herramientas/publicar.py` pasa las pruebas, empaqueta con PyInstaller (carpeta, no un solo .exe) junto con ffmpeg y publica en GitHub Releases un zip y su `.sha256`. La primera vez que se abre, la app se copia a `%LOCALAPPDATA%\Programs\DeepPrep`; los datos van en `%LOCALAPPDATA%\DeepPrep`, aparte, para que una actualización no los toque. Cada 6 horas la app mira `releases/latest`, baja el zip y su huella, la comprueba y espera a poder instalar sin estorbar (`Actualizador.puede_instalar`: sin partida ni selección, sin grabación, sin revisión pendiente y sin nadie mirando la ventana). Entonces lanza la versión nueva con `--actualizar PID DESTINO`; esta espera a que la vieja se cierre, se copia encima y se vuelve a abrir.
+`herramientas/publicar.py` pasa lo mismo que la CI (formato, lint, tipos, pruebas con cobertura y `node --test`), empaqueta con PyInstaller (carpeta, no un solo .exe) junto con ffmpeg y publica en GitHub Releases un zip y su `.sha256`. La primera vez que se abre, la app se copia a `%LOCALAPPDATA%\Programs\DeepPrep`; los datos van en `%LOCALAPPDATA%\DeepPrep`, aparte, para que una actualización no los toque. Cada 6 horas la app mira `releases/latest`, baja el zip y su huella, la comprueba y espera a poder instalar sin estorbar (`Actualizador.puede_instalar`: sin partida ni selección, sin grabación, sin revisión pendiente y sin nadie mirando la ventana). Entonces lanza la versión nueva con `--actualizar PID DESTINO`; esta espera a que la vieja se cierre, se copia encima y se vuelve a abrir.
 
 **Lo que no protege:** la huella SHA-256 viene de la misma versión publicada que el zip. Detecta una descarga corrupta o cortada, no una versión maliciosa ni una cuenta de GitHub comprometida. El .exe tampoco está firmado, y Windows avisa al abrirlo la primera vez (el LEEME explica cómo seguir).
 
@@ -236,16 +236,28 @@ La amenaza es una web abierta en el navegador del usuario que intente hablar con
 
 Lo cubren `test_otra_web_no_puede_tocar_la_app` y `test_paginas_y_estado` (por ejemplo, `/js/..%2Fservidor.py` da 404). **Alternativa:** un token aleatorio por sesión. Protegería también frente a otros procesos locales, pero complica la comunicación entre copias y las herramientas; hoy no está (sección 7).
 
+### 4.12 Un modo demo que no toca nada
+
+`py -m deepprep --demo` (o `DeepPrep.exe --demo`) enseña la app en un minuto a quien no tiene el LoL abierto ni una clave de Riot. Se aísla en tres sitios:
+
+- **Datos.** `config.elegir_datos` mira `--demo` antes que nada, también antes que `DEEPPREP_DATOS` y que la mudanza de Porofesor, y devuelve una carpeta temporal nueva (`config.carpeta_demo`). Ahí van el registro y lo que se guarde en Ajustes. Al cerrar la ventana, desde Ajustes o, sin ventanas, a los 5 minutos sin que nadie mire el panel, `demo.borrar_carpeta` la borra, y solo si cumple `config.es_carpeta_demo` (su prefijo y dentro de la carpeta temporal del sistema).
+- **Arranque.** `__main__.main` sale hacia `_demo()` antes de instalar la app, tocar accesos directos o el arranque con Windows y antes de crear `App`. En su lugar crea `demo.AppDemo`, que cumple lo que el servidor y las ventanas usan de la app (`tipos.AppDelPanel`, comprobado por mypy). No hay vigía del cliente del LoL (LCU), cliente de la API de Riot, grabación, recolector ni actualizador (`SinActualizaciones`). Solo los retratos de los campeones salen de Data Dragon; sin red, el panel funciona igual.
+- **Lo que sí es de verdad.** El servidor, las ventanas y el panel; `revision.revisar`, que saca las revisiones de ejemplo de la partida anonimizada de `tests/datos`; `ajustes.Ajustes`, con las mismas comprobaciones al guardar, y `app.para_el_modo`, así que en partida se quita lo mismo que en la app. La partida de ejemplo va en JSON dentro del paquete (`deepprep/demo/*.json`, todos los jugadores `Nombre#DEMO`) y la barra del panel cambia de escena con `POST /api/demo`, una ruta que solo existe en la demo.
+
+`test_no_escribe_fuera_de_su_carpeta_y_la_borra_al_salir` lanza la demo en otro proceso con un `DEEPPREP_DATOS` centinela y comprueba que ni esa carpeta ni la del proyecto cambian y que la temporal desaparece al salir.
+
+**Alternativa:** un vídeo o capturas, que no dejan tocar nada, o la maqueta de antes (`herramientas/maqueta.py`), que montaba su propia app, pedía la clave de Riot y repetía datos. Ahora la maqueta es la demo con opciones para diseñar. **Coste:** los JSON de ejemplo se mantienen a mano cuando cambia la forma del panel; `test_cada_escena_da_un_estado_como_el_de_la_app` compara sus claves con las del estado de la app para que no se separen.
+
 ## 5. Calidad
 
 | Qué | Cifra | Cómo se mide |
 |---|---|---|
-| Pruebas de Python | 168 en 13 archivos, 2,3 s | `py -X utf8 -m unittest discover -s tests -t .` |
+| Pruebas de Python | 200 en 15 archivos, 6,5 s | `py -X utf8 -m unittest discover -s tests -t .` |
 | De ellas, de caracterización | 12, contra 12 JSON en `tests/datos/esperado/` | `tests/test_caracterizacion.py` |
-| Pruebas del panel | 82 en 20 grupos (8 archivos), 0,13 s | `node --test` (Node 24, sin dependencias) |
-| Cobertura de Python | 71,9 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
-| Tipos | mypy estricto, 0 errores en 47 archivos | `mypy` |
-| Lint y formato | ruff sin avisos; 58 archivos formateados | `ruff check .`, `ruff format --check .` |
+| Pruebas del panel | 95 en 23 grupos (9 archivos), 0,13 s | `node --test` (Node 24, sin dependencias) |
+| Cobertura de Python | 73,2 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
+| Tipos | mypy estricto, 0 errores en 50 archivos | `mypy` |
+| Lint y formato | ruff sin avisos; 64 archivos formateados | `ruff check .`, `ruff format --check .` |
 
 **Unitarias con falsos.** `tests/test_app.py` define `RiotFalso`, `LolFalso`, `DatosFalsos` y `GrabadorFalso`; las bases van en `:memory:` y `Configuracion.en_memoria` no escribe `config.json`. Así, `test_partida_propia_de_principio_a_fin` recorre el vigía desde la sala hasta el final de la partida. Lo que depende de Windows o del tiempo se inyecta: `overlay.Controlador` recibe la tecla pulsada, si el juego está abierto y el reloj; `Limitador`, el reloj y la espera. `tests/__init__.py` manda la carpeta del programa y los accesos directos a una carpeta temporal antes de importar la app, para que ninguna prueba toque los de verdad.
 
@@ -253,11 +265,11 @@ Lo cubren `test_otra_web_no_puede_tocar_la_app` y `test_paginas_y_estado` (por e
 
 **Panel.** Las pruebas de `tests/js/` usan un DOM mínimo (`ayuda.mjs`) en el que `innerHTML` lanza un error, de modo que el tooltip no puede volver a usarlo. `modulos.test.mjs` comprueba que cada módulo tiene un nombre que el servidor acepta (lee la expresión de `servidor.py`) y que cada `import` existe.
 
-**Dónde falta cobertura.** La lógica pura está alta: `analisis` 93,3 %, `duelos` 94,1 %, `revision` 97,1 %, `cache` 100 %. Lo que habla con Windows o con la red está bajo: `ventanas` 0 %, `lcu` 18,5 %, `recolector` 23,2 %, `ddragon` 27,6 %, `grabacion` 36,9 %. Esas partes se prueban a mano, con el cliente real y con `herramientas/simular_propia.py`; es el hueco principal.
+**Dónde falta cobertura.** La lógica pura está alta: `analisis` 93,3 %, `duelos` 94,1 %, `revision` 97,1 %, `cache` 100 %. Lo que habla con Windows o con la red está bajo: `ventanas` 0 %, `lcu` 18,5 %, `recolector` 23,4 %, `grabacion` 36,9 %, `ddragon` 45,3 %. Esas partes se prueban a mano, con el cliente real y con `herramientas/simular_propia.py`; es el hueco principal.
 
 **CI** (`.github/workflows/ci.yml`). Un trabajo en `windows-latest` con Python 3.14, porque el código importa `msvcrt` y usa `ctypes.windll`: formato, lint, mypy, pruebas con cobertura y el mínimo de `pyproject.toml`; cada paso se ejecuta aunque falle otro. Otro trabajo en Ubuntu con Node 24 para el panel.
 
-**Tipos y registro.** mypy exige tipos en todas las funciones de `deepprep` salvo `servidor.imagen_ddragon` (`disallow_untyped_defs`, `warn_return_any`...). Los datos grandes de Riot son alias con nombre de `dict[str, Any]` (`Partida`, `Linea`, `Registro`, `Panel` en `tipos.py`) y lo pequeño y fijo va como `TypedDict` (`Resultado`, `Tarjeta`, `Aviso`). El registro usa un `logger` por módulo, con niveles, y va a `deepprep.log`.
+**Tipos y registro.** mypy exige tipos en todas las funciones de `deepprep`, sin excepciones (`disallow_untyped_defs`, `warn_return_any`...). Los datos grandes de Riot son alias con nombre de `dict[str, Any]` (`Partida`, `Linea`, `Registro`, `Panel` en `tipos.py`) y lo pequeño y fijo va como `TypedDict` (`Resultado`, `Tarjeta`, `Aviso`). El registro usa un `logger` por módulo, con niveles, y va a `deepprep.log`.
 
 ## 6. Privacidad
 
@@ -275,4 +287,3 @@ Lo cubren `test_otra_web_no_puede_tocar_la_app` y `test_paginas_y_estado` (por e
 6. **`cache.db` crece sin tope:** las partidas se guardan para siempre. Las grabaciones sí tienen límite. Siguiente paso: purgar por antigüedad.
 7. **Servidor local sin token:** cualquier proceso del mismo usuario puede usar la API, se aceptan peticiones sin `Origin` y no se limita el tamaño del cuerpo de un POST.
 8. **Overlay solo en ventana sin bordes,** y el panel sondea cada 1,5 s en vez de recibir cambios.
-9. **Pendientes pequeños:** `servidor.imagen_ddragon` es la única función sin tipos; `publicar.py` solo pasa las pruebas de Python antes de publicar (ruff, mypy y `node --test` solo los pasa la CI); en el recolector, los nombres (`cliente_europa`, `_europa_libre`) hablan de EUW aunque el código ya trabaja con la región de cada jugador.
