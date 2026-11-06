@@ -27,6 +27,7 @@ import zipfile
 from pathlib import Path
 
 from . import __version__, config, inicio_windows
+from .sistema import SIN_VENTANA, crear_acceso_directo, pedir_a_la_copia_en_marcha
 
 REPO = "Samuelmartinezduran/deep-prep"
 EXE = "DeepPrep.exe"
@@ -53,7 +54,6 @@ MIRANDO_S = 120
 NOVEDADES = config.DATOS / "novedades.json"
 # Última versión cuyas novedades se han visto. Si no está, quien viene de una versión que no la guardaba.
 VISTA = config.DATOS / "version_vista.txt"
-SIN_VENTANA = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 DESLIGADO = SIN_VENTANA | getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
 
 
@@ -72,20 +72,9 @@ def _get(url, binario=False):
     return datos if binario else json.loads(datos)
 
 
-def acceso_directo(destino, objetivo, argumentos="", descripcion="Deep Prep"):
-    ps = (
-        "$s=(New-Object -ComObject WScript.Shell).CreateShortcut($env:DESTINO); $s.TargetPath=$env:OBJETIVO;"
-        "$s.Arguments=$env:ARGS; $s.WorkingDirectory=$env:CARPETA; $s.Description=$env:DESC; $s.Save()"
-    )
-    entorno = dict(
-        os.environ,
-        DESTINO=str(destino),
-        OBJETIVO=str(objetivo),
-        ARGS=argumentos,
-        CARPETA=str(Path(objetivo).parent),
-        DESC=descripcion,
-    )
-    subprocess.run(["powershell", "-NoProfile", "-Command", ps], env=entorno, capture_output=True, creationflags=SIN_VENTANA)
+def _url_de_la_instalada(puerto=None):
+    """El panel de la copia instalada (si está en marcha): la del puerto de config.json."""
+    return f"http://127.0.0.1:{puerto or config.cargar().get('puerto', 5151)}/"
 
 
 def _segundos_encendido():
@@ -106,9 +95,8 @@ def _marcar_version(carpeta):
 
 def _version_instalada():
     """La versión instalada: la de la copia en marcha si la hay; si no, la que dejó apuntada al instalarse."""
-    puerto = config.cargar().get("puerto", 5151)
     try:
-        with urllib.request.urlopen(f"http://127.0.0.1:{puerto}/api/ajustes", timeout=5) as r:
+        with urllib.request.urlopen(_url_de_la_instalada() + "api/ajustes", timeout=5) as r:
             return json.loads(r.read())["version"]["version"]
     except (OSError, ValueError, KeyError, TypeError):
         pass
@@ -120,15 +108,9 @@ def _version_instalada():
 
 def _abrir_la_instalada():
     """Enseña la ventana de la copia instalada (o la arranca si no está en marcha)."""
-    puerto = config.cargar().get("puerto", 5151)
-    url = f"http://127.0.0.1:{puerto}/"
-    pet = urllib.request.Request(
-        url + "api/mostrar", data=b"{}", headers={"Origin": url.rstrip("/"), "Content-Type": "application/json"}
-    )
     try:
-        with urllib.request.urlopen(pet, timeout=5) as r:
-            if json.loads(r.read()).get("ok"):
-                return
+        if json.loads(pedir_a_la_copia_en_marcha(_url_de_la_instalada(), "api/mostrar")).get("ok"):
+            return
     except (OSError, ValueError):
         pass
     exe = CARPETA_PROGRAMA / EXE
@@ -200,11 +182,11 @@ def _pasar_de_porofesor(exe, vieja):
     """Deep Prep recién instalada encima de una Porofesor (1.0.x): accesos directos nuevos y fuera los viejos."""
     quitar_restos_de_porofesor(vieja)
     try:
-        acceso_directo(ESCRITORIO, exe)
+        crear_acceso_directo(ESCRITORIO, exe)
         # El arranque con Windows sigue como lo tenía: lo decide "siempre en marcha" de su configuración (la de
         # Porofesor, que es la que ve este proceso; los datos se mudan al abrirse la copia instalada).
         if config.cargar().get("siempre_en_marcha"):
-            acceso_directo(inicio_windows.ACCESO, exe, "--oculta", "Deep Prep (en segundo plano)")
+            crear_acceso_directo(inicio_windows.ACCESO, exe, "--oculta", "Deep Prep (en segundo plano)")
     except Exception as e:  # noqa: BLE001
         print(f"No se pudieron crear los accesos directos de Deep Prep: {e!r}")
 
@@ -237,7 +219,7 @@ def instalar_si_hace_falta():
     except OSError:
         pass
     exe = CARPETA_PROGRAMA / EXE
-    acceso_directo(ESCRITORIO, exe)
+    crear_acceso_directo(ESCRITORIO, exe)
     # Descargada a mano encima de una Porofesor (ya cerrada arriba): fuera sus accesos directos y su programa.
     quitar_restos_de_porofesor()
     subprocess.Popen([str(exe)], cwd=str(CARPETA_PROGRAMA), creationflags=DESLIGADO)
@@ -246,13 +228,9 @@ def instalar_si_hace_falta():
 
 def _cerrar_la_instalada(puerto=None):
     """Si ya hay una Deep Prep (o una Porofesor) en marcha, se le pide que se cierre antes de reinstalar."""
-    puerto = puerto or config.cargar().get("puerto", 5151)
-    url = f"http://127.0.0.1:{puerto}/"
-    pet = urllib.request.Request(
-        url + "api/salir", data=b"{}", headers={"Origin": url.rstrip("/"), "Content-Type": "application/json"}
-    )
+    url = _url_de_la_instalada(puerto)
     try:
-        urllib.request.urlopen(pet, timeout=5).read()
+        pedir_a_la_copia_en_marcha(url, "api/salir")
     except OSError:
         return
     for _ in range(30):  # hasta que suelte el puerto

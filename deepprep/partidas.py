@@ -7,7 +7,7 @@ from typing import Any
 
 from . import analisis as an
 from . import recolector as rec
-from .sesion import LIGA_COLA
+from .constantes import LIGA_COLA
 
 # Tus campeones por posición (el pool) se recalculan como mucho cada tanto.
 CADA_POOL_S = 600

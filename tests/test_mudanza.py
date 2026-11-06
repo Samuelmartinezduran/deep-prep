@@ -216,7 +216,7 @@ class ConInstalaciones(ConCarpetaTemporal):
             mock.patch.object(inicio_windows, "ACCESO_VIEJO", self.inicio / "Porofesor.lnk"),
             # La 1.0.x lanza la copia Porofesor.exe del zip puente.
             mock.patch.object(act, "sys", types.SimpleNamespace(executable=str(self.descarga / "Porofesor.exe"))),
-            mock.patch.object(act, "acceso_directo", crear),
+            mock.patch.object(act, "crear_acceso_directo", crear),
             mock.patch.object(act.subprocess, "Popen", self.popen),
             mock.patch.object(config, "cargar", lambda: dict(self.cfg)),
         ]

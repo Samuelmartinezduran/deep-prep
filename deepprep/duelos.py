@@ -11,8 +11,8 @@ from collections import Counter
 from typing import NamedTuple
 
 from . import analisis as an
+from .constantes import DURACION_MINIMA_S, MIN
 
-MIN = 60000
 POSICIONES = an.POSICIONES
 # Peleas "pequeñas": las dos del duelo implicadas y como mucho cuatro jugadores en total.
 MAX_IMPLICADOS = 4
@@ -46,7 +46,7 @@ def extraer(partida, linea, legendarios):
     """
     info, tl = partida["info"], linea["info"]
     jug = info["participants"]
-    if info.get("gameDuration", 0) < 15 * 60 or any(p.get("gameEndedInEarlySurrender") for p in jug):
+    if info.get("gameDuration", 0) < DURACION_MINIMA_S or any(p.get("gameEndedInEarlySurrender") for p in jug):
         return []
     parejas = _parejas(jug)
     if not parejas:
@@ -352,17 +352,38 @@ def _si_escala(registros, nombre_a):
     ]
 
 
+# Lo que se mide de cada registro (None si ese registro no lo tiene), para los hábitos y para compararte.
+def _muertes_10(r):
+    return r["m10"]
+
+
+def _peleas_antes_del_6(r):
+    return sum(1 for p in r["peleas"] if p[1] < 6)
+
+
+def _cs_10(r):
+    return r["cs10"]
+
+
+def _cs_sobre_el_rival_10(r):
+    return (r["dif"].get("10") or [None] * 3)[2]
+
+
+def _oro_sobre_el_rival_10(r):
+    return (r["dif"].get("10") or [None])[0]
+
+
 def _habitos_de(pos, nombre_b):
     """Lo que se mira de cada registro: (qué es, cómo se saca, decimales; None si es un porcentaje)."""
     habitos = [
-        ("muertes antes del 10", lambda r: r["m10"], 1),
-        (f"peleas con {nombre_b} antes del 6", lambda r: sum(1 for p in r["peleas"] if p[1] < 6), 1),
+        ("muertes antes del 10", _muertes_10, 1),
+        (f"peleas con {nombre_b} antes del 6", _peleas_antes_del_6, 1),
         ("kills y asistencias antes del 10", lambda r: r["ka10"], 1),
     ]
     if pos == "JUNGLE":
-        habitos.append(("CS al 10", lambda r: r["cs10"], 0))
+        habitos.append(("CS al 10", _cs_10, 0))
     elif pos != "UTILITY":
-        habitos.append((f"diferencia de CS con {nombre_b} al 10", lambda r: (r["dif"].get("10") or [None] * 3)[2], 1))
+        habitos.append((f"diferencia de CS con {nombre_b} al 10", _cs_sobre_el_rival_10, 1))
     if pos == "JUNGLE":
         habitos += [("larvas", lambda r: r.get("larvas"), 1), ("primer dragón", lambda r: r.get("drag1"), None)]
     return habitos
@@ -437,14 +458,14 @@ def _build(registros, nombre_objeto, nombre_runa):
 def metricas(pos):
     """Lo que se compara entre tú y tu referencia: (nombre, función del registro, decimales, con signo)."""
     filas = [
-        ("Muertes antes del 10", lambda r: r["m10"], 1, False),
-        ("Peleas con tu rival antes del 6", lambda r: sum(1 for p in r["peleas"] if p[1] < 6), 1, False),
+        ("Muertes antes del 10", _muertes_10, 1, False),
+        ("Peleas con tu rival antes del 6", _peleas_antes_del_6, 1, False),
     ]
     if pos == "JUNGLE":
-        filas.append(("CS al 10", lambda r: r["cs10"], 0, False))
+        filas.append(("CS al 10", _cs_10, 0, False))
     elif pos != "UTILITY":
-        filas.append(("CS sobre tu rival al 10", lambda r: (r["dif"].get("10") or [None] * 3)[2], 0, True))
-    filas.append(("Oro sobre tu rival al 10", lambda r: (r["dif"].get("10") or [None])[0], 0, True))
+        filas.append(("CS sobre tu rival al 10", _cs_sobre_el_rival_10, 0, True))
+    filas.append(("Oro sobre tu rival al 10", _oro_sobre_el_rival_10, 0, True))
     return filas
 
 

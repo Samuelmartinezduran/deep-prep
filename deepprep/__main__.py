@@ -6,11 +6,11 @@ import subprocess
 import sys
 import threading
 import time
-import urllib.request
 import webbrowser
 from pathlib import Path
 
 from . import config
+from .sistema import pedir_a_la_copia_en_marcha
 
 # Sin ventanas (--sin-ventana o sin pywebview): sin panel abierto durante este tiempo la app se cierra sola,
 # salvo con el cliente del LoL abierto, porque tiene que seguir ahí para grabar la siguiente partida.
@@ -35,12 +35,8 @@ def abrir_ventana(url):
 
 def pedir_que_se_muestre(url):
     """Ya hay otra copia en marcha: que enseñe su ventana. Devuelve False si no sabe hacerlo."""
-    pet = urllib.request.Request(
-        url + "api/mostrar", data=b"{}", headers={"Origin": url.rstrip("/"), "Content-Type": "application/json"}
-    )
     try:
-        with urllib.request.urlopen(pet, timeout=5) as r:
-            return bool(json.loads(r.read()).get("ok"))
+        return bool(json.loads(pedir_a_la_copia_en_marcha(url, "api/mostrar")).get("ok"))
     except (OSError, ValueError):
         return False
 

@@ -11,6 +11,7 @@ from . import analisis as an
 from . import clips
 from . import duelos as du
 from . import revision as rv
+from .constantes import LIGA_COLA, SOLO_DUO
 from .grabacion import buscar_ffmpeg, inicio_de_series
 from .riot import ErrorRiot
 
@@ -122,7 +123,7 @@ class Revisor:
 
     def cambio_lp(self, puuid, panel, cola):
         """Tu liga después de la partida y, si la de antes es de justo una partida atrás, los LP ganados o perdidos."""
-        tipo = {420: "RANKED_SOLO_5x5", 440: "RANKED_FLEX_SR"}.get(cola)
+        tipo = LIGA_COLA.get(cola)
         if not tipo:
             return None
         try:
@@ -142,7 +143,7 @@ class Revisor:
         }
         out = {"lp": despues["lp"], "nivel": despues["nivel"].lower(), "rank": despues["rank"]}
         yo = next((f for f in ((panel or {}).get("equipos") or {}).get("aliado", []) if f.get("soy_yo")), None)
-        antes = ((yo or {}).get("liga") or {}).get("solo" if cola == 420 else "flex")
+        antes = ((yo or {}).get("liga") or {}).get("solo" if cola == SOLO_DUO else "flex")
         if antes and "rank" in antes and despues["v"] + despues["d"] - antes["v"] - antes["d"] == 1:
             a = an.valor_liga(antes["nivel"], antes["rank"], antes["lp"])
             b = an.valor_liga(despues["nivel"], despues["rank"], despues["lp"])

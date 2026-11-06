@@ -4,12 +4,12 @@ import itertools
 import statistics
 from collections import Counter
 
-COLAS_GRIETA = {400, 420, 430, 440, 480, 490}
+from .constantes import COLAS_GRIETA, DIA_MS, MIN
+
 POSICIONES = ("TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY")
 NOMBRE_POS = {"TOP": "top", "JUNGLE": "jungla", "MIDDLE": "mid", "BOTTOM": "ADC", "UTILITY": "support"}
 NOMBRE_LINEA = {"top": "top", "mid": "mid", "bot": "bot"}
 SMITE = 11
-MIN = 60000
 CAMPO_LINEA = "laningPhaseGoldExpAdvantage"
 # Kills en solitario por partida a partir de las cuales un jugador destaca en su rol
 # (medido en Diamante-Master: la mediana es 2 en top y mid, 1 en jungla, 0 en bot).
@@ -100,8 +100,28 @@ def reducir_partida(m):
 def reducir_linea(t):
     """De la línea de tiempo (~850 KB) guarda posiciones y oro por minuto hasta el 15, kills y monstruos."""
     info = t["info"]
+    pos, est = estado_por_minuto(info["frames"][:16])
+    kills, monstruos = [], []
+    for f in info["frames"]:
+        for e in f.get("events", []):
+            if e["type"] == "CHAMPION_KILL" and e["timestamp"] < 20 * MIN:
+                kills.append(kill_reducida(e))
+            elif e["type"] == "ELITE_MONSTER_KILL":
+                monstruos.append(monstruo_reducido(e))
+    return {
+        "id": t["metadata"]["matchId"],
+        "pids": {p["puuid"]: p["participantId"] for p in info.get("participants", [])},
+        "pos": pos,
+        "est": est,
+        "kills": kills,
+        "monstruos": monstruos,
+    }
+
+
+def estado_por_minuto(frames):
+    """({pid: [[x, y], ...]}, {pid: [[oro, experiencia, CS, nivel], ...]}): un elemento por minuto de los frames dados."""
     pos, est = {}, {}
-    for f in info["frames"][:16]:
+    for f in frames:
         for pid, pf in f.get("participantFrames", {}).items():
             p = pf.get("position") or {}
             pos.setdefault(pid, []).append([p.get("x", 0), p.get("y", 0)])
@@ -113,39 +133,31 @@ def reducir_linea(t):
                     pf.get("level", 1),
                 ]
             )
-    kills, monstruos = [], []
-    for f in info["frames"]:
-        for e in f.get("events", []):
-            if e["type"] == "CHAMPION_KILL" and e["timestamp"] < 20 * MIN:
-                p = e.get("position") or {}
-                kills.append(
-                    [
-                        e["timestamp"],
-                        p.get("x", 0),
-                        p.get("y", 0),
-                        e.get("killerId", 0),
-                        e.get("victimId", 0),
-                        e.get("assistingParticipantIds") or [],
-                    ]
-                )
-            elif e["type"] == "ELITE_MONSTER_KILL":
-                monstruos.append(
-                    [
-                        e["timestamp"],
-                        e.get("monsterType", ""),
-                        e.get("monsterSubType") or "",
-                        e.get("killerId", 0),
-                        e.get("killerTeamId", 0),
-                    ]
-                )
-    return {
-        "id": t["metadata"]["matchId"],
-        "pids": {p["puuid"]: p["participantId"] for p in info.get("participants", [])},
-        "pos": pos,
-        "est": est,
-        "kills": kills,
-        "monstruos": monstruos,
-    }
+    return pos, est
+
+
+def kill_reducida(e):
+    """[ms, x, y, asesino, víctima, asistentes] de un evento CHAMPION_KILL."""
+    p = e.get("position") or {}
+    return [
+        e["timestamp"],
+        p.get("x", 0),
+        p.get("y", 0),
+        e.get("killerId", 0),
+        e.get("victimId", 0),
+        e.get("assistingParticipantIds") or [],
+    ]
+
+
+def monstruo_reducido(e):
+    """[ms, tipo, subtipo, quién lo mata, su equipo] de un evento ELITE_MONSTER_KILL."""
+    return [
+        e["timestamp"],
+        e.get("monsterType", ""),
+        e.get("monsterSubType") or "",
+        e.get("killerId", 0),
+        e.get("killerTeamId", 0),
+    ]
 
 
 # --- utilidades ------------------------------------------------------------------------
@@ -453,7 +465,7 @@ def etiquetas(res, rol, maestria, ahora_ms):
     elif puntos is not None and puntos < 25000 and camp["n"] <= 2:
         out.append({"t": "Poco rodado", "tono": "flojo", "d": f"{puntos // 1000}k de maestría"})
     if ultimo_uso and puntos and puntos >= 25000:
-        dias = (ahora_ms - ultimo_uso) / 86400000
+        dias = (ahora_ms - ultimo_uso) / DIA_MS
         if dias >= 30:
             out.append({"t": "Oxidado", "tono": "flojo", "d": f"{int(dias)} días sin jugarlo"})
     if fuera_de_rol(res, rol):
@@ -913,7 +925,7 @@ def _conocidos(juegos, presentes, ahora_ms):
                         "nombre": nombre,
                         "contigo": otro["equipo"] == yo["equipo"],
                         "ganaste": yo["gana"],
-                        "dias": int((ahora_ms - m["creacion"]) / 86400000),
+                        "dias": int((ahora_ms - m["creacion"]) / DIA_MS),
                         "veces": sum(1 for m2, _ in juegos if jugador_en(m2, puuid)),
                     }
                 )

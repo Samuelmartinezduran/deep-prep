@@ -5,11 +5,11 @@ Así el recolector de duelos sigue trabajando con el LoL cerrado y el overlay es
 
 import os
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
 from . import config
+from .sistema import crear_acceso_directo
 
 # DEEPPREP_INICIO lo manda a otro sitio (para probar sin tocar la carpeta Inicio de verdad).
 ACCESO = Path(
@@ -38,18 +38,14 @@ def poner(encendido):
         pyw, argumentos = shutil.which("pyw"), "-X utf8 -m deepprep --oculta"
     if not pyw:
         return "No encuentro pyw para arrancar con Windows."
-    icono = config.RUTA_WEB / "icono.ico"
-    ps = (
-        "$s=(New-Object -ComObject WScript.Shell).CreateShortcut($env:ACCESO);"
-        "$s.TargetPath=$env:PYW; $s.Arguments=$env:ARGS;"
-        "$s.WorkingDirectory=$env:RAIZ; $s.IconLocation=$env:ICONO; $s.Description='Deep Prep (en segundo plano)'; $s.Save()"
-    )
-    entorno = dict(os.environ, ACCESO=str(ACCESO), PYW=pyw, ARGS=argumentos, RAIZ=str(config.RAIZ), ICONO=str(icono))
-    r = subprocess.run(
-        ["powershell", "-NoProfile", "-Command", ps],
-        env=entorno,
-        capture_output=True,
-        text=True,
-        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    # Arranca en la RAIZ: desde el código, en la carpeta de pyw no se encontraría el paquete para "-m deepprep".
+    r = crear_acceso_directo(
+        ACCESO,
+        pyw,
+        argumentos,
+        "Deep Prep (en segundo plano)",
+        carpeta=config.RAIZ,
+        icono=config.RUTA_WEB / "icono.ico",
+        texto=True,
     )
     return "" if r.returncode == 0 and ACCESO.exists() else f"No se pudo crear el arranque con Windows: {r.stderr.strip()[:200]}"

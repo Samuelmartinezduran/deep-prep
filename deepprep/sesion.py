@@ -5,19 +5,8 @@ import time
 from collections import Counter
 
 from . import analisis as an
+from .constantes import COLAS, COLAS_GRIETA, FLEXIBLE, GRIETA, LIGA_COLA, NOMBRE_LIGA, SOLO_DUO
 
-COLAS = {
-    400: "Normal (reclutamiento)",
-    420: "Clasificatoria solo/dúo",
-    430: "Normal (a ciegas)",
-    440: "Clasificatoria flexible",
-    450: "ARAM",
-    480: "Swiftplay",
-    490: "Partida rápida",
-    700: "Clash",
-}
-LIGA_COLA = {420: "RANKED_SOLO_5x5", 440: "RANKED_FLEX_SR"}
-NOMBRE_LIGA = {420: " de solo/dúo", 440: " flexibles"}
 NIVELES = {
     "IRON": "Hierro",
     "BRONZE": "Bronce",
@@ -177,7 +166,7 @@ class Sesion:
 
     def _quizas_linea(self, j, red):
         """Decide si merece la pena pedir la línea de tiempo de esta partida (es la consulta cara)."""
-        if j["puuid"] == self.yo or red["remake"] or red["cola"] not in an.COLAS_GRIETA:
+        if j["puuid"] == self.yo or red["remake"] or red["cola"] not in COLAS_GRIETA:
             return
         en = an.jugador_en(red, j["puuid"])
         if not en:
@@ -260,7 +249,7 @@ class Sesion:
                 "d": e.get("losses", 0),
             }
 
-        return {"solo": una("RANKED_SOLO_5x5"), "flex": una("RANKED_FLEX_SR") if self.cola == 440 else None}
+        return {"solo": una(LIGA_COLA[SOLO_DUO]), "flex": una(LIGA_COLA[FLEXIBLE]) if self.cola == FLEXIBLE else None}
 
     def _montar(self):
         app = self.app
@@ -283,7 +272,7 @@ class Sesion:
             "id": self.id,
             "cola": COLAS.get(self.cola, f"Cola {self.cola}"),
             "yo": {"campeon": datos.nombre(yo["campeon"]), "splash": datos.splash(yo["campeon"])} if yo else None,
-            "grieta": self.mapa == 11,
+            "grieta": self.mapa == GRIETA,
             "inicio": self.inicio,
             "origen": self.origen,
             "equipos": equipos,

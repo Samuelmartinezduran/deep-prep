@@ -9,10 +9,10 @@ import subprocess
 from pathlib import Path
 
 from .revision import TROZO_S, en_grabacion, nombre_trozo
+from .sistema import SIN_VENTANA
 
 ANTES_S = 20  # lo que lleva a la muerte
 DESPUES_S = 4
-SIN_VENTANA = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 PRIORIDAD_MINIMA = getattr(subprocess, "IDLE_PRIORITY_CLASS", 0)
 
 

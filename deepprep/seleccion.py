@@ -3,7 +3,7 @@
 import time
 
 from . import analisis as an
-from .sesion import NOMBRE_LIGA
+from .constantes import NOMBRE_LIGA
 
 
 class Seleccion:

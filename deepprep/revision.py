@@ -23,45 +23,15 @@ TROZO_S = 300  # la grabación va en trozos de 5 minutos
 def reducir_linea_completa(t):
     """Línea de tiempo entera (no solo los 15 primeros minutos): estado por minuto, kills y monstruos."""
     info = t["info"]
-    pos, est = {}, {}
-    for f in info["frames"]:
-        for pid, pf in f.get("participantFrames", {}).items():
-            p = pf.get("position") or {}
-            pos.setdefault(pid, []).append([p.get("x", 0), p.get("y", 0)])
-            est.setdefault(pid, []).append(
-                [
-                    pf.get("totalGold", 0),
-                    pf.get("xp", 0),
-                    pf.get("minionsKilled", 0) + pf.get("jungleMinionsKilled", 0),
-                    pf.get("level", 1),
-                ]
-            )
+    pos, est = an.estado_por_minuto(info["frames"])
     kills, monstruos = [], []
     for f in info["frames"]:
         for e in f.get("events", []):
             if e["type"] == "CHAMPION_KILL":
-                p = e.get("position") or {}
-                kills.append(
-                    [
-                        e["timestamp"],
-                        p.get("x", 0),
-                        p.get("y", 0),
-                        e.get("killerId", 0),
-                        e.get("victimId", 0),
-                        e.get("assistingParticipantIds") or [],
-                    ]
-                )
+                kills.append(an.kill_reducida(e))
             elif e["type"] == "ELITE_MONSTER_KILL":
-                monstruos.append(
-                    [
-                        e["timestamp"],
-                        e.get("monsterType", ""),
-                        e.get("monsterSubType") or "",
-                        e.get("killerId", 0),
-                        e.get("killerTeamId", 0),
-                        e.get("assistingParticipantIds") or [],
-                    ]
-                )
+                # Aquí también quién ayudó: la revisión dice si participaste en cada objetivo.
+                monstruos.append([*an.monstruo_reducido(e), e.get("assistingParticipantIds") or []])
     return {"id": t["metadata"]["matchId"], "pos": pos, "est": est, "kills": kills, "monstruos": monstruos}
 
 

@@ -5,7 +5,7 @@ import time
 from typing import Any
 
 from . import recolector as rec
-from .grabacion import GRIETA
+from .constantes import GRIETA
 from .riot import ClaveInvalida, ErrorRiot
 
 FASES = {

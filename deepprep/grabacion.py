@@ -23,16 +23,15 @@ import time
 from pathlib import Path
 
 from . import config
+from .sistema import SIN_VENTANA
 
 RUTA_LOG = config.DATOS / "grabacion.log"
 RUTA_CERROJO = config.DATOS / "grabacion.lock"
 # En la carpeta de cada grabación: cuándo empezó cada serie de trozos (rNN_seg_*.mkv), en hora del reloj.
 SERIES = "series.json"
-GRIETA = 11
 # Si el vídeo lleva este tiempo sin crecer, algo va mal y el panel lo avisa.
 SEGUNDOS_SIN_CRECER = 20
 CLASE_JUEGO = "RiotWindowClass"
-SIN_VENTANA = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 # Ajustes de cada codificador, de mejor a peor opción. El de procesador es el del script de coaching.
 CODIFICADORES = {
@@ -187,13 +186,15 @@ def buscar_ffmpeg():
     return shutil.which("ffmpeg")
 
 
+class _GUID(ctypes.Structure):
+    """El GUID de Windows (carpetas conocidas, interfaces COM)."""
+
+    _fields_ = [("a", ctypes.c_ulong), ("b", ctypes.c_ushort), ("c", ctypes.c_ushort), ("d", ctypes.c_ubyte * 8)]
+
+
 def carpeta_videos():
     """Vídeos del usuario (aunque esté movida a OneDrive u otro disco)."""
-
-    class GUID(ctypes.Structure):
-        _fields_ = [("a", ctypes.c_ulong), ("b", ctypes.c_ushort), ("c", ctypes.c_ushort), ("d", ctypes.c_ubyte * 8)]
-
-    videos = GUID(0x18989B1D, 0x99B5, 0x455B, (ctypes.c_ubyte * 8)(0x84, 0x1C, 0xAB, 0x7C, 0x74, 0xE4, 0xDD, 0xFC))
+    videos = _GUID(0x18989B1D, 0x99B5, 0x455B, (ctypes.c_ubyte * 8)(0x84, 0x1C, 0xAB, 0x7C, 0x74, 0xE4, 0xDD, 0xFC))
     ruta = ctypes.c_wchar_p()
     try:
         if ctypes.windll.shell32.SHGetKnownFolderPath(ctypes.byref(videos), 0, None, ctypes.byref(ruta)) == 0:
@@ -242,11 +243,7 @@ def salida_del_juego():
     if not hwnd:
         return 0
     monitor = ctypes.windll.user32.MonitorFromWindow(hwnd, 2)
-
-    class GUID(ctypes.Structure):
-        _fields_ = [("a", ctypes.c_ulong), ("b", ctypes.c_ushort), ("c", ctypes.c_ushort), ("d", ctypes.c_ubyte * 8)]
-
-    iid = GUID(0x770AAE78, 0xF26F, 0x4DBA, (ctypes.c_ubyte * 8)(0xA8, 0x29, 0x25, 0x3C, 0x83, 0xD1, 0xB3, 0x87))  # IDXGIFactory1
+    iid = _GUID(0x770AAE78, 0xF26F, 0x4DBA, (ctypes.c_ubyte * 8)(0xA8, 0x29, 0x25, 0x3C, 0x83, 0xD1, 0xB3, 0x87))  # IDXGIFactory1
     fabrica, adaptador = ctypes.c_void_p(), ctypes.c_void_p()
     try:
         if ctypes.windll.dxgi.CreateDXGIFactory1(ctypes.byref(iid), ctypes.byref(fabrica)) != 0:

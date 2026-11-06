@@ -20,9 +20,10 @@ from . import recolector as rec
 from .ajustes import Ajustes
 from .cache import Cache
 from .comparador import Comparador
+from .constantes import GRIETA
 from .cuentas import Cuentas
 from .ddragon import Datos
-from .grabacion import GRIETA, Grabador
+from .grabacion import Grabador
 from .overlay import MODO_SIN_BORDES, modo_ventana
 from .partidas import Partidas
 from .revisiones import Revisor
