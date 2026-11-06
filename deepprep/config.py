@@ -13,6 +13,8 @@ import json
 import os
 import shutil
 import sys
+import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -155,28 +157,136 @@ POR_DEFECTO = {
 }
 
 
+# config.json y clave.txt se leen y se escriben desde varios hilos (servidor del panel, vigía del cliente...).
+_lock = threading.Lock()
+# Si config.json no se pudo leer ni apartar al cargarlo, no se escribe encima en todo el arranque: ahí siguen tus
+# datos y lo que hay en memoria son los valores por defecto (o la copia). Dice por qué.
+_no_pisar = ""
+
+
+def escribir_atomico(ruta, texto):
+    """Escribe un archivo de texto entero o nada.
+
+    Va primero a un temporal en la misma carpeta y luego se cambia por el de verdad (os.replace): si algo falla a
+    medias, o se va la luz, queda el archivo de antes entero, nunca uno a medio escribir.
+    """
+    ruta = Path(ruta)
+    fd, temporal = tempfile.mkstemp(dir=ruta.parent, prefix=f".{ruta.name}.", suffix=".tmp")
+    try:
+        with open(fd, "w", encoding="utf-8") as f:
+            f.write(texto)
+            f.flush()
+            os.fsync(f.fileno())
+        for intento in range(5):
+            try:
+                os.replace(temporal, ruta)
+                break
+            except PermissionError:
+                # Windows no deja cambiar un archivo que otro tiene abierto justo entonces (el antivirus, el
+                # proceso que graba leyendo la configuración...): se reintenta un momento.
+                if intento == 4:
+                    raise
+                time.sleep(0.1)
+    finally:
+        try:
+            os.unlink(temporal)  # si se cambió ya no está; si no, fuera el temporal a medias
+        except OSError:
+            pass
+
+
+def _ruta_copia():
+    return RUTA_CONFIG.with_name(RUTA_CONFIG.name + ".copia")
+
+
+def _ruta_rota():
+    return RUTA_CONFIG.with_name(RUTA_CONFIG.name + ".roto")
+
+
+def _texto(cfg):
+    return json.dumps(cfg, ensure_ascii=False, indent=2)
+
+
+def _objeto(texto):
+    datos = json.loads(texto)
+    if not isinstance(datos, dict):
+        raise ValueError(f"no es un objeto JSON sino {type(datos).__name__}")
+    return datos
+
+
+def _copiar(texto):
+    """Deja en config.json.copia el último config.json bueno: de ahí se tira si un día aparece roto."""
+    copia = _ruta_copia()
+    try:
+        if not copia.is_file() or copia.read_text(encoding="utf-8") != texto:
+            escribir_atomico(copia, texto)
+    except OSError as e:
+        print(f"No se pudo guardar la copia de config.json: {e!r}")
+
+
+def _recuperar(error):
+    """config.json está roto o no se puede leer: lo aparta (config.json.roto) y tira de la copia, si la hay.
+
+    Devuelve lo que se salva de la configuración ({} si nada). Nunca escribe encima del archivo roto: si no se
+    puede apartar, no se guarda nada en config.json hasta el siguiente arranque.
+    """
+    global _no_pisar
+    print(f"AVISO: config.json no se pudo leer ({error!r})")
+    try:
+        os.replace(RUTA_CONFIG, _ruta_rota())
+        print(f"AVISO: el config.json que no se podía leer queda en {_ruta_rota()}")
+    except OSError as e:
+        _no_pisar = f"al arrancar no se pudo leer ni apartar ({e!r}); se deja como está"
+        print(f"AVISO: config.json tampoco se pudo apartar ({e!r}); no se escribirá encima hasta reiniciar la app")
+    try:
+        texto = _ruta_copia().read_text(encoding="utf-8")
+        recuperado = _objeto(texto)
+    except (OSError, ValueError) as e:
+        print(f"AVISO: no hay copia buena de config.json ({e!r}); sigo con los valores por defecto")
+        texto, recuperado = _texto(POR_DEFECTO), {}
+    else:
+        print(f"Configuración recuperada de la copia ({_ruta_copia()})")
+    if not _no_pisar:
+        try:
+            escribir_atomico(RUTA_CONFIG, texto)
+        except OSError as e:
+            print(f"No se pudo rehacer config.json: {e!r}")
+    return recuperado
+
+
 def cargar():
     cfg = dict(POR_DEFECTO)
-    if RUTA_CONFIG.exists():
+    with _lock:
+        if not RUTA_CONFIG.exists():
+            escribir_atomico(RUTA_CONFIG, _texto(POR_DEFECTO))
+            return cfg
         try:
-            cfg.update(json.loads(RUTA_CONFIG.read_text(encoding="utf-8")))
+            texto = RUTA_CONFIG.read_text(encoding="utf-8")
+            cfg.update(_objeto(texto))
         except (OSError, ValueError) as e:
-            print(f"config.json no se pudo leer ({e}); uso los valores por defecto")
-    else:
-        RUTA_CONFIG.write_text(json.dumps(POR_DEFECTO, ensure_ascii=False, indent=2), encoding="utf-8")
+            cfg.update(_recuperar(e))
+        else:
+            _copiar(texto)
     return cfg
 
 
 def guardar(cfg):
-    RUTA_CONFIG.write_text(json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8")
+    texto = _texto(cfg)
+    with _lock:
+        if _no_pisar:
+            print(f"No guardo config.json: {_no_pisar}")
+            return
+        escribir_atomico(RUTA_CONFIG, texto)
+        _copiar(texto)
 
 
 def leer_clave():
     try:
-        return RUTA_CLAVE.read_text(encoding="utf-8").strip()
+        with _lock:  # que no esté abierta justo cuando guardar_clave la cambia (Windows no lo dejaría)
+            return RUTA_CLAVE.read_text(encoding="utf-8").strip()
     except OSError:
         return ""
 
 
 def guardar_clave(clave):
-    RUTA_CLAVE.write_text(clave.strip(), encoding="utf-8")
+    with _lock:
+        escribir_atomico(RUTA_CLAVE, clave.strip())

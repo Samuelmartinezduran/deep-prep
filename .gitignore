@@ -1,6 +1,9 @@
 # Datos de cada usuario (nunca al repositorio)
 clave.txt
 config.json
+config.json.copia
+config.json.roto
+*.tmp
 *.db
 *.db-shm
 *.db-wal
