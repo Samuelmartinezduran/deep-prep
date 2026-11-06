@@ -1,0 +1,561 @@
+{
+ "fase": "InProgress",
+ "fase_txt": "En partida",
+ "modo": "carga",
+ "reloj": null,
+ "overlay": {
+  "activo": true,
+  "atajo": "ctrl+tab",
+  "aviso": ""
+ },
+ "cuenta": "Yo#EUW",
+ "clave": {
+  "ok": true,
+  "error": ""
+ },
+ "cuota": {
+  "usadas": 0,
+  "tope": 96,
+  "espera": 0.0
+ },
+ "sync": {
+  "hechas": 0,
+  "total": 0
+ },
+ "grabacion": {
+  "carpeta": "",
+  "parada": false
+ },
+ "ultima_revision": null,
+ "seleccion": null,
+ "recolector": {
+  "partidas": 0,
+  "miradas": 0,
+  "activo": false,
+  "pool": []
+ },
+ "panel": {
+  "duelo": {
+   "n": 0,
+   "datos": [],
+   "build": null,
+   "tu": null,
+   "poco": true,
+   "a": "Campeón 40",
+   "b": "Campeón 421",
+   "icono_a": "",
+   "icono_b": "",
+   "pos": "top",
+   "en_pool": false
+  },
+  "id": 7000000002,
+  "cola": "Clasificatoria solo/dúo",
+  "yo": {
+   "campeon": "Campeón 40",
+   "splash": ""
+  },
+  "grieta": true,
+  "inicio": 1791801049144,
+  "origen": "propia",
+  "equipos": {
+   "aliado": [
+    {
+     "nombre": "Ashgrove",
+     "tag": "DEMO",
+     "campeon": "Campeón 40",
+     "icono": "",
+     "rol": "TOP",
+     "rol_txt": "top",
+     "soy_yo": true,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Saltmarsh",
+     "tag": "DEMO",
+     "campeon": "Campeón 59",
+     "icono": "",
+     "rol": "JUNGLE",
+     "rol_txt": "jungla",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Halcyon",
+     "tag": "DEMO",
+     "campeon": "Campeón 126",
+     "icono": "",
+     "rol": "MIDDLE",
+     "rol_txt": "mid",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Fennec",
+     "tag": "DEMO",
+     "campeon": "Campeón 30",
+     "icono": "",
+     "rol": "BOTTOM",
+     "rol_txt": "ADC",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Ironbark",
+     "tag": "DEMO",
+     "campeon": "Campeón 134",
+     "icono": "",
+     "rol": "UTILITY",
+     "rol_txt": "support",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    }
+   ],
+   "rival": [
+    {
+     "nombre": "Gloam",
+     "tag": "DEMO",
+     "campeon": "Campeón 421",
+     "icono": "",
+     "rol": "TOP",
+     "rol_txt": "top",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Larkspur",
+     "tag": "DEMO",
+     "campeon": "Campeón 887",
+     "icono": "",
+     "rol": "JUNGLE",
+     "rol_txt": "jungla",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Vesper",
+     "tag": "DEMO",
+     "campeon": "Campeón 555",
+     "icono": "",
+     "rol": "MIDDLE",
+     "rol_txt": "mid",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Thistle",
+     "tag": "DEMO",
+     "campeon": "Campeón 166",
+     "icono": "",
+     "rol": "BOTTOM",
+     "rol_txt": "ADC",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Kelpie",
+     "tag": "DEMO",
+     "campeon": "Campeón 90",
+     "icono": "",
+     "rol": "UTILITY",
+     "rol_txt": "support",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 0,
+      "v": 0
+     },
+     "camp": {
+      "n": 0,
+      "v": 0,
+      "kda": null
+     },
+     "kda": null,
+     "racha": [],
+     "etiquetas": [],
+     "grupo": "",
+     "cargando": false
+    }
+   ]
+  },
+  "jungla": {
+   "nombre": "Larkspur",
+   "campeon": "Campeón 887",
+   "icono": "",
+   "n": 0,
+   "n_campeon": 0,
+   "n_lineas": 0,
+   "tarjetas": [],
+   "mapa": {},
+   "cargando": false
+  },
+  "lineas": [],
+  "gank": null,
+  "historial": {
+   "n": 0,
+   "campeon": null,
+   "vs": [],
+   "vs_directo": null,
+   "conocidos": [],
+   "alcance": "temporada",
+   "cola_txt": " de solo/dúo",
+   "mi_campeon": "Campeón 40"
+  },
+  "avisos": [],
+  "plan": [],
+  "bans": [
+   {
+    "nombre": "Campeón 53",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 238",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 246",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 91",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 11",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 39",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 120",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 84",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 432",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 64",
+    "icono": ""
+   }
+  ],
+  "recordatorios": [],
+  "notas": [],
+  "progreso": {
+   "hechas": 30,
+   "total": 30
+  },
+  "terminada": false
+ }
+}

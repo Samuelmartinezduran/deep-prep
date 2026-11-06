@@ -1,0 +1,1097 @@
+{
+ "fase": "InProgress",
+ "fase_txt": "En partida",
+ "modo": "carga",
+ "reloj": null,
+ "overlay": {
+  "activo": true,
+  "atajo": "ctrl+tab",
+  "aviso": ""
+ },
+ "cuenta": "Yo#EUW",
+ "clave": {
+  "ok": true,
+  "error": ""
+ },
+ "cuota": {
+  "usadas": 0,
+  "tope": 96,
+  "espera": 0.0
+ },
+ "sync": {
+  "hechas": 0,
+  "total": 0
+ },
+ "grabacion": {
+  "carpeta": "",
+  "parada": false
+ },
+ "ultima_revision": null,
+ "seleccion": null,
+ "recolector": {
+  "partidas": 875,
+  "miradas": 875,
+  "activo": false,
+  "pool": []
+ },
+ "panel": {
+  "duelo": {
+   "n": 32,
+   "wr": 50,
+   "datos": [
+    {
+     "texto": "Muertes antes del 10: 0,0 en las que gana Campeón 40, 1,0 en las que pierde.",
+     "detalle": "16 victorias y 16 derrotas"
+    },
+    {
+     "texto": "Kills y asistencias antes del 10: 2,0 en las que gana Campeón 40, 0,0 en las que pierde.",
+     "detalle": "16 victorias y 16 derrotas"
+    },
+    {
+     "texto": "Campeón 40 gana el 50% de las peleas con Campeón 421 antes del 15.",
+     "detalle": "64 peleas de 2 a 4 jugadores"
+    }
+   ],
+   "build": {
+    "runa": "Runa 8008",
+    "secundaria": "Runa 8400",
+    "objeto": "Objeto 3087",
+    "minuto": "12,9",
+    "wr_objeto": 100,
+    "n_objeto": 16,
+    "maximiza": "W > Q > E"
+   },
+   "poco": false,
+   "tu": {
+    "n": 15,
+    "n_ref": 16,
+    "ref": "Ganan este duelo",
+    "filas": [
+     {
+      "que": "Muertes antes del 10",
+      "tu": "0,0",
+      "ref": "0,0",
+      "mejor": null
+     },
+     {
+      "que": "Peleas con tu rival antes del 6",
+      "tu": "0,0",
+      "ref": "0,0",
+      "mejor": null
+     },
+     {
+      "que": "CS sobre tu rival al 10",
+      "tu": "+2",
+      "ref": "+2",
+      "mejor": null
+     },
+     {
+      "que": "Oro sobre tu rival al 10",
+      "tu": "+337",
+      "ref": "+337",
+      "mejor": null
+     }
+    ]
+   },
+   "a": "Campeón 40",
+   "b": "Campeón 421",
+   "icono_a": "",
+   "icono_b": "",
+   "pos": "top",
+   "en_pool": false
+  },
+  "id": 7000000002,
+  "cola": "Clasificatoria solo/dúo",
+  "yo": {
+   "campeon": "Campeón 40",
+   "splash": ""
+  },
+  "grieta": true,
+  "inicio": 1791801049144,
+  "origen": "propia",
+  "equipos": {
+   "aliado": [
+    {
+     "nombre": "Ashgrove",
+     "tag": "DEMO",
+     "campeon": "Campeón 40",
+     "icono": "",
+     "rol": "TOP",
+     "rol_txt": "top",
+     "soy_yo": true,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 2,
+      "v": 2
+     },
+     "camp": {
+      "n": 2,
+      "v": 2,
+      "kda": [
+       5.0,
+       3.0,
+       6.0
+      ]
+     },
+     "kda": [
+      5.0,
+      3.0,
+      6.0
+     ],
+     "racha": [
+      true,
+      true
+     ],
+     "etiquetas": [
+      {
+       "t": "Poco rodado",
+       "tono": "flojo",
+       "d": "0k de maestría"
+      }
+     ],
+     "grupo": "A",
+     "cargando": false
+    },
+    {
+     "nombre": "Saltmarsh",
+     "tag": "DEMO",
+     "campeon": "Campeón 59",
+     "icono": "",
+     "rol": "JUNGLE",
+     "rol_txt": "jungla",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 2,
+      "v": 2
+     },
+     "camp": {
+      "n": 2,
+      "v": 2,
+      "kda": [
+       27.0,
+       7.0,
+       6.0
+      ]
+     },
+     "kda": [
+      27.0,
+      7.0,
+      6.0
+     ],
+     "racha": [
+      true,
+      true
+     ],
+     "etiquetas": [
+      {
+       "t": "Premade A",
+       "tono": "neutro",
+       "d": "ha jugado en el mismo equipo que otro jugador de esta partida en 2 o más partidas recientes"
+      },
+      {
+       "t": "Poco rodado",
+       "tono": "flojo",
+       "d": "0k de maestría"
+      }
+     ],
+     "grupo": "A",
+     "cargando": false
+    },
+    {
+     "nombre": "Halcyon",
+     "tag": "DEMO",
+     "campeon": "Campeón 126",
+     "icono": "",
+     "rol": "MIDDLE",
+     "rol_txt": "mid",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 2,
+      "v": 2
+     },
+     "camp": {
+      "n": 2,
+      "v": 2,
+      "kda": [
+       10.0,
+       8.0,
+       4.0
+      ]
+     },
+     "kda": [
+      10.0,
+      8.0,
+      4.0
+     ],
+     "racha": [
+      true,
+      true
+     ],
+     "etiquetas": [
+      {
+       "t": "Premade A",
+       "tono": "neutro",
+       "d": "ha jugado en el mismo equipo que otro jugador de esta partida en 2 o más partidas recientes"
+      },
+      {
+       "t": "Poco rodado",
+       "tono": "flojo",
+       "d": "0k de maestría"
+      }
+     ],
+     "grupo": "A",
+     "cargando": false
+    },
+    {
+     "nombre": "Fennec",
+     "tag": "DEMO",
+     "campeon": "Campeón 30",
+     "icono": "",
+     "rol": "BOTTOM",
+     "rol_txt": "ADC",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 1,
+      "v": 1
+     },
+     "camp": {
+      "n": 1,
+      "v": 1,
+      "kda": [
+       2.0,
+       8.0,
+       7.0
+      ]
+     },
+     "kda": [
+      2.0,
+      8.0,
+      7.0
+     ],
+     "racha": [
+      true
+     ],
+     "etiquetas": [
+      {
+       "t": "Primera vez",
+       "tono": "flojo",
+       "d": "0 puntos de maestría"
+      }
+     ],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Ironbark",
+     "tag": "DEMO",
+     "campeon": "Campeón 134",
+     "icono": "",
+     "rol": "UTILITY",
+     "rol_txt": "support",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 1,
+      "v": 1
+     },
+     "camp": {
+      "n": 1,
+      "v": 1,
+      "kda": [
+       0.0,
+       7.0,
+       25.0
+      ]
+     },
+     "kda": [
+      0.0,
+      7.0,
+      25.0
+     ],
+     "racha": [
+      true
+     ],
+     "etiquetas": [
+      {
+       "t": "Primera vez",
+       "tono": "flojo",
+       "d": "0 puntos de maestría"
+      }
+     ],
+     "grupo": "",
+     "cargando": false
+    }
+   ],
+   "rival": [
+    {
+     "nombre": "Gloam",
+     "tag": "DEMO",
+     "campeon": "Campeón 421",
+     "icono": "",
+     "rol": "TOP",
+     "rol_txt": "top",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 1,
+      "v": 0
+     },
+     "camp": {
+      "n": 1,
+      "v": 0,
+      "kda": [
+       4.0,
+       6.0,
+       1.0
+      ]
+     },
+     "kda": [
+      4.0,
+      6.0,
+      1.0
+     ],
+     "racha": [
+      false
+     ],
+     "etiquetas": [
+      {
+       "t": "Primera vez",
+       "tono": "flojo",
+       "d": "0 puntos de maestría"
+      }
+     ],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Larkspur",
+     "tag": "DEMO",
+     "campeon": "Campeón 887",
+     "icono": "",
+     "rol": "JUNGLE",
+     "rol_txt": "jungla",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 2,
+      "v": 0
+     },
+     "camp": {
+      "n": 2,
+      "v": 0,
+      "kda": [
+       4.0,
+       8.0,
+       6.0
+      ]
+     },
+     "kda": [
+      4.0,
+      8.0,
+      6.0
+     ],
+     "racha": [
+      false,
+      false
+     ],
+     "etiquetas": [
+      {
+       "t": "Premade A",
+       "tono": "neutro",
+       "d": "ha jugado en el mismo equipo que otro jugador de esta partida en 2 o más partidas recientes"
+      },
+      {
+       "t": "Poco rodado",
+       "tono": "flojo",
+       "d": "0k de maestría"
+      }
+     ],
+     "grupo": "A",
+     "cargando": false
+    },
+    {
+     "nombre": "Vesper",
+     "tag": "DEMO",
+     "campeon": "Campeón 555",
+     "icono": "",
+     "rol": "MIDDLE",
+     "rol_txt": "mid",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 2,
+      "v": 0
+     },
+     "camp": {
+      "n": 2,
+      "v": 0,
+      "kda": [
+       11.0,
+       10.0,
+       6.0
+      ]
+     },
+     "kda": [
+      11.0,
+      10.0,
+      6.0
+     ],
+     "racha": [
+      false,
+      false
+     ],
+     "etiquetas": [
+      {
+       "t": "Premade A",
+       "tono": "neutro",
+       "d": "ha jugado en el mismo equipo que otro jugador de esta partida en 2 o más partidas recientes"
+      },
+      {
+       "t": "Poco rodado",
+       "tono": "flojo",
+       "d": "0k de maestría"
+      }
+     ],
+     "grupo": "A",
+     "cargando": false
+    },
+    {
+     "nombre": "Thistle",
+     "tag": "DEMO",
+     "campeon": "Campeón 166",
+     "icono": "",
+     "rol": "BOTTOM",
+     "rol_txt": "ADC",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 1,
+      "v": 0
+     },
+     "camp": {
+      "n": 1,
+      "v": 0,
+      "kda": [
+       12.0,
+       9.0,
+       6.0
+      ]
+     },
+     "kda": [
+      12.0,
+      9.0,
+      6.0
+     ],
+     "racha": [
+      false
+     ],
+     "etiquetas": [
+      {
+       "t": "Primera vez",
+       "tono": "flojo",
+       "d": "0 puntos de maestría"
+      }
+     ],
+     "grupo": "",
+     "cargando": false
+    },
+    {
+     "nombre": "Kelpie",
+     "tag": "DEMO",
+     "campeon": "Campeón 90",
+     "icono": "",
+     "rol": "UTILITY",
+     "rol_txt": "support",
+     "soy_yo": false,
+     "oculto": false,
+     "liga": {
+      "solo": {
+       "nivel": "diamond",
+       "rank": "IV",
+       "txt": "Diamante IV",
+       "lp": 18,
+       "v": 72,
+       "d": 65
+      },
+      "flex": null
+     },
+     "maestria": 0,
+     "mains": [
+      {
+       "nombre": "Campeón 1",
+       "puntos": 900000
+      }
+     ],
+     "muestra": {
+      "n": 1,
+      "v": 0
+     },
+     "camp": {
+      "n": 1,
+      "v": 0,
+      "kda": [
+       1.0,
+       11.0,
+       17.0
+      ]
+     },
+     "kda": [
+      1.0,
+      11.0,
+      17.0
+     ],
+     "racha": [
+      false
+     ],
+     "etiquetas": [
+      {
+       "t": "Primera vez",
+       "tono": "flojo",
+       "d": "0 puntos de maestría"
+      }
+     ],
+     "grupo": "",
+     "cargando": false
+    }
+   ]
+  },
+  "jungla": {
+   "nombre": "Larkspur",
+   "campeon": "Campeón 887",
+   "icono": "",
+   "n": 2,
+   "n_campeon": 2,
+   "n_lineas": 2,
+   "tarjetas": [
+    {
+     "titulo": "Inicio",
+     "valor": "Rojo en 2 de 2",
+     "detalle": "Hoy su rojo cae en el lado superior. Al 3:00 ya ha cruzado al lado inferior en 2 de 2.",
+     "tono": "neutro"
+    },
+    {
+     "titulo": "Primer gank",
+     "valor": "min 6:07 · bot 2",
+     "detalle": "Primera kill o asistencia en una línea antes del 10, en 2 de 2 partidas.",
+     "tono": "neutro"
+    },
+    {
+     "titulo": "Lado del early",
+     "valor": "67% en el lado superior",
+     "detalle": "Del minuto 3 al 8 suele estar en el lado superior (top y larvas).",
+     "tono": "neutro"
+    },
+    {
+     "titulo": "Invades",
+     "valor": "Roba 7,0 monstruos por partida",
+     "detalle": "Pisa la jungla rival antes del 8 en 0 de 2. Referencia en Diamante-Master: 10 por partida.",
+     "tono": "neutro"
+    },
+    {
+     "titulo": "Objetivos",
+     "valor": "Primer dragón en 2 de 2 (min 6:41)",
+     "detalle": "Larvas: 3,0 por partida.",
+     "tono": "ojo"
+    },
+    {
+     "titulo": "Si se adelanta",
+     "valor": "Por detrás 0 de 2",
+     "detalle": "4,0/8,0/6,0 de media de jungla, 13% del daño de su equipo.",
+     "tono": "neutro"
+    },
+    {
+     "titulo": "Muertes tempranas",
+     "valor": "1,0 antes del 10",
+     "detalle": "Media de 2 partidas con línea de tiempo.",
+     "tono": "neutro"
+    }
+   ],
+   "mapa": {
+    "2": [
+     [
+      9889,
+      9136
+     ],
+     [
+      9889,
+      9136
+     ]
+    ],
+    "3": [
+     [
+      10174,
+      6060
+     ],
+     [
+      10174,
+      6060
+     ]
+    ],
+    "4": [
+     [
+      4524,
+      12204
+     ],
+     [
+      4524,
+      12204
+     ]
+    ],
+    "5": [
+     [
+      7903,
+      10000
+     ],
+     [
+      7903,
+      10000
+     ]
+    ],
+    "6": [
+     [
+      13602,
+      1740
+     ],
+     [
+      13602,
+      1740
+     ]
+    ]
+   },
+   "cargando": false
+  },
+  "lineas": [
+   {
+    "linea": "mid",
+    "veredicto": "Aquí se equivocan",
+    "tono": "bien",
+    "debilidad": 0.7,
+    "diferencia": -0.30000000000000004,
+    "rival": [
+     "Campeón 555 muere 4,0 veces antes del 15",
+     "Campeón 555 casi no ha jugado este campeón"
+    ],
+    "aliado": [
+     "Campeón 126 muere 5,0 veces antes del 15",
+     "Campeón 126 casi no ha jugado este campeón"
+    ]
+   },
+   {
+    "linea": "top",
+    "veredicto": "Tu línea es mejor",
+    "tono": "bien",
+    "debilidad": 0.4,
+    "diferencia": 0.6,
+    "rival": [
+     "Campeón 421 casi no ha jugado este campeón"
+    ],
+    "aliado": [
+     "Campeón 40 apenas muere antes del 15 (1,0)",
+     "Campeón 40 casi no ha jugado este campeón"
+    ]
+   },
+   {
+    "linea": "bot",
+    "veredicto": "Igualada",
+    "tono": "neutro",
+    "debilidad": 0.4,
+    "diferencia": 0.0,
+    "rival": [
+     "Campeón 166 casi no ha jugado este campeón",
+     "Campeón 90 casi no ha jugado este campeón"
+    ],
+    "aliado": [
+     "Campeón 30 casi no ha jugado este campeón",
+     "Campeón 134 casi no ha jugado este campeón"
+    ]
+   }
+  ],
+  "gank": null,
+  "historial": {
+   "n": 2,
+   "campeon": {
+    "n": 2,
+    "v": 2,
+    "racha": [
+     true,
+     true
+    ]
+   },
+   "vs": [
+    {
+     "campeon": 421,
+     "nombre": "Campeón 421",
+     "pos": "TOP",
+     "n": 1,
+     "v": 1,
+     "n_mio": 1,
+     "v_mio": 1,
+     "icono": ""
+    },
+    {
+     "campeon": 555,
+     "nombre": "Campeón 555",
+     "pos": "MIDDLE",
+     "n": 2,
+     "v": 2,
+     "n_mio": 2,
+     "v_mio": 2,
+     "icono": ""
+    },
+    {
+     "campeon": 887,
+     "nombre": "Campeón 887",
+     "pos": "JUNGLE",
+     "n": 2,
+     "v": 2,
+     "n_mio": 2,
+     "v_mio": 2,
+     "icono": ""
+    },
+    {
+     "campeon": 166,
+     "nombre": "Campeón 166",
+     "pos": "BOTTOM",
+     "n": 1,
+     "v": 1,
+     "n_mio": 1,
+     "v_mio": 1,
+     "icono": ""
+    },
+    {
+     "campeon": 90,
+     "nombre": "Campeón 90",
+     "pos": "UTILITY",
+     "n": 1,
+     "v": 1,
+     "n_mio": 1,
+     "v_mio": 1,
+     "icono": ""
+    }
+   ],
+   "vs_directo": {
+    "nombre": "Campeón 421",
+    "pos": "top",
+    "n": 1,
+    "v": 1,
+    "n_mio": 1,
+    "v_mio": 1
+   },
+   "conocidos": [
+    {
+     "nombre": "Saltmarsh",
+     "contigo": true,
+     "ganaste": true,
+     "dias": 3,
+     "veces": 2
+    },
+    {
+     "nombre": "Halcyon",
+     "contigo": true,
+     "ganaste": true,
+     "dias": 3,
+     "veces": 2
+    },
+    {
+     "nombre": "Fennec",
+     "contigo": true,
+     "ganaste": true,
+     "dias": 3,
+     "veces": 1
+    },
+    {
+     "nombre": "Ironbark",
+     "contigo": true,
+     "ganaste": true,
+     "dias": 3,
+     "veces": 1
+    },
+    {
+     "nombre": "Gloam",
+     "contigo": false,
+     "ganaste": true,
+     "dias": 3,
+     "veces": 1
+    },
+    {
+     "nombre": "Vesper",
+     "contigo": false,
+     "ganaste": true,
+     "dias": 3,
+     "veces": 2
+    },
+    {
+     "nombre": "Larkspur",
+     "contigo": false,
+     "ganaste": true,
+     "dias": 3,
+     "veces": 2
+    },
+    {
+     "nombre": "Thistle",
+     "contigo": false,
+     "ganaste": true,
+     "dias": 3,
+     "veces": 1
+    },
+    {
+     "nombre": "Kelpie",
+     "contigo": false,
+     "ganaste": true,
+     "dias": 3,
+     "veces": 1
+    }
+   ],
+   "alcance": "temporada",
+   "cola_txt": " de solo/dúo",
+   "mi_campeon": "Campeón 40"
+  },
+  "avisos": [
+   {
+    "tono": "neutro",
+    "texto": "Rivales con poco rodaje o fuera de rol: Campeón 421 (top, poco rodaje), Campeón 555 (mid, poco rodaje), Campeón 887 (jungla, poco rodaje), Campeón 166 (ADC, poco rodaje), Campeón 90 (support, poco rodaje)."
+   },
+   {
+    "tono": "neutro",
+    "texto": "Aliados con poco rodaje o fuera de rol: Campeón 59 (jungla, poco rodaje), Campeón 126 (mid, poco rodaje), Campeón 30 (ADC, poco rodaje), Campeón 134 (support, poco rodaje)."
+   },
+   {
+    "tono": "neutro",
+    "texto": "Premade rival: Campeón 555 + Campeón 887."
+   }
+  ],
+  "plan": [
+   "Más errores esperados en mid: Campeón 555 muere 4,0 veces antes del 15.",
+   "Su jungla suele empezar en rojo: hoy, arriba."
+  ],
+  "bans": [
+   {
+    "nombre": "Campeón 53",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 238",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 246",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 91",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 11",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 39",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 120",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 84",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 432",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 64",
+    "icono": ""
+   }
+  ],
+  "recordatorios": [
+   "Mirar el minimapa"
+  ],
+  "notas": [
+   {
+    "campeon": "Campeón 40",
+    "icono": "",
+    "texto": "Guardar la E",
+    "rival": false
+   },
+   {
+    "campeon": "Campeón 421",
+    "icono": "",
+    "texto": "Pega fuerte a nivel 3",
+    "rival": true
+   }
+  ],
+  "progreso": {
+   "hechas": 58,
+   "total": 58
+  },
+  "terminada": false
+ }
+}

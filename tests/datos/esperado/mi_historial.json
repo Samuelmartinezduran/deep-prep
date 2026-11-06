@@ -1,0 +1,2082 @@
+{
+ "puuid-demo-01": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 4,
+   "racha": [
+    true,
+    true,
+    true,
+    true
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 164",
+   "pos": "top",
+   "n": 4,
+   "v": 4,
+   "n_mio": 4,
+   "v_mio": 4
+  },
+  "conocidos": [
+   {
+    "nombre": "Nightjar",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Mossback",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Lanternfish",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Quillon",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Sablewing",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Driftmark",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Brindle",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Tallow",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Corvid",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-01_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ },
+ "puuid-demo-02": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 4,
+   "racha": [
+    true,
+    true,
+    true,
+    true
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 131",
+   "pos": "jungla",
+   "n": 4,
+   "v": 4,
+   "n_mio": 4,
+   "v_mio": 4
+  },
+  "conocidos": [
+   {
+    "nombre": "Kestrel",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Mossback",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Lanternfish",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Quillon",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Sablewing",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Driftmark",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Brindle",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Tallow",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Corvid",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-02_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ },
+ "puuid-demo-03": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 4,
+   "racha": [
+    true,
+    true,
+    true,
+    true
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 105",
+   "pos": "mid",
+   "n": 4,
+   "v": 4,
+   "n_mio": 4,
+   "v_mio": 4
+  },
+  "conocidos": [
+   {
+    "nombre": "Kestrel",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Nightjar",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Lanternfish",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Quillon",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Sablewing",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Driftmark",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Brindle",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Tallow",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Corvid",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-03_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ },
+ "puuid-demo-04": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 4,
+   "racha": [
+    true,
+    true,
+    true,
+    true
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 202",
+   "pos": "ADC",
+   "n": 4,
+   "v": 4,
+   "n_mio": 4,
+   "v_mio": 4
+  },
+  "conocidos": [
+   {
+    "nombre": "Kestrel",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Nightjar",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Mossback",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Quillon",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Sablewing",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Driftmark",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Brindle",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Tallow",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Corvid",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-04_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ },
+ "puuid-demo-05": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 4,
+   "racha": [
+    true,
+    true,
+    true,
+    true
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 4
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 101",
+   "pos": "support",
+   "n": 4,
+   "v": 4,
+   "n_mio": 4,
+   "v_mio": 4
+  },
+  "conocidos": [
+   {
+    "nombre": "Kestrel",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Nightjar",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Mossback",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Lanternfish",
+    "contigo": true,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Sablewing",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Driftmark",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Brindle",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Tallow",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Corvid",
+    "contigo": false,
+    "ganaste": true,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-05_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 164,
+    "nombre": "Campeón 164",
+    "pos": "TOP",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 131,
+    "nombre": "Campeón 131",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 105,
+    "nombre": "Campeón 105",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 202,
+    "nombre": "Campeón 202",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 101,
+    "nombre": "Campeón 101",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 4,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ },
+ "puuid-demo-06": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 0,
+   "racha": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 106",
+   "pos": "top",
+   "n": 4,
+   "v": 0,
+   "n_mio": 4,
+   "v_mio": 0
+  },
+  "conocidos": [
+   {
+    "nombre": "Kestrel",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Nightjar",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Mossback",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Lanternfish",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Quillon",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Driftmark",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Brindle",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Tallow",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Corvid",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-06_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ },
+ "puuid-demo-07": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 0,
+   "racha": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 11",
+   "pos": "jungla",
+   "n": 4,
+   "v": 0,
+   "n_mio": 4,
+   "v_mio": 0
+  },
+  "conocidos": [
+   {
+    "nombre": "Kestrel",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Nightjar",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Mossback",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Lanternfish",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Quillon",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Sablewing",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Brindle",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Tallow",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Corvid",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-07_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ },
+ "puuid-demo-08": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 0,
+   "racha": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 800",
+   "pos": "mid",
+   "n": 4,
+   "v": 0,
+   "n_mio": 4,
+   "v_mio": 0
+  },
+  "conocidos": [
+   {
+    "nombre": "Kestrel",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Nightjar",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Mossback",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Lanternfish",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Quillon",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Sablewing",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Driftmark",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Tallow",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Corvid",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-08_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ },
+ "puuid-demo-09": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 0,
+   "racha": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 221",
+   "pos": "ADC",
+   "n": 4,
+   "v": 0,
+   "n_mio": 4,
+   "v_mio": 0
+  },
+  "conocidos": [
+   {
+    "nombre": "Kestrel",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Nightjar",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Mossback",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Lanternfish",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Quillon",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Sablewing",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Driftmark",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Brindle",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Corvid",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-09_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ },
+ "puuid-demo-10": {
+  "n": 4,
+  "campeon": {
+   "n": 4,
+   "v": 0,
+   "racha": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 4,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": {
+   "nombre": "Campeón 235",
+   "pos": "support",
+   "n": 4,
+   "v": 0,
+   "n_mio": 4,
+   "v_mio": 0
+  },
+  "conocidos": [
+   {
+    "nombre": "Kestrel",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Nightjar",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Mossback",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Lanternfish",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Quillon",
+    "contigo": false,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Sablewing",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Driftmark",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Brindle",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   },
+   {
+    "nombre": "Tallow",
+    "contigo": true,
+    "ganaste": false,
+    "dias": 3,
+    "veces": 4
+   }
+  ]
+ },
+ "puuid-demo-10_otro_campeon": {
+  "n": 4,
+  "campeon": {
+   "n": 0,
+   "v": 0,
+   "racha": []
+  },
+  "vs": [
+   {
+    "campeon": 106,
+    "nombre": "Campeón 106",
+    "pos": "TOP",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 11,
+    "nombre": "Campeón 11",
+    "pos": "JUNGLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 800,
+    "nombre": "Campeón 800",
+    "pos": "MIDDLE",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 221,
+    "nombre": "Campeón 221",
+    "pos": "BOTTOM",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 235,
+    "nombre": "Campeón 235",
+    "pos": "UTILITY",
+    "n": 4,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   },
+   {
+    "campeon": 1,
+    "nombre": "Campeón 1",
+    "pos": "",
+    "n": 0,
+    "v": 0,
+    "n_mio": 0,
+    "v_mio": 0
+   }
+  ],
+  "vs_directo": null,
+  "conocidos": []
+ }
+}

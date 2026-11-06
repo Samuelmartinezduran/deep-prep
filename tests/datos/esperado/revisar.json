@@ -1,0 +1,3945 @@
+{
+ "puuid-demo-01": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": true,
+  "campeon": "Campeón 106",
+  "campeon_id": 106,
+  "pos": "TOP",
+  "equipo": 100,
+  "kda": [
+   5,
+   3,
+   6
+  ],
+  "cs_min": 8.9,
+  "oro": 15762,
+  "dano": 31323,
+  "kp": 25,
+  "dano_pct": 24,
+  "vision": 22,
+  "wards": 11,
+  "control": 0,
+  "muertes": [
+   {
+    "t": "14:50",
+    "ms": 890447,
+    "x": 1480,
+    "y": 10790,
+    "donde": "en top",
+    "asesino": "Campeón 164",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_003.mkv",
+     "en": "0:10"
+    }
+   },
+   {
+    "t": "21:12",
+    "ms": 1272309,
+    "x": 9706,
+    "y": 13710,
+    "donde": "en top",
+    "asesino": "Campeón 131",
+    "ayudas": [
+     "Campeón 164"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "1:12"
+    }
+   },
+   {
+    "t": "23:03",
+    "ms": 1383830,
+    "x": 13663,
+    "y": 4160,
+    "donde": "en bot",
+    "asesino": "Campeón 105",
+    "ayudas": [
+     "Campeón 131"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "3:03"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 164",
+   "minutos": {
+    "10": {
+     "oro": [
+      3376,
+      3039
+     ],
+     "xp": [
+      4715,
+      4521
+     ],
+     "cs": [
+      61,
+      59
+     ],
+     "nivel": [
+      8,
+      8
+     ]
+    },
+    "15": {
+     "oro": [
+      4983,
+      4852
+     ],
+     "xp": [
+      8331,
+      8491
+     ],
+     "cs": [
+      106,
+      98
+     ],
+     "nivel": [
+      11,
+      11
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 6:07",
+    "acierto": false
+   }
+  ]
+ },
+ "puuid-demo-02": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": true,
+  "campeon": "Campeón 11",
+  "campeon_id": 11,
+  "pos": "JUNGLE",
+  "equipo": 100,
+  "kda": [
+   27,
+   7,
+   6
+  ],
+  "cs_min": 6.9,
+  "oro": 20205,
+  "dano": 46847,
+  "kp": 75,
+  "dano_pct": 37,
+  "vision": 23,
+  "wards": 1,
+  "control": 0,
+  "muertes": [
+   {
+    "t": "9:01",
+    "ms": 541577,
+    "x": 13992,
+    "y": 8031,
+    "donde": "en bot",
+    "asesino": "Campeón 105",
+    "ayudas": [
+     "Campeón 202"
+    ],
+    "rivales": 2,
+    "perdido": "Larvas rival 0:01 después",
+    "video": {
+     "archivo": "r01_seg_001.mkv",
+     "en": "4:21"
+    }
+   },
+   {
+    "t": "12:35",
+    "ms": 755489,
+    "x": 13973,
+    "y": 4296,
+    "donde": "en bot",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 131",
+     "Campeón 105"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "2:55"
+    }
+   },
+   {
+    "t": "17:29",
+    "ms": 1049593,
+    "x": 10702,
+    "y": 5267,
+    "donde": "en el río (abajo)",
+    "asesino": "Campeón 131",
+    "ayudas": [
+     "Campeón 105",
+     "Campeón 101"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "2:29"
+    }
+   },
+   {
+    "t": "20:55",
+    "ms": 1255246,
+    "x": 8594,
+    "y": 7936,
+    "donde": "en mid",
+    "asesino": "Campeón 105",
+    "ayudas": [
+     "Campeón 202"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "0:55"
+    }
+   },
+   {
+    "t": "23:10",
+    "ms": 1390906,
+    "x": 12052,
+    "y": 4393,
+    "donde": "en la jungla rival (abajo)",
+    "asesino": "Campeón 164",
+    "ayudas": [
+     "Campeón 105",
+     "Campeón 202",
+     "Campeón 101"
+    ],
+    "rivales": 4,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "3:10"
+    }
+   },
+   {
+    "t": "27:01",
+    "ms": 1621941,
+    "x": 10560,
+    "y": 10610,
+    "donde": "en mid",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 105",
+     "Campeón 101"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "2:01"
+    }
+   },
+   {
+    "t": "29:27",
+    "ms": 1767545,
+    "x": 13716,
+    "y": 13564,
+    "donde": "en la base rival",
+    "asesino": "Torre o súbditos",
+    "ayudas": [],
+    "rivales": 0,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "4:27"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 131",
+   "minutos": {
+    "10": {
+     "oro": [
+      5645,
+      3560
+     ],
+     "xp": [
+      4057,
+      3795
+     ],
+     "cs": [
+      61,
+      74
+     ],
+     "nivel": [
+      7,
+      7
+     ]
+    },
+    "15": {
+     "oro": [
+      9866,
+      5614
+     ],
+     "xp": [
+      7915,
+      6811
+     ],
+     "cs": [
+      109,
+      118
+     ],
+     "nivel": [
+      11,
+      10
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": true
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 6:07",
+    "acierto": false
+   }
+  ]
+ },
+ "puuid-demo-03": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": true,
+  "campeon": "Campeón 800",
+  "campeon_id": 800,
+  "pos": "MIDDLE",
+  "equipo": 100,
+  "kda": [
+   10,
+   8,
+   4
+  ],
+  "cs_min": 7.7,
+  "oro": 14129,
+  "dano": 25871,
+  "kp": 32,
+  "dano_pct": 20,
+  "vision": 18,
+  "wards": 11,
+  "control": 0,
+  "muertes": [
+   {
+    "t": "2:37",
+    "ms": 157094,
+    "x": 6303,
+    "y": 6564,
+    "donde": "en mid",
+    "asesino": "Campeón 105",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_000.mkv",
+     "en": "2:57"
+    }
+   },
+   {
+    "t": "5:43",
+    "ms": 343671,
+    "x": 6776,
+    "y": 7377,
+    "donde": "en mid",
+    "asesino": "Campeón 105",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "Dragón oceánico rival 0:57 después",
+    "video": {
+     "archivo": "r01_seg_001.mkv",
+     "en": "1:03"
+    }
+   },
+   {
+    "t": "6:57",
+    "ms": 417764,
+    "x": 6552,
+    "y": 6875,
+    "donde": "en mid",
+    "asesino": "Campeón 131",
+    "ayudas": [
+     "Campeón 105"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_001.mkv",
+     "en": "2:17"
+    }
+   },
+   {
+    "t": "12:25",
+    "ms": 745202,
+    "x": 10963,
+    "y": 3722,
+    "donde": "en el río (abajo)",
+    "asesino": "Campeón 105",
+    "ayudas": [
+     "Campeón 131",
+     "Campeón 101"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "2:45"
+    }
+   },
+   {
+    "t": "14:38",
+    "ms": 878668,
+    "x": 6313,
+    "y": 7078,
+    "donde": "en mid",
+    "asesino": "Campeón 105",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "4:58"
+    }
+   },
+   {
+    "t": "16:47",
+    "ms": 1007186,
+    "x": 11480,
+    "y": 1364,
+    "donde": "en bot",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 101"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "1:47"
+    }
+   },
+   {
+    "t": "21:06",
+    "ms": 1266616,
+    "x": 6318,
+    "y": 6223,
+    "donde": "en mid",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 101"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "1:06"
+    }
+   },
+   {
+    "t": "22:24",
+    "ms": 1344705,
+    "x": 2774,
+    "y": 7408,
+    "donde": "en tu jungla (arriba)",
+    "asesino": "Campeón 164",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "2:24"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 105",
+   "minutos": {
+    "10": {
+     "oro": [
+      3622,
+      4462
+     ],
+     "xp": [
+      4611,
+      5146
+     ],
+     "cs": [
+      76,
+      64
+     ],
+     "nivel": [
+      8,
+      9
+     ]
+    },
+    "15": {
+     "oro": [
+      5321,
+      6804
+     ],
+     "xp": [
+      6725,
+      8101
+     ],
+     "cs": [
+      113,
+      99
+     ],
+     "nivel": [
+      10,
+      11
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": true
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 6:07",
+    "acierto": false
+   }
+  ]
+ },
+ "puuid-demo-04": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": true,
+  "campeon": "Campeón 221",
+  "campeon_id": 221,
+  "pos": "BOTTOM",
+  "equipo": 100,
+  "kda": [
+   2,
+   8,
+   7
+  ],
+  "cs_min": 7.4,
+  "oro": 11649,
+  "dano": 7896,
+  "kp": 20,
+  "dano_pct": 6,
+  "vision": 19,
+  "wards": 7,
+  "control": 0,
+  "muertes": [
+   {
+    "t": "4:33",
+    "ms": 273926,
+    "x": 12162,
+    "y": 1146,
+    "donde": "en bot",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 101"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_000.mkv",
+     "en": "4:53"
+    }
+   },
+   {
+    "t": "8:50",
+    "ms": 530546,
+    "x": 13525,
+    "y": 5810,
+    "donde": "en bot",
+    "asesino": "Campeón 105",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "Larvas rival 0:04 después",
+    "video": {
+     "archivo": "r01_seg_001.mkv",
+     "en": "4:10"
+    }
+   },
+   {
+    "t": "10:38",
+    "ms": 638061,
+    "x": 9174,
+    "y": 2534,
+    "donde": "en tu jungla (abajo)",
+    "asesino": "Campeón 105",
+    "ayudas": [
+     "Campeón 202",
+     "Campeón 101"
+    ],
+    "rivales": 3,
+    "perdido": "Dragón infernal rival 1:22 después",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "0:58"
+    }
+   },
+   {
+    "t": "14:50",
+    "ms": 890819,
+    "x": 13242,
+    "y": 2130,
+    "donde": "en bot",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 131"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_003.mkv",
+     "en": "0:10"
+    }
+   },
+   {
+    "t": "17:36",
+    "ms": 1056951,
+    "x": 9162,
+    "y": 6627,
+    "donde": "en el río (abajo)",
+    "asesino": "Campeón 131",
+    "ayudas": [
+     "Campeón 202",
+     "Campeón 101"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "2:36"
+    }
+   },
+   {
+    "t": "19:12",
+    "ms": 1152622,
+    "x": 8129,
+    "y": 6160,
+    "donde": "en el río (abajo)",
+    "asesino": "Campeón 105",
+    "ayudas": [
+     "Campeón 202",
+     "Campeón 101"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "4:12"
+    }
+   },
+   {
+    "t": "21:40",
+    "ms": 1300723,
+    "x": 1862,
+    "y": 12875,
+    "donde": "en top",
+    "asesino": "Campeón 101",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "1:40"
+    }
+   },
+   {
+    "t": "24:57",
+    "ms": 1497856,
+    "x": 8496,
+    "y": 10026,
+    "donde": "en la jungla rival (arriba)",
+    "asesino": "Campeón 202",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "4:57"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 202",
+   "minutos": {
+    "10": {
+     "oro": [
+      3211,
+      4065
+     ],
+     "xp": [
+      3058,
+      3431
+     ],
+     "cs": [
+      69,
+      74
+     ],
+     "nivel": [
+      6,
+      7
+     ]
+    },
+    "15": {
+     "oro": [
+      5279,
+      7670
+     ],
+     "xp": [
+      5624,
+      5832
+     ],
+     "cs": [
+      104,
+      119
+     ],
+     "nivel": [
+      9,
+      9
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": true
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 6:07",
+    "acierto": false
+   }
+  ]
+ },
+ "puuid-demo-05": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": true,
+  "campeon": "Campeón 235",
+  "campeon_id": 235,
+  "pos": "UTILITY",
+  "equipo": 100,
+  "kda": [
+   0,
+   7,
+   25
+  ],
+  "cs_min": 1.1,
+  "oro": 11092,
+  "dano": 16112,
+  "kp": 57,
+  "dano_pct": 13,
+  "vision": 68,
+  "wards": 27,
+  "control": 2,
+  "muertes": [
+   {
+    "t": "4:29",
+    "ms": 269685,
+    "x": 11323,
+    "y": 1001,
+    "donde": "en bot",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 101"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_000.mkv",
+     "en": "4:49"
+    }
+   },
+   {
+    "t": "6:07",
+    "ms": 367917,
+    "x": 11957,
+    "y": 1133,
+    "donde": "en bot",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 131",
+     "Campeón 101"
+    ],
+    "rivales": 3,
+    "perdido": "Dragón oceánico rival 0:33 después",
+    "video": {
+     "archivo": "r01_seg_001.mkv",
+     "en": "1:27"
+    }
+   },
+   {
+    "t": "10:31",
+    "ms": 631405,
+    "x": 10799,
+    "y": 1408,
+    "donde": "en bot",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 101"
+    ],
+    "rivales": 2,
+    "perdido": "Dragón infernal rival 1:29 después",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "0:51"
+    }
+   },
+   {
+    "t": "19:05",
+    "ms": 1145091,
+    "x": 6368,
+    "y": 7568,
+    "donde": "en mid",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 101"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "4:05"
+    }
+   },
+   {
+    "t": "21:12",
+    "ms": 1272108,
+    "x": 4998,
+    "y": 5884,
+    "donde": "en mid",
+    "asesino": "Campeón 202",
+    "ayudas": [
+     "Campeón 101"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "1:12"
+    }
+   },
+   {
+    "t": "23:17",
+    "ms": 1397186,
+    "x": 9785,
+    "y": 3070,
+    "donde": "en tu jungla (abajo)",
+    "asesino": "Campeón 164",
+    "ayudas": [
+     "Campeón 131",
+     "Campeón 105",
+     "Campeón 101"
+    ],
+    "rivales": 4,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "3:17"
+    }
+   },
+   {
+    "t": "29:24",
+    "ms": 1764205,
+    "x": 12196,
+    "y": 11935,
+    "donde": "en la base rival",
+    "asesino": "Campeón 105",
+    "ayudas": [
+     "Campeón 101"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "4:24"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 101",
+   "minutos": {
+    "10": {
+     "oro": [
+      3026,
+      2702
+     ],
+     "xp": [
+      3166,
+      2832
+     ],
+     "cs": [
+      17,
+      8
+     ],
+     "nivel": [
+      6,
+      6
+     ]
+    },
+    "15": {
+     "oro": [
+      4916,
+      4080
+     ],
+     "xp": [
+      5633,
+      4330
+     ],
+     "cs": [
+      20,
+      12
+     ],
+     "nivel": [
+      9,
+      8
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": true
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 6:07",
+    "acierto": false
+   }
+  ]
+ },
+ "puuid-demo-06": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": false,
+  "campeon": "Campeón 164",
+  "campeon_id": 164,
+  "pos": "TOP",
+  "equipo": 200,
+  "kda": [
+   4,
+   6,
+   1
+  ],
+  "cs_min": 6.1,
+  "oro": 10267,
+  "dano": 21971,
+  "kp": 16,
+  "dano_pct": 19,
+  "vision": 25,
+  "wards": 11,
+  "control": 0,
+  "muertes": [
+   {
+    "t": "9:47",
+    "ms": 587988,
+    "x": 927,
+    "y": 10609,
+    "donde": "en top",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "0:07"
+    }
+   },
+   {
+    "t": "16:49",
+    "ms": 1009593,
+    "x": 5404,
+    "y": 9527,
+    "donde": "en el río (arriba)",
+    "asesino": "Campeón 221",
+    "ayudas": [
+     "Campeón 106",
+     "Campeón 11"
+    ],
+    "rivales": 3,
+    "perdido": "Dragón de nube rival 0:34 después",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "1:49"
+    }
+   },
+   {
+    "t": "19:02",
+    "ms": 1142786,
+    "x": 4306,
+    "y": 13316,
+    "donde": "en top",
+    "asesino": "Campeón 106",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "4:02"
+    }
+   },
+   {
+    "t": "23:32",
+    "ms": 1412934,
+    "x": 9884,
+    "y": 1226,
+    "donde": "en bot",
+    "asesino": "Campeón 800",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "3:32"
+    }
+   },
+   {
+    "t": "25:15",
+    "ms": 1515303,
+    "x": 3703,
+    "y": 13144,
+    "donde": "en top",
+    "asesino": "Campeón 106",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "0:15"
+    }
+   },
+   {
+    "t": "28:26",
+    "ms": 1706915,
+    "x": 13507,
+    "y": 3960,
+    "donde": "en bot",
+    "asesino": "Campeón 800",
+    "ayudas": [
+     "Campeón 106",
+     "Campeón 11",
+     "Campeón 235"
+    ],
+    "rivales": 4,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "3:26"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 106",
+   "minutos": {
+    "10": {
+     "oro": [
+      3039,
+      3376
+     ],
+     "xp": [
+      4521,
+      4715
+     ],
+     "cs": [
+      59,
+      61
+     ],
+     "nivel": [
+      8,
+      8
+     ]
+    },
+    "15": {
+     "oro": [
+      4852,
+      4983
+     ],
+     "xp": [
+      8491,
+      8331
+     ],
+     "cs": [
+      98,
+      106
+     ],
+     "nivel": [
+      11,
+      11
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 4:37",
+    "acierto": false
+   }
+  ]
+ },
+ "puuid-demo-07": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": false,
+  "campeon": "Campeón 131",
+  "campeon_id": 131,
+  "pos": "JUNGLE",
+  "equipo": 200,
+  "kda": [
+   4,
+   8,
+   6
+  ],
+  "cs_min": 7.8,
+  "oro": 12070,
+  "dano": 14429,
+  "kp": 31,
+  "dano_pct": 13,
+  "vision": 33,
+  "wards": 4,
+  "control": 2,
+  "muertes": [
+   {
+    "t": "9:45",
+    "ms": 585918,
+    "x": 1198,
+    "y": 10042,
+    "donde": "en top",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "0:05"
+    }
+   },
+   {
+    "t": "12:23",
+    "ms": 743665,
+    "x": 11477,
+    "y": 4121,
+    "donde": "en el río (abajo)",
+    "asesino": "Campeón 800",
+    "ayudas": [
+     "Campeón 11",
+     "Campeón 221",
+     "Campeón 235"
+    ],
+    "rivales": 4,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "2:43"
+    }
+   },
+   {
+    "t": "14:53",
+    "ms": 893124,
+    "x": 13926,
+    "y": 3832,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "Heraldo rival 1:18 después",
+    "video": {
+     "archivo": "r01_seg_003.mkv",
+     "en": "0:13"
+    }
+   },
+   {
+    "t": "18:04",
+    "ms": 1084571,
+    "x": 8275,
+    "y": 2056,
+    "donde": "en bot",
+    "asesino": "Campeón 800",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "3:04"
+    }
+   },
+   {
+    "t": "19:10",
+    "ms": 1150618,
+    "x": 7382,
+    "y": 13826,
+    "donde": "en top",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "4:10"
+    }
+   },
+   {
+    "t": "24:40",
+    "ms": 1480299,
+    "x": 8751,
+    "y": 11553,
+    "donde": "en tu jungla (arriba)",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "Barón rival 0:28 después",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "4:40"
+    }
+   },
+   {
+    "t": "26:38",
+    "ms": 1598244,
+    "x": 7910,
+    "y": 11752,
+    "donde": "en tu jungla (arriba)",
+    "asesino": "Campeón 11",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "1:38"
+    }
+   },
+   {
+    "t": "29:43",
+    "ms": 1783240,
+    "x": 13032,
+    "y": 12418,
+    "donde": "en tu base",
+    "asesino": "Campeón 106",
+    "ayudas": [
+     "Campeón 221"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "4:43"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 11",
+   "minutos": {
+    "10": {
+     "oro": [
+      3560,
+      5645
+     ],
+     "xp": [
+      3795,
+      4057
+     ],
+     "cs": [
+      74,
+      61
+     ],
+     "nivel": [
+      7,
+      7
+     ]
+    },
+    "15": {
+     "oro": [
+      5614,
+      9866
+     ],
+     "xp": [
+      6811,
+      7915
+     ],
+     "cs": [
+      118,
+      109
+     ],
+     "nivel": [
+      10,
+      11
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 4:37",
+    "acierto": false
+   }
+  ]
+ },
+ "puuid-demo-08": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": false,
+  "campeon": "Campeón 105",
+  "campeon_id": 105,
+  "pos": "MIDDLE",
+  "equipo": 200,
+  "kda": [
+   11,
+   10,
+   6
+  ],
+  "cs_min": 6.7,
+  "oro": 13698,
+  "dano": 25992,
+  "kp": 53,
+  "dano_pct": 23,
+  "vision": 18,
+  "wards": 4,
+  "control": 0,
+  "muertes": [
+   {
+    "t": "2:39",
+    "ms": 159031,
+    "x": 6538,
+    "y": 6560,
+    "donde": "en mid",
+    "asesino": "Campeón 800",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_000.mkv",
+     "en": "2:59"
+    }
+   },
+   {
+    "t": "9:01",
+    "ms": 541109,
+    "x": 14090,
+    "y": 8400,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_001.mkv",
+     "en": "4:21"
+    }
+   },
+   {
+    "t": "10:44",
+    "ms": 644307,
+    "x": 10300,
+    "y": 3078,
+    "donde": "en la jungla rival (abajo)",
+    "asesino": "Campeón 11",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "1:04"
+    }
+   },
+   {
+    "t": "12:27",
+    "ms": 747807,
+    "x": 12524,
+    "y": 4432,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 800",
+     "Campeón 221",
+     "Campeón 235"
+    ],
+    "rivales": 4,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "2:47"
+    }
+   },
+   {
+    "t": "17:29",
+    "ms": 1049092,
+    "x": 10495,
+    "y": 5109,
+    "donde": "en el río (abajo)",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "2:29"
+    }
+   },
+   {
+    "t": "20:53",
+    "ms": 1253388,
+    "x": 8670,
+    "y": 7677,
+    "donde": "en mid",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 800",
+     "Campeón 235"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "0:53"
+    }
+   },
+   {
+    "t": "23:18",
+    "ms": 1398571,
+    "x": 9696,
+    "y": 3350,
+    "donde": "en la jungla rival (abajo)",
+    "asesino": "Campeón 800",
+    "ayudas": [
+     "Campeón 11",
+     "Campeón 235"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "3:18"
+    }
+   },
+   {
+    "t": "24:28",
+    "ms": 1468647,
+    "x": 6767,
+    "y": 7597,
+    "donde": "en mid",
+    "asesino": "Campeón 800",
+    "ayudas": [
+     "Campeón 11",
+     "Campeón 235"
+    ],
+    "rivales": 3,
+    "perdido": "Barón rival 0:40 después",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "4:28"
+    }
+   },
+   {
+    "t": "25:56",
+    "ms": 1556391,
+    "x": 11789,
+    "y": 5889,
+    "donde": "en tu jungla (abajo)",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "0:56"
+    }
+   },
+   {
+    "t": "29:35",
+    "ms": 1775056,
+    "x": 11361,
+    "y": 12206,
+    "donde": "en tu base",
+    "asesino": "Campeón 106",
+    "ayudas": [
+     "Campeón 800"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "4:35"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 800",
+   "minutos": {
+    "10": {
+     "oro": [
+      4462,
+      3622
+     ],
+     "xp": [
+      5146,
+      4611
+     ],
+     "cs": [
+      64,
+      76
+     ],
+     "nivel": [
+      9,
+      8
+     ]
+    },
+    "15": {
+     "oro": [
+      6804,
+      5321
+     ],
+     "xp": [
+      8101,
+      6725
+     ],
+     "cs": [
+      99,
+      113
+     ],
+     "nivel": [
+      11,
+      10
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 4:37",
+    "acierto": false
+   }
+  ]
+ },
+ "puuid-demo-09": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": false,
+  "campeon": "Campeón 202",
+  "campeon_id": 202,
+  "pos": "BOTTOM",
+  "equipo": 200,
+  "kda": [
+   12,
+   9,
+   6
+  ],
+  "cs_min": 7.5,
+  "oro": 16319,
+  "dano": 25447,
+  "kp": 56,
+  "dano_pct": 22,
+  "vision": 16,
+  "wards": 9,
+  "control": 0,
+  "muertes": [
+   {
+    "t": "4:37",
+    "ms": 277266,
+    "x": 12154,
+    "y": 1402,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 221"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_000.mkv",
+     "en": "4:57"
+    }
+   },
+   {
+    "t": "8:55",
+    "ms": 535622,
+    "x": 13979,
+    "y": 7839,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_001.mkv",
+     "en": "4:15"
+    }
+   },
+   {
+    "t": "12:33",
+    "ms": 753051,
+    "x": 14063,
+    "y": 4704,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "2:53"
+    }
+   },
+   {
+    "t": "14:56",
+    "ms": 896804,
+    "x": 14072,
+    "y": 4752,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 221",
+     "Campeón 235"
+    ],
+    "rivales": 3,
+    "perdido": "Heraldo rival 1:15 después",
+    "video": {
+     "archivo": "r01_seg_003.mkv",
+     "en": "0:16"
+    }
+   },
+   {
+    "t": "19:43",
+    "ms": 1183691,
+    "x": 9443,
+    "y": 9011,
+    "donde": "en mid",
+    "asesino": "Campeón 11",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_000.mkv",
+     "en": "4:43"
+    }
+   },
+   {
+    "t": "23:08",
+    "ms": 1388902,
+    "x": 12467,
+    "y": 4273,
+    "donde": "en tu jungla (abajo)",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "3:08"
+    }
+   },
+   {
+    "t": "25:35",
+    "ms": 1535191,
+    "x": 9985,
+    "y": 9910,
+    "donde": "en mid",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "0:35"
+    }
+   },
+   {
+    "t": "27:05",
+    "ms": 1625425,
+    "x": 11868,
+    "y": 12113,
+    "donde": "en tu base",
+    "asesino": "Campeón 106",
+    "ayudas": [
+     "Campeón 11",
+     "Campeón 235"
+    ],
+    "rivales": 3,
+    "perdido": "Dragón de nube rival 1:14 después",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "2:05"
+    }
+   },
+   {
+    "t": "29:04",
+    "ms": 1744975,
+    "x": 14050,
+    "y": 9367,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 800",
+     "Campeón 235"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "4:04"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 221",
+   "minutos": {
+    "10": {
+     "oro": [
+      4065,
+      3211
+     ],
+     "xp": [
+      3431,
+      3058
+     ],
+     "cs": [
+      74,
+      69
+     ],
+     "nivel": [
+      7,
+      6
+     ]
+    },
+    "15": {
+     "oro": [
+      7670,
+      5279
+     ],
+     "xp": [
+      5832,
+      5624
+     ],
+     "cs": [
+      119,
+      104
+     ],
+     "nivel": [
+      9,
+      9
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 4:37",
+    "acierto": false
+   }
+  ]
+ },
+ "puuid-demo-10": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": false,
+  "campeon": "Campeón 101",
+  "campeon_id": 101,
+  "pos": "UTILITY",
+  "equipo": 200,
+  "kda": [
+   1,
+   11,
+   17
+  ],
+  "cs_min": 1.3,
+  "oro": 9055,
+  "dano": 25805,
+  "kp": 56,
+  "dano_pct": 23,
+  "vision": 70,
+  "wards": 31,
+  "control": 7,
+  "muertes": [
+   {
+    "t": "4:59",
+    "ms": 299041,
+    "x": 13381,
+    "y": 1572,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_001.mkv",
+     "en": "0:19"
+    }
+   },
+   {
+    "t": "8:47",
+    "ms": 527507,
+    "x": 13900,
+    "y": 4836,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 221",
+     "Campeón 235"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_001.mkv",
+     "en": "4:07"
+    }
+   },
+   {
+    "t": "10:47",
+    "ms": 647624,
+    "x": 10871,
+    "y": 2225,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "1:07"
+    }
+   },
+   {
+    "t": "12:29",
+    "ms": 749945,
+    "x": 13510,
+    "y": 4576,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 221",
+     "Campeón 235"
+    ],
+    "rivales": 3,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "2:49"
+    }
+   },
+   {
+    "t": "14:59",
+    "ms": 899676,
+    "x": 13754,
+    "y": 4661,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "Heraldo rival 1:12 después",
+    "video": {
+     "archivo": "r01_seg_003.mkv",
+     "en": "0:19"
+    }
+   },
+   {
+    "t": "23:40",
+    "ms": 1420650,
+    "x": 11959,
+    "y": 2072,
+    "donde": "en bot",
+    "asesino": "Campeón 221",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "Barón rival 1:28 después",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "3:40"
+    }
+   },
+   {
+    "t": "24:41",
+    "ms": 1481534,
+    "x": 8722,
+    "y": 10083,
+    "donde": "en mid",
+    "asesino": "Campeón 800",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "Barón rival 0:27 después",
+    "video": {
+     "archivo": "r02_seg_001.mkv",
+     "en": "4:41"
+    }
+   },
+   {
+    "t": "25:37",
+    "ms": 1537031,
+    "x": 10171,
+    "y": 10240,
+    "donde": "en mid",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "0:37"
+    }
+   },
+   {
+    "t": "26:57",
+    "ms": 1617056,
+    "x": 11796,
+    "y": 11126,
+    "donde": "en tu base",
+    "asesino": "Campeón 800",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "Dragón de nube rival 1:23 después",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "1:57"
+    }
+   },
+   {
+    "t": "27:56",
+    "ms": 1676341,
+    "x": 9860,
+    "y": 9948,
+    "donde": "en mid",
+    "asesino": "Campeón 800",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "Dragón de nube rival 0:23 después",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "2:56"
+    }
+   },
+   {
+    "t": "29:26",
+    "ms": 1766610,
+    "x": 13966,
+    "y": 13839,
+    "donde": "en tu base",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r02_seg_002.mkv",
+     "en": "4:26"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 235",
+   "minutos": {
+    "10": {
+     "oro": [
+      2702,
+      3026
+     ],
+     "xp": [
+      2832,
+      3166
+     ],
+     "cs": [
+      8,
+      17
+     ],
+     "nivel": [
+      6,
+      6
+     ]
+    },
+    "15": {
+     "oro": [
+      4080,
+      4916
+     ],
+     "xp": [
+      4330,
+      5633
+     ],
+     "cs": [
+      12,
+      20
+     ],
+     "nivel": [
+      8,
+      9
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Primer gank del jungla rival",
+    "dijo": "top (4 de 7 partidas)",
+    "paso": "bot al 4:37",
+    "acierto": false
+   }
+  ]
+ },
+ "sin_panel_ni_video": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": false,
+  "campeon": "Campeón 131",
+  "campeon_id": 131,
+  "pos": "JUNGLE",
+  "equipo": 200,
+  "kda": [
+   4,
+   8,
+   6
+  ],
+  "cs_min": 7.8,
+  "oro": 12070,
+  "dano": 14429,
+  "kp": 31,
+  "dano_pct": 13,
+  "vision": 33,
+  "wards": 4,
+  "control": 2,
+  "muertes": [
+   {
+    "t": "9:45",
+    "ms": 585918,
+    "x": 1198,
+    "y": 10042,
+    "donde": "en top",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": null
+   },
+   {
+    "t": "12:23",
+    "ms": 743665,
+    "x": 11477,
+    "y": 4121,
+    "donde": "en el río (abajo)",
+    "asesino": "Campeón 800",
+    "ayudas": [
+     "Campeón 11",
+     "Campeón 221",
+     "Campeón 235"
+    ],
+    "rivales": 4,
+    "perdido": "",
+    "video": null
+   },
+   {
+    "t": "14:53",
+    "ms": 893124,
+    "x": 13926,
+    "y": 3832,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "Heraldo rival 1:18 después",
+    "video": null
+   },
+   {
+    "t": "18:04",
+    "ms": 1084571,
+    "x": 8275,
+    "y": 2056,
+    "donde": "en bot",
+    "asesino": "Campeón 800",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": null
+   },
+   {
+    "t": "19:10",
+    "ms": 1150618,
+    "x": 7382,
+    "y": 13826,
+    "donde": "en top",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": null
+   },
+   {
+    "t": "24:40",
+    "ms": 1480299,
+    "x": 8751,
+    "y": 11553,
+    "donde": "en tu jungla (arriba)",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "Barón rival 0:28 después",
+    "video": null
+   },
+   {
+    "t": "26:38",
+    "ms": 1598244,
+    "x": 7910,
+    "y": 11752,
+    "donde": "en tu jungla (arriba)",
+    "asesino": "Campeón 11",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": null
+   },
+   {
+    "t": "29:43",
+    "ms": 1783240,
+    "x": 13032,
+    "y": 12418,
+    "donde": "en tu base",
+    "asesino": "Campeón 106",
+    "ayudas": [
+     "Campeón 221"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": null
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 11",
+   "minutos": {
+    "10": {
+     "oro": [
+      3560,
+      5645
+     ],
+     "xp": [
+      3795,
+      4057
+     ],
+     "cs": [
+      74,
+      61
+     ],
+     "nivel": [
+      7,
+      7
+     ]
+    },
+    "15": {
+     "oro": [
+      5614,
+      9866
+     ],
+     "xp": [
+      6811,
+      7915
+     ],
+     "cs": [
+      118,
+      109
+     ],
+     "nivel": [
+      10,
+      11
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   }
+  ],
+  "prevision": []
+ },
+ "con_un_desfase": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": false,
+  "campeon": "Campeón 131",
+  "campeon_id": 131,
+  "pos": "JUNGLE",
+  "equipo": 200,
+  "kda": [
+   4,
+   8,
+   6
+  ],
+  "cs_min": 7.8,
+  "oro": 12070,
+  "dano": 14429,
+  "kp": 31,
+  "dano_pct": 13,
+  "vision": 33,
+  "wards": 4,
+  "control": 2,
+  "muertes": [
+   {
+    "t": "9:45",
+    "ms": 585918,
+    "x": 1198,
+    "y": 10042,
+    "donde": "en top",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "0:20"
+    }
+   },
+   {
+    "t": "12:23",
+    "ms": 743665,
+    "x": 11477,
+    "y": 4121,
+    "donde": "en el río (abajo)",
+    "asesino": "Campeón 800",
+    "ayudas": [
+     "Campeón 11",
+     "Campeón 221",
+     "Campeón 235"
+    ],
+    "rivales": 4,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_002.mkv",
+     "en": "2:58"
+    }
+   },
+   {
+    "t": "14:53",
+    "ms": 893124,
+    "x": 13926,
+    "y": 3832,
+    "donde": "en bot",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 235"
+    ],
+    "rivales": 2,
+    "perdido": "Heraldo rival 1:18 después",
+    "video": {
+     "archivo": "r01_seg_003.mkv",
+     "en": "0:28"
+    }
+   },
+   {
+    "t": "18:04",
+    "ms": 1084571,
+    "x": 8275,
+    "y": 2056,
+    "donde": "en bot",
+    "asesino": "Campeón 800",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_003.mkv",
+     "en": "3:39"
+    }
+   },
+   {
+    "t": "19:10",
+    "ms": 1150618,
+    "x": 7382,
+    "y": 13826,
+    "donde": "en top",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_003.mkv",
+     "en": "4:45"
+    }
+   },
+   {
+    "t": "24:40",
+    "ms": 1480299,
+    "x": 8751,
+    "y": 11553,
+    "donde": "en tu jungla (arriba)",
+    "asesino": "Campeón 11",
+    "ayudas": [
+     "Campeón 106"
+    ],
+    "rivales": 2,
+    "perdido": "Barón rival 0:28 después",
+    "video": {
+     "archivo": "r01_seg_005.mkv",
+     "en": "0:15"
+    }
+   },
+   {
+    "t": "26:38",
+    "ms": 1598244,
+    "x": 7910,
+    "y": 11752,
+    "donde": "en tu jungla (arriba)",
+    "asesino": "Campeón 11",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_005.mkv",
+     "en": "2:13"
+    }
+   },
+   {
+    "t": "29:43",
+    "ms": 1783240,
+    "x": 13032,
+    "y": 12418,
+    "donde": "en tu base",
+    "asesino": "Campeón 106",
+    "ayudas": [
+     "Campeón 221"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": {
+     "archivo": "r01_seg_006.mkv",
+     "en": "0:18"
+    }
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 11",
+   "minutos": {
+    "10": {
+     "oro": [
+      3560,
+      5645
+     ],
+     "xp": [
+      3795,
+      4057
+     ],
+     "cs": [
+      74,
+      61
+     ],
+     "nivel": [
+      7,
+      7
+     ]
+    },
+    "15": {
+     "oro": [
+      5614,
+      9866
+     ],
+     "xp": [
+      6811,
+      7915
+     ],
+     "cs": [
+      118,
+      109
+     ],
+     "nivel": [
+      10,
+      11
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": true,
+    "participaste": true
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": false,
+    "participaste": false
+   }
+  ],
+  "prevision": []
+ },
+ "nadie": null,
+ "mapa_muertes": [
+  {
+   "x": 1480,
+   "y": 10790,
+   "ms": 890447,
+   "t": "14:50",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 106",
+   "gana": true,
+   "asesino": "Campeón 164"
+  },
+  {
+   "x": 9706,
+   "y": 13710,
+   "ms": 1272309,
+   "t": "21:12",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 106",
+   "gana": true,
+   "asesino": "Campeón 131"
+  },
+  {
+   "x": 13663,
+   "y": 4160,
+   "ms": 1383830,
+   "t": "23:03",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 106",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 13992,
+   "y": 8031,
+   "ms": 541577,
+   "t": "9:01",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 11",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 13973,
+   "y": 4296,
+   "ms": 755489,
+   "t": "12:35",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 11",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 10702,
+   "y": 5267,
+   "ms": 1049593,
+   "t": "17:29",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 11",
+   "gana": true,
+   "asesino": "Campeón 131"
+  },
+  {
+   "x": 8594,
+   "y": 7936,
+   "ms": 1255246,
+   "t": "20:55",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 11",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 12052,
+   "y": 4393,
+   "ms": 1390906,
+   "t": "23:10",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 11",
+   "gana": true,
+   "asesino": "Campeón 164"
+  },
+  {
+   "x": 10560,
+   "y": 10610,
+   "ms": 1621941,
+   "t": "27:01",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 11",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 13716,
+   "y": 13564,
+   "ms": 1767545,
+   "t": "29:27",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 11",
+   "gana": true,
+   "asesino": "Torre o súbditos"
+  },
+  {
+   "x": 6303,
+   "y": 6564,
+   "ms": 157094,
+   "t": "2:37",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 800",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 6776,
+   "y": 7377,
+   "ms": 343671,
+   "t": "5:43",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 800",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 6552,
+   "y": 6875,
+   "ms": 417764,
+   "t": "6:57",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 800",
+   "gana": true,
+   "asesino": "Campeón 131"
+  },
+  {
+   "x": 10963,
+   "y": 3722,
+   "ms": 745202,
+   "t": "12:25",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 800",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 6313,
+   "y": 7078,
+   "ms": 878668,
+   "t": "14:38",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 800",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 11480,
+   "y": 1364,
+   "ms": 1007186,
+   "t": "16:47",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 800",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 6318,
+   "y": 6223,
+   "ms": 1266616,
+   "t": "21:06",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 800",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 2774,
+   "y": 7408,
+   "ms": 1344705,
+   "t": "22:24",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 800",
+   "gana": true,
+   "asesino": "Campeón 164"
+  },
+  {
+   "x": 12162,
+   "y": 1146,
+   "ms": 273926,
+   "t": "4:33",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 221",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 13525,
+   "y": 5810,
+   "ms": 530546,
+   "t": "8:50",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 221",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 9174,
+   "y": 2534,
+   "ms": 638061,
+   "t": "10:38",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 221",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 13242,
+   "y": 2130,
+   "ms": 890819,
+   "t": "14:50",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 221",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 9162,
+   "y": 6627,
+   "ms": 1056951,
+   "t": "17:36",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 221",
+   "gana": true,
+   "asesino": "Campeón 131"
+  },
+  {
+   "x": 8129,
+   "y": 6160,
+   "ms": 1152622,
+   "t": "19:12",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 221",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 1862,
+   "y": 12875,
+   "ms": 1300723,
+   "t": "21:40",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 221",
+   "gana": true,
+   "asesino": "Campeón 101"
+  },
+  {
+   "x": 8496,
+   "y": 10026,
+   "ms": 1497856,
+   "t": "24:57",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 221",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 11323,
+   "y": 1001,
+   "ms": 269685,
+   "t": "4:29",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 235",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 11957,
+   "y": 1133,
+   "ms": 367917,
+   "t": "6:07",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 235",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 10799,
+   "y": 1408,
+   "ms": 631405,
+   "t": "10:31",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 235",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 6368,
+   "y": 7568,
+   "ms": 1145091,
+   "t": "19:05",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 235",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 4998,
+   "y": 5884,
+   "ms": 1272108,
+   "t": "21:12",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 235",
+   "gana": true,
+   "asesino": "Campeón 202"
+  },
+  {
+   "x": 9785,
+   "y": 3070,
+   "ms": 1397186,
+   "t": "23:17",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 235",
+   "gana": true,
+   "asesino": "Campeón 164"
+  },
+  {
+   "x": 12196,
+   "y": 11935,
+   "ms": 1764205,
+   "t": "29:24",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 235",
+   "gana": true,
+   "asesino": "Campeón 105"
+  },
+  {
+   "x": 13813,
+   "y": 4211,
+   "ms": 587988,
+   "t": "9:47",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 164",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 9336,
+   "y": 5293,
+   "ms": 1009593,
+   "t": "16:49",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 164",
+   "gana": false,
+   "asesino": "Campeón 221"
+  },
+  {
+   "x": 10434,
+   "y": 1504,
+   "ms": 1142786,
+   "t": "19:02",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 164",
+   "gana": false,
+   "asesino": "Campeón 106"
+  },
+  {
+   "x": 4856,
+   "y": 13594,
+   "ms": 1412934,
+   "t": "23:32",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 164",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 11037,
+   "y": 1676,
+   "ms": 1515303,
+   "t": "25:15",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 164",
+   "gana": false,
+   "asesino": "Campeón 106"
+  },
+  {
+   "x": 1233,
+   "y": 10860,
+   "ms": 1706915,
+   "t": "28:26",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 164",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 13542,
+   "y": 4778,
+   "ms": 585918,
+   "t": "9:45",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 131",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 3263,
+   "y": 10699,
+   "ms": 743665,
+   "t": "12:23",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 131",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 814,
+   "y": 10988,
+   "ms": 893124,
+   "t": "14:53",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 131",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 6465,
+   "y": 12764,
+   "ms": 1084571,
+   "t": "18:04",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 131",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 7358,
+   "y": 994,
+   "ms": 1150618,
+   "t": "19:10",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 131",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 5989,
+   "y": 3267,
+   "ms": 1480299,
+   "t": "24:40",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 131",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 6830,
+   "y": 3068,
+   "ms": 1598244,
+   "t": "26:38",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 131",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 1708,
+   "y": 2402,
+   "ms": 1783240,
+   "t": "29:43",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 131",
+   "gana": false,
+   "asesino": "Campeón 106"
+  },
+  {
+   "x": 8202,
+   "y": 8260,
+   "ms": 159031,
+   "t": "2:39",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 650,
+   "y": 6420,
+   "ms": 541109,
+   "t": "9:01",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 4440,
+   "y": 11742,
+   "ms": 644307,
+   "t": "10:44",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 2216,
+   "y": 10388,
+   "ms": 747807,
+   "t": "12:27",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 4245,
+   "y": 9711,
+   "ms": 1049092,
+   "t": "17:29",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 6070,
+   "y": 7143,
+   "ms": 1253388,
+   "t": "20:53",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 5044,
+   "y": 11470,
+   "ms": 1398571,
+   "t": "23:18",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 7973,
+   "y": 7223,
+   "ms": 1468647,
+   "t": "24:28",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 2951,
+   "y": 8931,
+   "ms": 1556391,
+   "t": "25:56",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 3379,
+   "y": 2614,
+   "ms": 1775056,
+   "t": "29:35",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 105",
+   "gana": false,
+   "asesino": "Campeón 106"
+  },
+  {
+   "x": 2586,
+   "y": 13418,
+   "ms": 277266,
+   "t": "4:37",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 202",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 761,
+   "y": 6981,
+   "ms": 535622,
+   "t": "8:55",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 202",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 677,
+   "y": 10116,
+   "ms": 753051,
+   "t": "12:33",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 202",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 668,
+   "y": 10068,
+   "ms": 896804,
+   "t": "14:56",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 202",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 5297,
+   "y": 5809,
+   "ms": 1183691,
+   "t": "19:43",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 202",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 2273,
+   "y": 10547,
+   "ms": 1388902,
+   "t": "23:08",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 202",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 4755,
+   "y": 4910,
+   "ms": 1535191,
+   "t": "25:35",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 202",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 2872,
+   "y": 2707,
+   "ms": 1625425,
+   "t": "27:05",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 202",
+   "gana": false,
+   "asesino": "Campeón 106"
+  },
+  {
+   "x": 690,
+   "y": 5453,
+   "ms": 1744975,
+   "t": "29:04",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 202",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 1359,
+   "y": 13248,
+   "ms": 299041,
+   "t": "4:59",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 840,
+   "y": 9984,
+   "ms": 527507,
+   "t": "8:47",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 3869,
+   "y": 12595,
+   "ms": 647624,
+   "t": "10:47",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 1230,
+   "y": 10244,
+   "ms": 749945,
+   "t": "12:29",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 986,
+   "y": 10159,
+   "ms": 899676,
+   "t": "14:59",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 2781,
+   "y": 12748,
+   "ms": 1420650,
+   "t": "23:40",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 221"
+  },
+  {
+   "x": 6018,
+   "y": 4737,
+   "ms": 1481534,
+   "t": "24:41",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 4569,
+   "y": 4580,
+   "ms": 1537031,
+   "t": "25:37",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 11"
+  },
+  {
+   "x": 2944,
+   "y": 3694,
+   "ms": 1617056,
+   "t": "26:57",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 4880,
+   "y": 4872,
+   "ms": 1676341,
+   "t": "27:56",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 800"
+  },
+  {
+   "x": 774,
+   "y": 981,
+   "ms": 1766610,
+   "t": "29:26",
+   "id": "EUW1_7000000001",
+   "campeon": "Campeón 101",
+   "gana": false,
+   "asesino": "Campeón 11"
+  }
+ ]
+}

@@ -1,0 +1,522 @@
+{
+ "puuid-demo-01": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 4
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 0,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 6
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 2
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 164",
+    "n": 6,
+    "v": 6,
+    "campeon": 164
+   }
+  ]
+ },
+ "puuid-demo-02": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 4
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 0,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 6
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 2
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 131",
+    "n": 6,
+    "v": 6,
+    "campeon": 131
+   }
+  ]
+ },
+ "puuid-demo-03": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 4
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 0,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 6
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 2
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 105",
+    "n": 6,
+    "v": 6,
+    "campeon": 105
+   }
+  ]
+ },
+ "puuid-demo-04": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 4
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 0,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 6
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 2
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 202",
+    "n": 6,
+    "v": 6,
+    "campeon": 202
+   }
+  ]
+ },
+ "puuid-demo-05": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 4
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 0,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 6
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 2
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 2
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 101",
+    "n": 6,
+    "v": 6,
+    "campeon": 101
+   }
+  ]
+ },
+ "puuid-demo-06": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 0
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 0,
+    "v": 0
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 0
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 106",
+    "n": 6,
+    "v": 0,
+    "campeon": 106
+   }
+  ]
+ },
+ "puuid-demo-07": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 0
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 0,
+    "v": 0
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 0
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 11",
+    "n": 6,
+    "v": 0,
+    "campeon": 11
+   }
+  ]
+ },
+ "puuid-demo-08": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 0
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 0,
+    "v": 0
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 0
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 800",
+    "n": 6,
+    "v": 0,
+    "campeon": 800
+   }
+  ]
+ },
+ "puuid-demo-09": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 0
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 0,
+    "v": 0
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 0
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 221",
+    "n": 6,
+    "v": 0,
+    "campeon": 221
+   }
+  ]
+ },
+ "puuid-demo-10": {
+  "n": 6,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 4,
+    "v": 0
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 0,
+    "v": 0
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 6,
+    "v": 0
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 2,
+    "v": 0
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 2,
+    "v": 0
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Campeón 235",
+    "n": 6,
+    "v": 0,
+    "campeon": 235
+   }
+  ]
+ }
+}

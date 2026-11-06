@@ -1,0 +1,568 @@
+{
+ "revision": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": true,
+  "campeon": "Campeón 40",
+  "campeon_id": 40,
+  "pos": "TOP",
+  "equipo": 100,
+  "kda": [
+   5,
+   3,
+   6
+  ],
+  "cs_min": 8.9,
+  "oro": 15762,
+  "dano": 31323,
+  "kp": 25,
+  "dano_pct": 24,
+  "vision": 22,
+  "wards": 11,
+  "control": 0,
+  "muertes": [
+   {
+    "t": "14:50",
+    "ms": 890447,
+    "x": 1480,
+    "y": 10790,
+    "donde": "en top",
+    "asesino": "Campeón 421",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": null
+   },
+   {
+    "t": "21:12",
+    "ms": 1272309,
+    "x": 9706,
+    "y": 13710,
+    "donde": "en top",
+    "asesino": "Campeón 887",
+    "ayudas": [
+     "Campeón 421"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": null
+   },
+   {
+    "t": "23:03",
+    "ms": 1383830,
+    "x": 13663,
+    "y": 4160,
+    "donde": "en bot",
+    "asesino": "Campeón 555",
+    "ayudas": [
+     "Campeón 887"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": null
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 421",
+   "minutos": {
+    "10": {
+     "oro": [
+      3376,
+      3039
+     ],
+     "xp": [
+      4715,
+      4521
+     ],
+     "cs": [
+      61,
+      59
+     ],
+     "nivel": [
+      8,
+      8
+     ]
+    },
+    "15": {
+     "oro": [
+      4983,
+      4852
+     ],
+     "xp": [
+      8331,
+      8491
+     ],
+     "cs": [
+      106,
+      98
+     ],
+     "nivel": [
+      11,
+      11
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Rival de mid con más errores",
+    "dijo": "el que más fallaba en sus partidas",
+    "paso": "4 muertes antes del 15 (lo normal: 3)",
+    "acierto": true
+   }
+  ],
+  "referencia": {
+   "n": 1,
+   "n_ref": 16,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "0,0",
+     "ref": "0,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "0,0",
+     "ref": "0,0",
+     "mejor": null
+    },
+    {
+     "que": "CS sobre tu rival al 10",
+     "tu": "+2",
+     "ref": "+2",
+     "mejor": null
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "+337",
+     "ref": "+337",
+     "mejor": null
+    }
+   ]
+  },
+  "lp": {
+   "lp": 39,
+   "nivel": "diamond",
+   "rank": "IV",
+   "cambio": 21
+  },
+  "carpeta": "",
+  "icono": ""
+ },
+ "revisiones": {
+  "lista": [
+   {
+    "id": "EUW1_7000000001",
+    "fecha": 1791799676248,
+    "cola": 420,
+    "duracion": "29:53",
+    "gana": true,
+    "campeon": "Campeón 40",
+    "campeon_id": 40,
+    "kda": [
+     5,
+     3,
+     6
+    ],
+    "icono": "",
+    "lp": 21
+   }
+  ],
+  "tendencias": {
+   "n": 2,
+   "sesion": [
+    {
+     "nombre": "Primera partida de la sesión",
+     "n": 2,
+     "v": 2
+    },
+    {
+     "nombre": "Después de ganar",
+     "n": 0,
+     "v": 0
+    },
+    {
+     "nombre": "Después de perder",
+     "n": 0,
+     "v": 0
+    }
+   ],
+   "duracion": [
+    {
+     "nombre": "25 a 35 min",
+     "n": 2,
+     "v": 2
+    }
+   ],
+   "rivales": [
+    {
+     "nombre": "Campeón 164",
+     "n": 1,
+     "v": 1,
+     "campeon": 164
+    },
+    {
+     "nombre": "Campeón 421",
+     "n": 1,
+     "v": 1,
+     "campeon": 421
+    }
+   ]
+  },
+  "muertes": [
+   {
+    "x": 1480,
+    "y": 10790,
+    "ms": 890447,
+    "t": "14:50",
+    "id": "EUW1_7000000001",
+    "campeon": "Campeón 40",
+    "gana": true,
+    "asesino": "Campeón 421"
+   },
+   {
+    "x": 9706,
+    "y": 13710,
+    "ms": 1272309,
+    "t": "21:12",
+    "id": "EUW1_7000000001",
+    "campeon": "Campeón 40",
+    "gana": true,
+    "asesino": "Campeón 887"
+   },
+   {
+    "x": 13663,
+    "y": 4160,
+    "ms": 1383830,
+    "t": "23:03",
+    "id": "EUW1_7000000001",
+    "campeon": "Campeón 40",
+    "gana": true,
+    "asesino": "Campeón 555"
+   }
+  ]
+ },
+ "una_revision": {
+  "id": "EUW1_7000000001",
+  "fecha": 1791799676248,
+  "cola": 420,
+  "duracion": "29:53",
+  "gana": true,
+  "campeon": "Campeón 40",
+  "campeon_id": 40,
+  "pos": "TOP",
+  "equipo": 100,
+  "kda": [
+   5,
+   3,
+   6
+  ],
+  "cs_min": 8.9,
+  "oro": 15762,
+  "dano": 31323,
+  "kp": 25,
+  "dano_pct": 24,
+  "vision": 22,
+  "wards": 11,
+  "control": 0,
+  "muertes": [
+   {
+    "t": "14:50",
+    "ms": 890447,
+    "x": 1480,
+    "y": 10790,
+    "donde": "en top",
+    "asesino": "Campeón 421",
+    "ayudas": [],
+    "rivales": 1,
+    "perdido": "",
+    "video": null
+   },
+   {
+    "t": "21:12",
+    "ms": 1272309,
+    "x": 9706,
+    "y": 13710,
+    "donde": "en top",
+    "asesino": "Campeón 887",
+    "ayudas": [
+     "Campeón 421"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": null
+   },
+   {
+    "t": "23:03",
+    "ms": 1383830,
+    "x": 13663,
+    "y": 4160,
+    "donde": "en bot",
+    "asesino": "Campeón 555",
+    "ayudas": [
+     "Campeón 887"
+    ],
+    "rivales": 2,
+    "perdido": "",
+    "video": null
+   }
+  ],
+  "comparacion": {
+   "rival": "Campeón 421",
+   "minutos": {
+    "10": {
+     "oro": [
+      3376,
+      3039
+     ],
+     "xp": [
+      4715,
+      4521
+     ],
+     "cs": [
+      61,
+      59
+     ],
+     "nivel": [
+      8,
+      8
+     ]
+    },
+    "15": {
+     "oro": [
+      4983,
+      4852
+     ],
+     "xp": [
+      8331,
+      8491
+     ],
+     "cs": [
+      106,
+      98
+     ],
+     "nivel": [
+      11,
+      11
+     ]
+    }
+   }
+  },
+  "objetivos": [
+   {
+    "t": "6:41",
+    "nombre": "Dragón oceánico",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "8:55",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:03",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "9:10",
+    "nombre": "Larvas",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "12:00",
+    "nombre": "Dragón infernal",
+    "tuyo": false,
+    "participaste": false
+   },
+   {
+    "t": "16:12",
+    "nombre": "Heraldo",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "17:23",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "22:37",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "25:09",
+    "nombre": "Barón",
+    "tuyo": true,
+    "participaste": false
+   },
+   {
+    "t": "28:20",
+    "nombre": "Dragón de nube",
+    "tuyo": true,
+    "participaste": false
+   }
+  ],
+  "prevision": [
+   {
+    "tema": "Rival de mid con más errores",
+    "dijo": "el que más fallaba en sus partidas",
+    "paso": "4 muertes antes del 15 (lo normal: 3)",
+    "acierto": true
+   }
+  ],
+  "referencia": {
+   "n": 1,
+   "n_ref": 16,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "0,0",
+     "ref": "0,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "0,0",
+     "ref": "0,0",
+     "mejor": null
+    },
+    {
+     "que": "CS sobre tu rival al 10",
+     "tu": "+2",
+     "ref": "+2",
+     "mejor": null
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "+337",
+     "ref": "+337",
+     "mejor": null
+    }
+   ]
+  },
+  "lp": {
+   "lp": 39,
+   "nivel": "diamond",
+   "rank": "IV",
+   "cambio": 21
+  },
+  "carpeta": "",
+  "icono": ""
+ },
+ "ajustes": {
+  "cuentas": [
+   "Yo#EUW"
+  ],
+  "recordatorios": [
+   "Mirar el minimapa"
+  ],
+  "notas": {
+   "421": "Pega fuerte a nivel 3",
+   "40": "Guardar la E"
+  },
+  "grabar": true,
+  "overlay": true,
+  "atajo_overlay": "ctrl+tab",
+  "overlay_opacidad": 0.94,
+  "siempre_en_marcha": true,
+  "comparar_con": "ganan",
+  "referencias": {},
+  "perfil_base": "",
+  "grabacion_codificador": "auto",
+  "grabacion_max_gb": 50,
+  "campeones": [
+   {
+    "id": 131,
+    "nombre": "Diana"
+   },
+   {
+    "id": 11,
+    "nombre": "Maestro Yi"
+   }
+  ],
+  "opciones_comparar": {
+   "perfil": "Un jugador (tu perfil de referencia)",
+   "ganan": "Los que ganan este duelo",
+   "challenger": "Challenger",
+   "gm": "Gran Maestro o más",
+   "mis_victorias": "Tus victorias"
+  },
+  "referencias_partidas": {},
+  "perfil_partidas": null
+ }
+}

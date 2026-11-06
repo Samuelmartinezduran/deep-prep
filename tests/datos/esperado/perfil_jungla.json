@@ -1,0 +1,1406 @@
+{
+ "puuid-demo-02_100": {
+  "n": 5,
+  "n_campeon": 5,
+  "n_lineas": 5,
+  "tarjetas": [
+   {
+    "titulo": "Inicio",
+    "valor": "Rojo en 5 de 5",
+    "detalle": "Hoy su rojo cae en el lado inferior. Al 3:00 ya ha cruzado al lado superior en 5 de 5.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Primer gank",
+    "valor": "min 4:37 · bot 5",
+    "detalle": "Primera kill o asistencia en una línea antes del 10, en 5 de 5 partidas.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Invades",
+    "valor": "Roba 12,0 monstruos por partida",
+    "detalle": "Pisa la jungla rival antes del 8 en 5 de 5. Referencia en Diamante-Master: 10 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 0 de 5 (min 17:23)",
+    "detalle": "Larvas: 2,0 por partida.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Si se adelanta",
+    "valor": "Por delante al 10 gana 5 de 5",
+    "detalle": "27,0/7,0/6,0 de media con este campeón, 37% del daño de su equipo.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Muertes tempranas",
+    "valor": "1,0 antes del 10",
+    "detalle": "Media de 5 partidas con línea de tiempo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {
+   "bot": 5
+  },
+  "snowball": {
+   "delante": [
+    5,
+    5
+   ],
+   "detras": [
+    0,
+    0
+   ],
+   "kda": [
+    27.0,
+    7.0,
+    6.0
+   ],
+   "dano_pct": 0.366,
+   "solo": 5.0
+  },
+  "mapa": {
+   "2": [
+    [
+     5544,
+     5472
+    ],
+    [
+     5544,
+     5472
+    ],
+    [
+     5544,
+     5472
+    ],
+    [
+     5544,
+     5472
+    ],
+    [
+     5544,
+     5472
+    ]
+   ],
+   "3": [
+    [
+     5034,
+     9128
+    ],
+    [
+     5034,
+     9128
+    ],
+    [
+     5034,
+     9128
+    ],
+    [
+     5034,
+     9128
+    ],
+    [
+     5034,
+     9128
+    ]
+   ],
+   "4": [
+    [
+     7805,
+     1704
+    ],
+    [
+     7805,
+     1704
+    ],
+    [
+     7805,
+     1704
+    ],
+    [
+     7805,
+     1704
+    ],
+    [
+     7805,
+     1704
+    ]
+   ],
+   "5": [
+    [
+     13324,
+     1507
+    ],
+    [
+     13324,
+     1507
+    ],
+    [
+     13324,
+     1507
+    ],
+    [
+     13324,
+     1507
+    ],
+    [
+     13324,
+     1507
+    ]
+   ],
+   "6": [
+    [
+     3376,
+     8526
+    ],
+    [
+     3376,
+     8526
+    ],
+    [
+     3376,
+     8526
+    ],
+    [
+     3376,
+     8526
+    ],
+    [
+     3376,
+     8526
+    ]
+   ]
+  },
+  "inicio": {
+   "buff": "rojo",
+   "veces": 5,
+   "n": 5,
+   "lado": "inf",
+   "marcado": true
+  },
+  "invade": {
+   "veces": 5,
+   "n": 5,
+   "robados": 12.0
+  }
+ },
+ "puuid-demo-02_200": {
+  "n": 5,
+  "n_campeon": 5,
+  "n_lineas": 5,
+  "tarjetas": [
+   {
+    "titulo": "Inicio",
+    "valor": "Rojo en 5 de 5",
+    "detalle": "Hoy su rojo cae en el lado superior. Al 3:00 ya ha cruzado al lado inferior en 5 de 5.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Primer gank",
+    "valor": "min 4:37 · bot 5",
+    "detalle": "Primera kill o asistencia en una línea antes del 10, en 5 de 5 partidas.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Invades",
+    "valor": "Roba 12,0 monstruos por partida",
+    "detalle": "Pisa la jungla rival antes del 8 en 5 de 5. Referencia en Diamante-Master: 10 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 0 de 5 (min 17:23)",
+    "detalle": "Larvas: 2,0 por partida.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Si se adelanta",
+    "valor": "Por delante al 10 gana 5 de 5",
+    "detalle": "27,0/7,0/6,0 de media con este campeón, 37% del daño de su equipo.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Muertes tempranas",
+    "valor": "1,0 antes del 10",
+    "detalle": "Media de 5 partidas con línea de tiempo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {
+   "bot": 5
+  },
+  "snowball": {
+   "delante": [
+    5,
+    5
+   ],
+   "detras": [
+    0,
+    0
+   ],
+   "kda": [
+    27.0,
+    7.0,
+    6.0
+   ],
+   "dano_pct": 0.366,
+   "solo": 5.0
+  },
+  "mapa": {
+   "2": [
+    [
+     9196,
+     9348
+    ],
+    [
+     9196,
+     9348
+    ],
+    [
+     9196,
+     9348
+    ],
+    [
+     9196,
+     9348
+    ],
+    [
+     9196,
+     9348
+    ]
+   ],
+   "3": [
+    [
+     9706,
+     5692
+    ],
+    [
+     9706,
+     5692
+    ],
+    [
+     9706,
+     5692
+    ],
+    [
+     9706,
+     5692
+    ],
+    [
+     9706,
+     5692
+    ]
+   ],
+   "4": [
+    [
+     6935,
+     13116
+    ],
+    [
+     6935,
+     13116
+    ],
+    [
+     6935,
+     13116
+    ],
+    [
+     6935,
+     13116
+    ],
+    [
+     6935,
+     13116
+    ]
+   ],
+   "5": [
+    [
+     1416,
+     13313
+    ],
+    [
+     1416,
+     13313
+    ],
+    [
+     1416,
+     13313
+    ],
+    [
+     1416,
+     13313
+    ],
+    [
+     1416,
+     13313
+    ]
+   ],
+   "6": [
+    [
+     11364,
+     6294
+    ],
+    [
+     11364,
+     6294
+    ],
+    [
+     11364,
+     6294
+    ],
+    [
+     11364,
+     6294
+    ],
+    [
+     11364,
+     6294
+    ]
+   ]
+  },
+  "inicio": {
+   "buff": "rojo",
+   "veces": 5,
+   "n": 5,
+   "lado": "sup",
+   "marcado": true
+  },
+  "invade": {
+   "veces": 5,
+   "n": 5,
+   "robados": 12.0
+  }
+ },
+ "puuid-demo-02_una": {
+  "n": 1,
+  "n_campeon": 1,
+  "n_lineas": 1,
+  "tarjetas": [
+   {
+    "titulo": "Primer gank",
+    "valor": "min 4:37 · bot 1",
+    "detalle": "Primera kill o asistencia en una línea antes del 10, en 1 de 1 partidas.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Invades",
+    "valor": "Roba 12,0 monstruos por partida",
+    "detalle": "Pisa la jungla rival antes del 8 en 1 de 1. Referencia en Diamante-Master: 10 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 0 de 1 (min 17:23)",
+    "detalle": "Larvas: 2,0 por partida.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Si se adelanta",
+    "valor": "Por delante al 10 gana 1 de 1",
+    "detalle": "27,0/7,0/6,0 de media de jungla, 37% del daño de su equipo.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Muertes tempranas",
+    "valor": "1,0 antes del 10",
+    "detalle": "Media de 1 partidas con línea de tiempo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {
+   "bot": 1
+  },
+  "snowball": {
+   "delante": [
+    1,
+    1
+   ],
+   "detras": [
+    0,
+    0
+   ],
+   "kda": [
+    27.0,
+    7.0,
+    6.0
+   ],
+   "dano_pct": 0.366,
+   "solo": 5.0
+  },
+  "mapa": {
+   "2": [
+    [
+     5544,
+     5472
+    ]
+   ],
+   "3": [
+    [
+     5034,
+     9128
+    ]
+   ],
+   "4": [
+    [
+     7805,
+     1704
+    ]
+   ],
+   "5": [
+    [
+     13324,
+     1507
+    ]
+   ],
+   "6": [
+    [
+     3376,
+     8526
+    ]
+   ]
+  },
+  "invade": {
+   "veces": 1,
+   "n": 1,
+   "robados": 12.0
+  }
+ },
+ "puuid-demo-02_sin_lineas": {
+  "n": 5,
+  "n_campeon": 0,
+  "n_lineas": 0,
+  "tarjetas": [
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 0 de 5 (min 17:23)",
+    "detalle": "Larvas: 2,0 por partida.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Rendimiento",
+    "valor": "27,0/7,0/6,0 de media de jungla",
+    "detalle": "37% del daño de su equipo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {},
+  "snowball": {
+   "delante": [
+    0,
+    0
+   ],
+   "detras": [
+    0,
+    0
+   ],
+   "kda": [
+    27.0,
+    7.0,
+    6.0
+   ],
+   "dano_pct": 0.366,
+   "solo": 5.0
+  },
+  "mapa": {}
+ },
+ "puuid-demo-02_otro_campeon": {
+  "n": 5,
+  "n_campeon": 0,
+  "n_lineas": 5,
+  "tarjetas": [
+   {
+    "titulo": "Inicio",
+    "valor": "Rojo en 5 de 5",
+    "detalle": "Hoy su rojo cae en el lado inferior. Al 3:00 ya ha cruzado al lado superior en 5 de 5.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Primer gank",
+    "valor": "min 4:37 · bot 5",
+    "detalle": "Primera kill o asistencia en una línea antes del 10, en 5 de 5 partidas.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Invades",
+    "valor": "Roba 12,0 monstruos por partida",
+    "detalle": "Pisa la jungla rival antes del 8 en 5 de 5. Referencia en Diamante-Master: 10 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 0 de 5 (min 17:23)",
+    "detalle": "Larvas: 2,0 por partida.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Si se adelanta",
+    "valor": "Por delante al 10 gana 5 de 5",
+    "detalle": "27,0/7,0/6,0 de media de jungla, 37% del daño de su equipo.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Muertes tempranas",
+    "valor": "1,0 antes del 10",
+    "detalle": "Media de 5 partidas con línea de tiempo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {
+   "bot": 5
+  },
+  "snowball": {
+   "delante": [
+    5,
+    5
+   ],
+   "detras": [
+    0,
+    0
+   ],
+   "kda": [
+    27.0,
+    7.0,
+    6.0
+   ],
+   "dano_pct": 0.366,
+   "solo": 5.0
+  },
+  "mapa": {
+   "2": [
+    [
+     5544,
+     5472
+    ],
+    [
+     5544,
+     5472
+    ],
+    [
+     5544,
+     5472
+    ],
+    [
+     5544,
+     5472
+    ],
+    [
+     5544,
+     5472
+    ]
+   ],
+   "3": [
+    [
+     5034,
+     9128
+    ],
+    [
+     5034,
+     9128
+    ],
+    [
+     5034,
+     9128
+    ],
+    [
+     5034,
+     9128
+    ],
+    [
+     5034,
+     9128
+    ]
+   ],
+   "4": [
+    [
+     7805,
+     1704
+    ],
+    [
+     7805,
+     1704
+    ],
+    [
+     7805,
+     1704
+    ],
+    [
+     7805,
+     1704
+    ],
+    [
+     7805,
+     1704
+    ]
+   ],
+   "5": [
+    [
+     13324,
+     1507
+    ],
+    [
+     13324,
+     1507
+    ],
+    [
+     13324,
+     1507
+    ],
+    [
+     13324,
+     1507
+    ],
+    [
+     13324,
+     1507
+    ]
+   ],
+   "6": [
+    [
+     3376,
+     8526
+    ],
+    [
+     3376,
+     8526
+    ],
+    [
+     3376,
+     8526
+    ],
+    [
+     3376,
+     8526
+    ],
+    [
+     3376,
+     8526
+    ]
+   ]
+  },
+  "inicio": {
+   "buff": "rojo",
+   "veces": 5,
+   "n": 5,
+   "lado": "inf",
+   "marcado": true
+  },
+  "invade": {
+   "veces": 5,
+   "n": 5,
+   "robados": 12.0
+  }
+ },
+ "puuid-demo-07_100": {
+  "n": 5,
+  "n_campeon": 5,
+  "n_lineas": 5,
+  "tarjetas": [
+   {
+    "titulo": "Inicio",
+    "valor": "Rojo en 5 de 5",
+    "detalle": "Hoy su rojo cae en el lado inferior. Al 3:00 ya ha cruzado al lado superior en 5 de 5.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Primer gank",
+    "valor": "min 6:07 · bot 5",
+    "detalle": "Primera kill o asistencia en una línea antes del 10, en 5 de 5 partidas.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Lado del early",
+    "valor": "67% en el lado superior",
+    "detalle": "Del minuto 3 al 8 suele estar en el lado superior (top y larvas).",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Invades",
+    "valor": "Roba 7,0 monstruos por partida",
+    "detalle": "Pisa la jungla rival antes del 8 en 0 de 5. Referencia en Diamante-Master: 10 por partida.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 5 de 5 (min 6:41)",
+    "detalle": "Larvas: 3,0 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Si se adelanta",
+    "valor": "Por detrás 0 de 5",
+    "detalle": "4,0/8,0/6,0 de media con este campeón, 13% del daño de su equipo.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Muertes tempranas",
+    "valor": "1,0 antes del 10",
+    "detalle": "Media de 5 partidas con línea de tiempo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {
+   "bot": 5
+  },
+  "snowball": {
+   "delante": [
+    0,
+    0
+   ],
+   "detras": [
+    0,
+    5
+   ],
+   "kda": [
+    4.0,
+    8.0,
+    6.0
+   ],
+   "dano_pct": 0.127,
+   "solo": 0.0
+  },
+  "mapa": {
+   "2": [
+    [
+     4851,
+     5684
+    ],
+    [
+     4851,
+     5684
+    ],
+    [
+     4851,
+     5684
+    ],
+    [
+     4851,
+     5684
+    ],
+    [
+     4851,
+     5684
+    ]
+   ],
+   "3": [
+    [
+     4566,
+     8760
+    ],
+    [
+     4566,
+     8760
+    ],
+    [
+     4566,
+     8760
+    ],
+    [
+     4566,
+     8760
+    ],
+    [
+     4566,
+     8760
+    ]
+   ],
+   "4": [
+    [
+     10216,
+     2616
+    ],
+    [
+     10216,
+     2616
+    ],
+    [
+     10216,
+     2616
+    ],
+    [
+     10216,
+     2616
+    ],
+    [
+     10216,
+     2616
+    ]
+   ],
+   "5": [
+    [
+     6837,
+     4820
+    ],
+    [
+     6837,
+     4820
+    ],
+    [
+     6837,
+     4820
+    ],
+    [
+     6837,
+     4820
+    ],
+    [
+     6837,
+     4820
+    ]
+   ],
+   "6": [
+    [
+     1138,
+     13080
+    ],
+    [
+     1138,
+     13080
+    ],
+    [
+     1138,
+     13080
+    ],
+    [
+     1138,
+     13080
+    ],
+    [
+     1138,
+     13080
+    ]
+   ]
+  },
+  "inicio": {
+   "buff": "rojo",
+   "veces": 5,
+   "n": 5,
+   "lado": "inf",
+   "marcado": true
+  },
+  "invade": {
+   "veces": 0,
+   "n": 5,
+   "robados": 7.0
+  }
+ },
+ "puuid-demo-07_200": {
+  "n": 5,
+  "n_campeon": 5,
+  "n_lineas": 5,
+  "tarjetas": [
+   {
+    "titulo": "Inicio",
+    "valor": "Rojo en 5 de 5",
+    "detalle": "Hoy su rojo cae en el lado superior. Al 3:00 ya ha cruzado al lado inferior en 5 de 5.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Primer gank",
+    "valor": "min 6:07 · bot 5",
+    "detalle": "Primera kill o asistencia en una línea antes del 10, en 5 de 5 partidas.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Lado del early",
+    "valor": "67% en el lado superior",
+    "detalle": "Del minuto 3 al 8 suele estar en el lado superior (top y larvas).",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Invades",
+    "valor": "Roba 7,0 monstruos por partida",
+    "detalle": "Pisa la jungla rival antes del 8 en 0 de 5. Referencia en Diamante-Master: 10 por partida.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 5 de 5 (min 6:41)",
+    "detalle": "Larvas: 3,0 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Si se adelanta",
+    "valor": "Por detrás 0 de 5",
+    "detalle": "4,0/8,0/6,0 de media con este campeón, 13% del daño de su equipo.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Muertes tempranas",
+    "valor": "1,0 antes del 10",
+    "detalle": "Media de 5 partidas con línea de tiempo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {
+   "bot": 5
+  },
+  "snowball": {
+   "delante": [
+    0,
+    0
+   ],
+   "detras": [
+    0,
+    5
+   ],
+   "kda": [
+    4.0,
+    8.0,
+    6.0
+   ],
+   "dano_pct": 0.127,
+   "solo": 0.0
+  },
+  "mapa": {
+   "2": [
+    [
+     9889,
+     9136
+    ],
+    [
+     9889,
+     9136
+    ],
+    [
+     9889,
+     9136
+    ],
+    [
+     9889,
+     9136
+    ],
+    [
+     9889,
+     9136
+    ]
+   ],
+   "3": [
+    [
+     10174,
+     6060
+    ],
+    [
+     10174,
+     6060
+    ],
+    [
+     10174,
+     6060
+    ],
+    [
+     10174,
+     6060
+    ],
+    [
+     10174,
+     6060
+    ]
+   ],
+   "4": [
+    [
+     4524,
+     12204
+    ],
+    [
+     4524,
+     12204
+    ],
+    [
+     4524,
+     12204
+    ],
+    [
+     4524,
+     12204
+    ],
+    [
+     4524,
+     12204
+    ]
+   ],
+   "5": [
+    [
+     7903,
+     10000
+    ],
+    [
+     7903,
+     10000
+    ],
+    [
+     7903,
+     10000
+    ],
+    [
+     7903,
+     10000
+    ],
+    [
+     7903,
+     10000
+    ]
+   ],
+   "6": [
+    [
+     13602,
+     1740
+    ],
+    [
+     13602,
+     1740
+    ],
+    [
+     13602,
+     1740
+    ],
+    [
+     13602,
+     1740
+    ],
+    [
+     13602,
+     1740
+    ]
+   ]
+  },
+  "inicio": {
+   "buff": "rojo",
+   "veces": 5,
+   "n": 5,
+   "lado": "sup",
+   "marcado": true
+  },
+  "invade": {
+   "veces": 0,
+   "n": 5,
+   "robados": 7.0
+  }
+ },
+ "puuid-demo-07_una": {
+  "n": 1,
+  "n_campeon": 1,
+  "n_lineas": 1,
+  "tarjetas": [
+   {
+    "titulo": "Primer gank",
+    "valor": "min 6:07 · bot 1",
+    "detalle": "Primera kill o asistencia en una línea antes del 10, en 1 de 1 partidas.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Invades",
+    "valor": "Roba 7,0 monstruos por partida",
+    "detalle": "Pisa la jungla rival antes del 8 en 0 de 1. Referencia en Diamante-Master: 10 por partida.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 1 de 1 (min 6:41)",
+    "detalle": "Larvas: 3,0 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Si se adelanta",
+    "valor": "Por detrás 0 de 1",
+    "detalle": "4,0/8,0/6,0 de media de jungla, 13% del daño de su equipo.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Muertes tempranas",
+    "valor": "1,0 antes del 10",
+    "detalle": "Media de 1 partidas con línea de tiempo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {
+   "bot": 1
+  },
+  "snowball": {
+   "delante": [
+    0,
+    0
+   ],
+   "detras": [
+    0,
+    1
+   ],
+   "kda": [
+    4.0,
+    8.0,
+    6.0
+   ],
+   "dano_pct": 0.127,
+   "solo": 0.0
+  },
+  "mapa": {
+   "2": [
+    [
+     4851,
+     5684
+    ]
+   ],
+   "3": [
+    [
+     4566,
+     8760
+    ]
+   ],
+   "4": [
+    [
+     10216,
+     2616
+    ]
+   ],
+   "5": [
+    [
+     6837,
+     4820
+    ]
+   ],
+   "6": [
+    [
+     1138,
+     13080
+    ]
+   ]
+  },
+  "invade": {
+   "veces": 0,
+   "n": 1,
+   "robados": 7.0
+  }
+ },
+ "puuid-demo-07_sin_lineas": {
+  "n": 5,
+  "n_campeon": 0,
+  "n_lineas": 0,
+  "tarjetas": [
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 5 de 5 (min 6:41)",
+    "detalle": "Larvas: 3,0 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Rendimiento",
+    "valor": "4,0/8,0/6,0 de media de jungla",
+    "detalle": "13% del daño de su equipo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {},
+  "snowball": {
+   "delante": [
+    0,
+    0
+   ],
+   "detras": [
+    0,
+    0
+   ],
+   "kda": [
+    4.0,
+    8.0,
+    6.0
+   ],
+   "dano_pct": 0.127,
+   "solo": 0.0
+  },
+  "mapa": {}
+ },
+ "puuid-demo-07_otro_campeon": {
+  "n": 5,
+  "n_campeon": 0,
+  "n_lineas": 5,
+  "tarjetas": [
+   {
+    "titulo": "Inicio",
+    "valor": "Rojo en 5 de 5",
+    "detalle": "Hoy su rojo cae en el lado superior. Al 3:00 ya ha cruzado al lado inferior en 5 de 5.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Primer gank",
+    "valor": "min 6:07 · bot 5",
+    "detalle": "Primera kill o asistencia en una línea antes del 10, en 5 de 5 partidas.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Lado del early",
+    "valor": "67% en el lado superior",
+    "detalle": "Del minuto 3 al 8 suele estar en el lado superior (top y larvas).",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Invades",
+    "valor": "Roba 7,0 monstruos por partida",
+    "detalle": "Pisa la jungla rival antes del 8 en 0 de 5. Referencia en Diamante-Master: 10 por partida.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 5 de 5 (min 6:41)",
+    "detalle": "Larvas: 3,0 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Si se adelanta",
+    "valor": "Por detrás 0 de 5",
+    "detalle": "4,0/8,0/6,0 de media de jungla, 13% del daño de su equipo.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Muertes tempranas",
+    "valor": "1,0 antes del 10",
+    "detalle": "Media de 5 partidas con línea de tiempo.",
+    "tono": "neutro"
+   }
+  ],
+  "ganks": {
+   "bot": 5
+  },
+  "snowball": {
+   "delante": [
+    0,
+    0
+   ],
+   "detras": [
+    0,
+    5
+   ],
+   "kda": [
+    4.0,
+    8.0,
+    6.0
+   ],
+   "dano_pct": 0.127,
+   "solo": 0.0
+  },
+  "mapa": {
+   "2": [
+    [
+     9889,
+     9136
+    ],
+    [
+     9889,
+     9136
+    ],
+    [
+     9889,
+     9136
+    ],
+    [
+     9889,
+     9136
+    ],
+    [
+     9889,
+     9136
+    ]
+   ],
+   "3": [
+    [
+     10174,
+     6060
+    ],
+    [
+     10174,
+     6060
+    ],
+    [
+     10174,
+     6060
+    ],
+    [
+     10174,
+     6060
+    ],
+    [
+     10174,
+     6060
+    ]
+   ],
+   "4": [
+    [
+     4524,
+     12204
+    ],
+    [
+     4524,
+     12204
+    ],
+    [
+     4524,
+     12204
+    ],
+    [
+     4524,
+     12204
+    ],
+    [
+     4524,
+     12204
+    ]
+   ],
+   "5": [
+    [
+     7903,
+     10000
+    ],
+    [
+     7903,
+     10000
+    ],
+    [
+     7903,
+     10000
+    ],
+    [
+     7903,
+     10000
+    ],
+    [
+     7903,
+     10000
+    ]
+   ],
+   "6": [
+    [
+     13602,
+     1740
+    ],
+    [
+     13602,
+     1740
+    ],
+    [
+     13602,
+     1740
+    ],
+    [
+     13602,
+     1740
+    ],
+    [
+     13602,
+     1740
+    ]
+   ]
+  },
+  "inicio": {
+   "buff": "rojo",
+   "veces": 5,
+   "n": 5,
+   "lado": "sup",
+   "marcado": true
+  },
+  "invade": {
+   "veces": 0,
+   "n": 5,
+   "robados": 7.0
+  }
+ }
+}

@@ -1,0 +1,666 @@
+{
+ "TOP_106_164": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Muertes antes del 10: 0,0 en las que gana Campeón 106, 1,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Kills y asistencias antes del 10: 2,0 en las que gana Campeón 106, 0,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Campeón 106 gana el 50% de las peleas con Campeón 164 antes del 15.",
+    "detalle": "32 peleas de 2 a 4 jugadores"
+   }
+  ],
+  "build": {
+   "runa": "Runa 8008",
+   "secundaria": "Runa 8400",
+   "objeto": "Objeto 3087",
+   "minuto": "12,9",
+   "wr_objeto": 100,
+   "n_objeto": 8,
+   "maximiza": "W > Q > E"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "0,0",
+     "ref": "0,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "0,0",
+     "ref": "0,0",
+     "mejor": null
+    },
+    {
+     "que": "CS sobre tu rival al 10",
+     "tu": "+2",
+     "ref": "+2",
+     "mejor": null
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "+337",
+     "ref": "+337",
+     "mejor": null
+    }
+   ]
+  }
+ },
+ "TOP_106_164_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ },
+ "TOP_164_106": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Muertes antes del 10: 0,0 en las que gana Campeón 164, 1,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Kills y asistencias antes del 10: 2,0 en las que gana Campeón 164, 0,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Campeón 164 gana el 50% de las peleas con Campeón 106 antes del 15.",
+    "detalle": "32 peleas de 2 a 4 jugadores"
+   }
+  ],
+  "build": {
+   "runa": "Runa 8437",
+   "secundaria": "Runa 8300",
+   "objeto": "Objeto 3078",
+   "minuto": "14,1",
+   "wr_objeto": 0,
+   "n_objeto": 8,
+   "maximiza": "Q > E > W"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "1,0",
+     "ref": "0,0",
+     "mejor": false
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "0,0",
+     "ref": "0,0",
+     "mejor": null
+    },
+    {
+     "que": "CS sobre tu rival al 10",
+     "tu": "-2",
+     "ref": "+2",
+     "mejor": null
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "-337",
+     "ref": "+337",
+     "mejor": false
+    }
+   ]
+  }
+ },
+ "TOP_164_106_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ },
+ "JUNGLE_11_131": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Campeón 11 con +500 de oro sobre Campeón 131 al 10 gana el 100% de las partidas; con −500, el 0%.",
+    "detalle": "8 y 8 partidas"
+   },
+   {
+    "texto": "Primer dragón para tu equipo: 0% en las que gana Campeón 11, 100% en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Larvas: 0,0 en las que gana Campeón 11, 3,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "El 50% de las muertes de Campeón 11 con Campeón 131 de por medio antes del 15 son en la línea de bot.",
+    "detalle": "32 muertes"
+   }
+  ],
+  "build": {
+   "runa": "Runa 9923",
+   "secundaria": "Runa 8000",
+   "objeto": "Objeto 6672",
+   "minuto": "9,1",
+   "wr_objeto": 100,
+   "n_objeto": 8,
+   "maximiza": "Q > E > W"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "1,0",
+     "ref": "1,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "0,0",
+     "ref": "0,0",
+     "mejor": null
+    },
+    {
+     "que": "CS al 10",
+     "tu": "61",
+     "ref": "61",
+     "mejor": null
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "+2085",
+     "ref": "+2085",
+     "mejor": null
+    }
+   ]
+  }
+ },
+ "JUNGLE_11_131_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ },
+ "JUNGLE_131_11": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Campeón 131 con +500 de oro sobre Campeón 11 al 10 gana el 100% de las partidas; con −500, el 0%.",
+    "detalle": "8 y 8 partidas"
+   },
+   {
+    "texto": "Primer dragón para tu equipo: 0% en las que gana Campeón 131, 100% en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Larvas: 0,0 en las que gana Campeón 131, 3,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "El 50% de las muertes de Campeón 131 con Campeón 11 de por medio antes del 15 son en la línea de bot.",
+    "detalle": "32 muertes"
+   }
+  ],
+  "build": {
+   "runa": "Runa 8010",
+   "secundaria": "Runa 8300",
+   "objeto": "Objeto 3147",
+   "minuto": "15,3",
+   "wr_objeto": 0,
+   "n_objeto": 8,
+   "maximiza": "Q > W > E"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "1,0",
+     "ref": "1,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "0,0",
+     "ref": "0,0",
+     "mejor": null
+    },
+    {
+     "que": "CS al 10",
+     "tu": "74",
+     "ref": "61",
+     "mejor": true
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "-2085",
+     "ref": "+2085",
+     "mejor": false
+    }
+   ]
+  }
+ },
+ "JUNGLE_131_11_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ },
+ "MIDDLE_800_105": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Campeón 800 con +500 de oro sobre Campeón 105 al 10 gana el 0% de las partidas; con −500, el 100%.",
+    "detalle": "8 y 8 partidas"
+   },
+   {
+    "texto": "Muertes antes del 10: 3,0 en las que gana Campeón 800, 2,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Kills y asistencias antes del 10: 1,0 en las que gana Campeón 800, 5,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Campeón 800 gana el 50% de las peleas con Campeón 105 antes de su 6; desde el 6, el 50%.",
+    "detalle": "32 y 64 peleas de 2 a 4 jugadores antes del 15"
+   }
+  ],
+  "build": {
+   "runa": "Runa 8229",
+   "secundaria": "Runa 8000",
+   "objeto": "Objeto 4645",
+   "minuto": "21,1",
+   "wr_objeto": 100,
+   "n_objeto": 8,
+   "maximiza": "Q > E > W"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "3,0",
+     "ref": "3,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "CS sobre tu rival al 10",
+     "tu": "+12",
+     "ref": "+12",
+     "mejor": null
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "-840",
+     "ref": "-840",
+     "mejor": null
+    }
+   ]
+  }
+ },
+ "MIDDLE_800_105_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ },
+ "MIDDLE_105_800": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Campeón 105 con +500 de oro sobre Campeón 800 al 10 gana el 0% de las partidas; con −500, el 100%.",
+    "detalle": "8 y 8 partidas"
+   },
+   {
+    "texto": "Muertes antes del 10: 3,0 en las que gana Campeón 105, 2,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Kills y asistencias antes del 10: 1,0 en las que gana Campeón 105, 5,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Campeón 105 gana el 50% de las peleas con Campeón 800 antes de su 6; desde el 6, el 50%.",
+    "detalle": "32 y 64 peleas de 2 a 4 jugadores antes del 15"
+   }
+  ],
+  "build": {
+   "runa": "Runa 8112",
+   "secundaria": "Runa 8200",
+   "objeto": "Objeto 3100",
+   "minuto": "9,1",
+   "wr_objeto": 0,
+   "n_objeto": 8,
+   "maximiza": "E > W > Q"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "2,0",
+     "ref": "3,0",
+     "mejor": true
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "CS sobre tu rival al 10",
+     "tu": "-12",
+     "ref": "+12",
+     "mejor": false
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "+840",
+     "ref": "-840",
+     "mejor": true
+    }
+   ]
+  }
+ },
+ "MIDDLE_105_800_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ },
+ "BOTTOM_221_202": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Campeón 221 con +500 de oro sobre Campeón 202 al 10 gana el 0% de las partidas; con −500, el 100%.",
+    "detalle": "8 y 8 partidas"
+   },
+   {
+    "texto": "Kills y asistencias antes del 10: 2,0 en las que gana Campeón 221, 4,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Diferencia de CS con Campeón 202 al 10: -5,0 en las que gana Campeón 221, 5,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Campeón 221 gana el 50% de las peleas con Campeón 202 antes de su 6; desde el 6, el 50%.",
+    "detalle": "32 y 48 peleas de 2 a 4 jugadores antes del 15"
+   }
+  ],
+  "build": {
+   "runa": "Runa 8008",
+   "secundaria": "Runa 8400",
+   "objeto": "Objeto 3085",
+   "minuto": "19,6",
+   "wr_objeto": 100,
+   "n_objeto": 8,
+   "maximiza": "Q > E > W"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "CS sobre tu rival al 10",
+     "tu": "-5",
+     "ref": "-5",
+     "mejor": null
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "-854",
+     "ref": "-854",
+     "mejor": null
+    }
+   ]
+  }
+ },
+ "BOTTOM_221_202_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ },
+ "BOTTOM_202_221": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Campeón 202 con +500 de oro sobre Campeón 221 al 10 gana el 0% de las partidas; con −500, el 100%.",
+    "detalle": "8 y 8 partidas"
+   },
+   {
+    "texto": "Kills y asistencias antes del 10: 2,0 en las que gana Campeón 202, 4,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Diferencia de CS con Campeón 221 al 10: -5,0 en las que gana Campeón 202, 5,0 en las que pierde.",
+    "detalle": "8 victorias y 8 derrotas"
+   },
+   {
+    "texto": "Campeón 202 gana el 50% de las peleas con Campeón 221 antes de su 6; desde el 6, el 50%.",
+    "detalle": "32 y 48 peleas de 2 a 4 jugadores antes del 15"
+   }
+  ],
+  "build": {
+   "runa": "Runa 8021",
+   "secundaria": "Runa 8200",
+   "objeto": "Objeto 6697",
+   "minuto": "11,0",
+   "wr_objeto": 0,
+   "n_objeto": 8,
+   "maximiza": "Q > W > E"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "CS sobre tu rival al 10",
+     "tu": "+5",
+     "ref": "-5",
+     "mejor": true
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "+854",
+     "ref": "-854",
+     "mejor": true
+    }
+   ]
+  }
+ },
+ "BOTTOM_202_221_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ },
+ "UTILITY_235_101": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Con un nivel más que Campeón 101, Campeón 235 gana el 67% de las peleas; a la par, el 50%.",
+    "detalle": "24 y 48 peleas"
+   },
+   {
+    "texto": "Campeón 235 gana el 50% de las peleas con Campeón 101 antes de su 6; desde el 6, el 50%.",
+    "detalle": "32 y 64 peleas de 2 a 4 jugadores antes del 15"
+   }
+  ],
+  "build": {
+   "runa": "Runa 8992",
+   "secundaria": "Runa 8300",
+   "objeto": "Objeto 3071",
+   "minuto": "15,7",
+   "wr_objeto": 100,
+   "n_objeto": 8,
+   "maximiza": "Q > W > E"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "+324",
+     "ref": "+324",
+     "mejor": null
+    }
+   ]
+  }
+ },
+ "UTILITY_235_101_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ },
+ "UTILITY_101_235": {
+  "n": 16,
+  "wr": 50,
+  "datos": [
+   {
+    "texto": "Con un nivel más que Campeón 235, Campeón 101 gana el 67% de las peleas; a la par, el 50%.",
+    "detalle": "24 y 48 peleas"
+   },
+   {
+    "texto": "Campeón 101 gana el 50% de las peleas con Campeón 235 antes de su 6; desde el 6, el 50%.",
+    "detalle": "32 y 64 peleas de 2 a 4 jugadores antes del 15"
+   }
+  ],
+  "build": {
+   "runa": "Runa 8229",
+   "secundaria": "Runa 8000",
+   "objeto": "Objeto 6655",
+   "minuto": "13,0",
+   "wr_objeto": 0,
+   "n_objeto": 8,
+   "maximiza": "Q > W > E"
+  },
+  "poco": false,
+  "tu": {
+   "n": 1,
+   "n_ref": 8,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "2,0",
+     "ref": "2,0",
+     "mejor": null
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "-324",
+     "ref": "+324",
+     "mejor": false
+    }
+   ]
+  }
+ },
+ "UTILITY_101_235_poco": {
+  "n": 11,
+  "datos": [],
+  "build": null,
+  "tu": null,
+  "poco": true
+ }
+}
