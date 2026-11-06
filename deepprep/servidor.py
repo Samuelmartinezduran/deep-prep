@@ -36,8 +36,12 @@ RUTA_IMAGENES = config.DATOS / "imagenes"
 NOMBRE_SEGURO = re.compile(r"^[A-Za-z0-9]+$")
 
 
-def imagen_ddragon(tipo, clave, version):
-    """Bytes de la imagen (de disco o recién bajada), o None."""
+def imagen_ddragon(tipo: str, clave: str, version: str) -> bytes | None:
+    """Bytes de la imagen (de disco o recién bajada), o None.
+
+    tipo: una clave de URL_DDRAGON; clave: el nombre del campeón (o del mapa) en Data Dragon; version: el parche
+    (solo cuenta para los retratos, que cambian con él).
+    """
     if tipo not in URL_DDRAGON or not NOMBRE_SEGURO.match(clave):
         return None
     ext = EXT_DDRAGON[tipo]
@@ -47,7 +51,7 @@ def imagen_ddragon(tipo, clave, version):
     try:
         pet = urllib.request.Request(URL_DDRAGON[tipo].format(v=version, n=clave), headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(pet, timeout=10) as r:
-            datos = r.read()
+            datos: bytes = r.read()
     except OSError:
         return None
     destino.parent.mkdir(parents=True, exist_ok=True)

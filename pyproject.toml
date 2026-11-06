@@ -180,6 +180,7 @@ module = [
     "deepprep.revisiones",
     "deepprep.riot",
     "deepprep.seleccion",
+    "deepprep.servidor",
     "deepprep.sesion",
     "deepprep.sistema",
     "deepprep.tipos",
@@ -188,16 +189,6 @@ module = [
     "deepprep.vigia",
 ]
 disallow_untyped_defs = true
-disallow_incomplete_defs = true
-disallow_any_generics = true
-disallow_untyped_decorators = true
-warn_return_any = true
-warn_unreachable = true
-
-[[tool.mypy.overrides]]
-# servidor: igual, salvo imagen_ddragon, que está en la parte de los archivos estáticos (arriba del todo) y se deja
-# como estaba mientras la toca la rama del panel. Cuando se una, se anota y el módulo pasa al bloque de arriba.
-module = ["deepprep.servidor"]
 disallow_incomplete_defs = true
 disallow_any_generics = true
 disallow_untyped_decorators = true
