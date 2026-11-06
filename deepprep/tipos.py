@@ -2,11 +2,11 @@
 
 Lo que viene de Riot y lo que se guarda en la caché son diccionarios grandes que pasan tal cual: se nombran con un
 alias que dice qué son, y sus claves se explican donde se crean. Lo pequeño y fijo va como TypedDict. Nada de esto
-cambia el JSON: son solo tipos.
+cambia el JSON: son solo tipos. Al final, AppDelPanel: lo que el servidor y las ventanas necesitan de la app.
 """
 
 from collections.abc import Callable
-from typing import Any, NotRequired, TypedDict
+from typing import Any, NotRequired, Protocol, TypedDict
 
 Json = dict[str, Any]  # un objeto JSON cualquiera (lo que da la API de Riot, o del cliente del LoL)
 Cfg = dict[str, Any]  # la configuración en uso (config.POR_DEFECTO y lo que haya en config.json)
@@ -74,3 +74,55 @@ class EstadoVersion(TypedDict):
     nueva: str | None
     lista: bool
     error: str
+
+
+class _ConVersion(Protocol):
+    """Los datos de campeones, tal y como los usa el servidor: la versión de Data Dragon de las imágenes."""
+
+    @property
+    def version(self) -> str: ...
+
+
+class _ConNovedades(Protocol):
+    def novedades_vistas(self) -> Resultado: ...
+
+
+class AppDelPanel(Protocol):
+    """Lo que usan de la app el servidor del panel y las ventanas: la de verdad (app.App) o la de la demo
+    (demo.AppDemo). Si el panel pide algo nuevo a la app, mypy obliga a que la demo también lo tenga."""
+
+    cfg: Cfg
+    al_mostrar: Callable[[], None] | None
+    al_salir: Callable[[], None] | None
+    ventana_visible: Callable[[], bool] | None
+
+    @property
+    def fase(self) -> str | None: ...
+
+    @property
+    def datos(self) -> _ConVersion: ...
+
+    @property
+    def actualizador(self) -> _ConNovedades: ...
+
+    def estado(self, contar: bool = True) -> Json: ...
+
+    def revisiones(self) -> Json: ...
+
+    def revision(self, id_: str) -> Revision | None: ...
+
+    def ajustes(self) -> Json: ...
+
+    def guardar_ajustes(self, cambios: Any) -> Resultado: ...
+
+    def buscar(self, rid: str) -> Resultado: ...
+
+    def volver(self) -> Resultado: ...
+
+    def poner_clave(self, clave: str) -> Resultado: ...
+
+    def abrir_carpeta(self, id_: str) -> Resultado: ...
+
+    def abrir_clip(self, id_: str, i: Any) -> Resultado: ...
+
+    def salir(self) -> Resultado: ...

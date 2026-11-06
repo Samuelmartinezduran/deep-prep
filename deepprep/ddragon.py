@@ -3,7 +3,8 @@
 import json
 import logging
 import urllib.request
-from typing import TYPE_CHECKING, Any
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, Self
 
 from .riot import USER_AGENT
 
@@ -28,14 +29,24 @@ def _descargar(url: str) -> Any:
 
 
 class Datos:
-    def __init__(self, cache: "Cache") -> None:
+    def __init__(self, cache: "Cache | None") -> None:
+        """Carga los datos de la caché o, si son viejos, de Data Dragon. Sin caché (None) empieza vacío y no baja nada."""
         self.version = ""
         self.campeones: dict[int, dict[str, str]] = {}  # id -> {"nombre", "clave"}
         self.roles: dict[int, dict[str, float]] = {}  # id -> {posición: frecuencia relativa}
         self.objetos: dict[int, str] = {}  # id -> nombre
         self.legendarios: set[int] = set()  # ids de objetos completos (los que cuentan como "primer objeto")
         self.runas: dict[int, str] = {}  # id de runa o de rama -> nombre
-        self._cargar(cache)
+        if cache is not None:
+            self._cargar(cache)
+
+    @classmethod
+    def fijos(cls, version: str, campeones: Mapping[int, Mapping[str, str]]) -> Self:
+        """Datos ya sabidos, sin caché ni red (los de la demo): la versión de Data Dragon y los campeones."""
+        datos = cls(None)
+        datos.version = version
+        datos.campeones = {int(k): dict(v) for k, v in campeones.items()}
+        return datos
 
     def _cargar(self, cache: "Cache") -> None:
         guardado = cache.kv_get("ddragon", max_edad=DIA / 2)

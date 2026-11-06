@@ -3,17 +3,14 @@
 import json
 import re
 import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from . import config
 from .riot import USER_AGENT
-from .tipos import Json, Resultado
-
-if TYPE_CHECKING:
-    from .app import App
+from .tipos import AppDelPanel, Json, Resultado
 
 ARCHIVOS = {
     "/": ("index.html", "text/html; charset=utf-8"),
@@ -58,7 +55,7 @@ def imagen_ddragon(tipo, clave, version):
     return datos
 
 
-def _mostrar(app: "App", cuerpo: Json) -> Resultado:
+def _mostrar(app: AppDelPanel, cuerpo: Json) -> Resultado:
     """Otra copia de la app arrancada con el acceso directo pide que esta enseñe su ventana."""
     mostrar = getattr(app, "al_mostrar", None)
     if mostrar:
@@ -67,13 +64,14 @@ def _mostrar(app: "App", cuerpo: Json) -> Resultado:
 
 
 # La API del panel: ruta -> qué hace (con la URL de la petición en GET y con el cuerpo JSON ya leído en POST).
-API_GET: dict[str, Callable[["App", Any], Any]] = {
+Accion = Callable[[AppDelPanel, Any], Any]
+API_GET: dict[str, Accion] = {
     "/api/estado": lambda app, url: app.estado(contar="vista=overlay" not in url.query),
     "/api/revisiones": lambda app, url: app.revisiones(),
     "/api/revision": lambda app, url: app.revision(parse_qs(url.query).get("id", [""])[0]),
     "/api/ajustes": lambda app, url: app.ajustes(),
 }
-API_POST: dict[str, Callable[["App", Any], Any]] = {
+API_POST: dict[str, Accion] = {
     "/api/buscar": lambda app, cuerpo: app.buscar(str(cuerpo.get("riot_id", ""))),
     "/api/volver": lambda app, cuerpo: app.volver(),
     "/api/clave": lambda app, cuerpo: app.poner_clave(str(cuerpo.get("clave", ""))),
@@ -119,10 +117,14 @@ class Servidor(ThreadingHTTPServer):
     daemon_threads = True
 
 
-def crear(app: "App", puerto: int) -> Servidor:
-    class Manejador(_Respuestas):
-        permitidos = frozenset({f"127.0.0.1:{puerto}", f"localhost:{puerto}"})
+def crear(app: AppDelPanel, puerto: int, post: Mapping[str, Accion] | None = None) -> Servidor:
+    """El servidor del panel en 127.0.0.1:puerto (con 0, el puerto libre que dé Windows: srv.server_address[1]).
 
+    post: acciones de más, además de las de API_POST (las de la barra de la demo).
+    """
+    acciones = {**API_POST, **(post or {})}
+
+    class Manejador(_Respuestas):
         def do_GET(self) -> None:
             if self._ajena():
                 return self._json({"error": "origen no permitido"}, 403)
@@ -157,9 +159,12 @@ def crear(app: "App", puerto: int) -> Servidor:
                 cuerpo = json.loads(self.rfile.read(largo) or b"{}")
             except ValueError:
                 return self._json({"error": "petición mal formada"}, 400)
-            accion = API_POST.get(urlparse(self.path).path)
+            accion = acciones.get(urlparse(self.path).path)
             if accion:
                 return self._json(accion(app, cuerpo))
             self._json({"error": "no existe"}, 404)
 
-    return Servidor(("127.0.0.1", puerto), Manejador)
+    srv = Servidor(("127.0.0.1", puerto), Manejador)
+    puerto = srv.server_address[1]
+    Manejador.permitidos = frozenset({f"127.0.0.1:{puerto}", f"localhost:{puerto}"})
+    return srv

@@ -3,19 +3,18 @@
 Cerrar la principal solo la esconde: la app sigue viva mientras el cliente del LoL esté abierto, para
 enseñar el overlay y grabar la siguiente partida. Se cierra sola a los 5 minutos de cerrar el cliente,
 salvo con "siempre en marcha" (entonces solo se cierra desde Ajustes o al apagar el PC).
+En la demo no hay ventana encima del juego y cerrar la principal cierra la app.
 """
 
 import logging
 import threading
 import time
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import webview
 
 from . import config, overlay
-
-if TYPE_CHECKING:
-    from .app import App
+from .tipos import AppDelPanel
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +24,12 @@ MINUTOS_PARA_SALIR = 5
 
 
 class Ventanas:
-    def __init__(self, app: "App", url: str) -> None:
+    def __init__(self, app: AppDelPanel, url: str, *, titulo: str = "Deep Prep", demo: bool = False) -> None:
+        """demo: sin la ventana del overlay (no hay juego encima del que ponerla) y cerrar la principal cierra la app."""
         self.app = app
         self.url = url
+        self.titulo = titulo
+        self.demo = demo
         self.principal: Any = None  # webview.Window
         self.flotante: Any = None
         self.saliendo = False
@@ -40,12 +42,12 @@ class Ventanas:
         """
         cfg = self.app.cfg
         self.principal = webview.create_window(
-            "Deep Prep", self.url, width=1500, height=950, min_size=(1100, 700), background_color=FONDO, hidden=oculta
+            self.titulo, self.url, width=1500, height=950, min_size=(1100, 700), background_color=FONDO, hidden=oculta
         )
         if oculta:
             self.oculta_desde = time.time()
         self.principal.events.closing += self._al_cerrar
-        if cfg.get("overlay", True):
+        if cfg.get("overlay", True) and not self.demo:
             self.flotante = webview.create_window(
                 "Deep Prep · partida",
                 self.url + "?vista=overlay",
@@ -91,6 +93,8 @@ class Ventanas:
         return None
 
     def _al_cerrar(self) -> bool:
+        if self.demo:
+            self.saliendo = True  # en la demo, cerrar la ventana es salir
         if self.saliendo:
             return True
         self.oculta_desde = time.time()

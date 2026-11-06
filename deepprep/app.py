@@ -41,8 +41,31 @@ logger = logging.getLogger(__name__)
 
 
 def sin_arranque_windows(encendido: bool) -> str:
-    """Para las pruebas y las herramientas: el arranque con Windows no se toca."""
+    """Para las pruebas, las herramientas y la demo: el arranque con Windows no se toca."""
     return ""
+
+
+def para_el_modo(panel: Panel, modo: str) -> Panel:
+    """Con el juego ya empezado (modo 'juego'), solo datos: fuera el plan y los veredictos de línea.
+
+    Riot no permite que una app saque conclusiones por el jugador durante la partida; antes de empezar
+    (selección y pantalla de carga) sí se pueden enseñar. Lo usan la app y la demo. El panel no se toca: sale otro.
+    """
+    if modo != "juego":
+        return panel
+    # Los colores de alerta también son una lectura: en juego todo va en neutro.
+    jungla = panel.get("jungla")
+    if jungla:
+        # El mapa de dónde suele estar en los primeros minutos se queda fuera: ya jugando, se parecería a seguirle.
+        jungla = dict(jungla, tarjetas=[dict(t, tono="neutro") for t in jungla["tarjetas"]], mapa={})
+    return dict(
+        panel,
+        plan=[],
+        lineas=[dict(l, veredicto="", tono="neutro") for l in panel["lineas"]],
+        avisos=[dict(a, tono="neutro") for a in panel["avisos"]],
+        jungla=jungla,
+        duelo=None,  # lo que hacen los que ganan el duelo es una lectura: solo antes de empezar
+    )
 
 
 class App:
@@ -317,26 +340,7 @@ class App:
 
     # --- estado para el panel ------------------------------------------------------------------------
     def _para_el_modo(self, panel: Panel) -> Panel:
-        """Con el juego ya empezado, solo datos: fuera el plan y los veredictos de línea.
-
-        Riot no permite que una app saque conclusiones por el jugador durante la partida; antes de empezar
-        (selección y pantalla de carga) sí se pueden enseñar.
-        """
-        if self.modo != "juego":
-            return panel
-        # Los colores de alerta también son una lectura: en juego todo va en neutro.
-        jungla = panel.get("jungla")
-        if jungla:
-            # El mapa de dónde suele estar en los primeros minutos se queda fuera: ya jugando, se parecería a seguirle.
-            jungla = dict(jungla, tarjetas=[dict(t, tono="neutro") for t in jungla["tarjetas"]], mapa={})
-        return dict(
-            panel,
-            plan=[],
-            lineas=[dict(l, veredicto="", tono="neutro") for l in panel["lineas"]],
-            avisos=[dict(a, tono="neutro") for a in panel["avisos"]],
-            jungla=jungla,
-            duelo=None,  # lo que hacen los que ganan el duelo es una lectura: solo antes de empezar
-        )
+        return para_el_modo(panel, self.modo)
 
     def _estado_overlay(self) -> Json:
         if not self.cfg.get("overlay", True):

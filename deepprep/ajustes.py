@@ -1,9 +1,9 @@
 """Lo que se cambia desde los ajustes del panel: qué se puede tocar, cómo se comprueba y tus notas por campeón."""
 
 from collections.abc import Callable, Collection, Iterable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
-from .comparador import COMPARAR_CON, Comparador
+from .comparador import COMPARAR_CON
 from .config import Configuracion
 from .ddragon import Datos
 from .overlay import parsear_atajo
@@ -28,6 +28,14 @@ EDITABLES = (
     "grabacion_codificador",
     "grabacion_max_gb",
 )
+
+
+class Referencias(Protocol):
+    """Lo que los ajustes piden al comparador (comparador.Comparador; en la demo, uno que no pregunta a Riot)."""
+
+    def resolver_referencia(self, rid: str) -> str: ...
+
+    def partidas_de_referencias(self) -> tuple[dict[str, int | None], int | None]: ...
 
 
 class _Rechazo(Exception):
@@ -87,7 +95,7 @@ class Ajustes:
         self,
         configuracion: Configuracion,
         datos: Datos,
-        comparador: Comparador,
+        comparador: Referencias,
         actualizador: "Actualizador",
         arranque_windows: Callable[[bool], str],
         al_guardar: Callable[[Json], None],
