@@ -1,0 +1,20 @@
+# Datos de cada usuario (nunca al repositorio)
+clave.txt
+config.json
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.lock
+imagenes/
+__pycache__/
+
+# Empaquetado
+empaquetado/build/
+empaquetado/dist/
+empaquetado/descargas/
+empaquetado/*.zip
+empaquetado/*.sha256
+empaquetado/*.spec
+novedades.json
+version_vista.txt

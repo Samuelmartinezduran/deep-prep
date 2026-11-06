@@ -1,0 +1,257 @@
+{
+ "gameId": 7000000002,
+ "mapId": 11,
+ "gameMode": "CLASSIC",
+ "gameType": "MATCHED",
+ "gameQueueConfigId": 420,
+ "participants": [
+  {
+   "puuid": "puuid-demo-11",
+   "teamId": 100,
+   "spell1Id": 4,
+   "spell2Id": 7,
+   "championId": 40,
+   "lastSelectedSkinIndex": 67,
+   "profileIconId": 7243,
+   "riotId": "Ashgrove#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     8214
+    ],
+    "perkStyle": 8200,
+    "perkSubStyle": 8100
+   }
+  },
+  {
+   "puuid": "puuid-demo-12",
+   "teamId": 100,
+   "spell1Id": 4,
+   "spell2Id": 11,
+   "championId": 59,
+   "lastSelectedSkinIndex": 7,
+   "profileIconId": 6386,
+   "riotId": "Saltmarsh#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     8010
+    ],
+    "perkStyle": 8000,
+    "perkSubStyle": 8300
+   }
+  },
+  {
+   "puuid": "puuid-demo-13",
+   "teamId": 100,
+   "spell1Id": 4,
+   "spell2Id": 14,
+   "championId": 126,
+   "lastSelectedSkinIndex": 0,
+   "profileIconId": 7049,
+   "riotId": "Halcyon#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     8230
+    ],
+    "perkStyle": 8200,
+    "perkSubStyle": 8000
+   }
+  },
+  {
+   "puuid": "puuid-demo-14",
+   "teamId": 100,
+   "spell1Id": 4,
+   "spell2Id": 3,
+   "championId": 30,
+   "lastSelectedSkinIndex": 10,
+   "profileIconId": 7047,
+   "riotId": "Fennec#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     8992
+    ],
+    "perkStyle": 8200,
+    "perkSubStyle": 8000
+   }
+  },
+  {
+   "puuid": "puuid-demo-15",
+   "teamId": 100,
+   "spell1Id": 12,
+   "spell2Id": 4,
+   "championId": 134,
+   "lastSelectedSkinIndex": 0,
+   "profileIconId": 1640,
+   "riotId": "Ironbark#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     8229
+    ],
+    "perkStyle": 8200,
+    "perkSubStyle": 8300
+   }
+  },
+  {
+   "puuid": "puuid-demo-16",
+   "teamId": 200,
+   "spell1Id": 12,
+   "spell2Id": 4,
+   "championId": 421,
+   "lastSelectedSkinIndex": 0,
+   "profileIconId": 709,
+   "riotId": "Gloam#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     8437
+    ],
+    "perkStyle": 8400,
+    "perkSubStyle": 8000
+   }
+  },
+  {
+   "puuid": "puuid-demo-17",
+   "teamId": 200,
+   "spell1Id": 14,
+   "spell2Id": 4,
+   "championId": 555,
+   "lastSelectedSkinIndex": 0,
+   "profileIconId": 5287,
+   "riotId": "Vesper#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     9923
+    ],
+    "perkStyle": 8100,
+    "perkSubStyle": 8400
+   }
+  },
+  {
+   "puuid": "puuid-demo-18",
+   "teamId": 200,
+   "spell1Id": 11,
+   "spell2Id": 6,
+   "championId": 887,
+   "lastSelectedSkinIndex": 39,
+   "profileIconId": 7195,
+   "riotId": "Larkspur#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     8010
+    ],
+    "perkStyle": 8000,
+    "perkSubStyle": 8300
+   }
+  },
+  {
+   "puuid": "puuid-demo-19",
+   "teamId": 200,
+   "spell1Id": 4,
+   "spell2Id": 12,
+   "championId": 166,
+   "lastSelectedSkinIndex": 0,
+   "profileIconId": 5995,
+   "riotId": "Thistle#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     8005
+    ],
+    "perkStyle": 8000,
+    "perkSubStyle": 8200
+   }
+  },
+  {
+   "puuid": "puuid-demo-20",
+   "teamId": 200,
+   "spell1Id": 12,
+   "spell2Id": 4,
+   "championId": 90,
+   "lastSelectedSkinIndex": 28,
+   "profileIconId": 2076,
+   "riotId": "Kelpie#DEMO",
+   "bot": false,
+   "gameCustomizationObjects": [],
+   "perks": {
+    "perkIds": [
+     8992
+    ],
+    "perkStyle": 8200,
+    "perkSubStyle": 8300
+   }
+  }
+ ],
+ "observers": {
+  "encryptionKey": "mo8FT1Fw5rhAYBFpqjquuNJRLV1KcA5C"
+ },
+ "platformId": "EUW1",
+ "bannedChampions": [
+  {
+   "championId": 53,
+   "teamId": 100,
+   "pickTurn": 1
+  },
+  {
+   "championId": 238,
+   "teamId": 100,
+   "pickTurn": 2
+  },
+  {
+   "championId": 246,
+   "teamId": 100,
+   "pickTurn": 3
+  },
+  {
+   "championId": 91,
+   "teamId": 100,
+   "pickTurn": 4
+  },
+  {
+   "championId": 11,
+   "teamId": 100,
+   "pickTurn": 5
+  },
+  {
+   "championId": 39,
+   "teamId": 200,
+   "pickTurn": 6
+  },
+  {
+   "championId": 120,
+   "teamId": 200,
+   "pickTurn": 7
+  },
+  {
+   "championId": 84,
+   "teamId": 200,
+   "pickTurn": 8
+  },
+  {
+   "championId": 432,
+   "teamId": 200,
+   "pickTurn": 9
+  },
+  {
+   "championId": 64,
+   "teamId": 200,
+   "pickTurn": 10
+  }
+ ],
+ "gameStartTime": 1791801049144,
+ "gameLength": 1664
+}
