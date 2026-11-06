@@ -3,7 +3,8 @@
 Los datos de cada usuario (clave, configuración, cachés, registros) van en DATOS: en la app empaquetada,
 %LOCALAPPDATA%\\DeepPrep, para que una actualización del programa no los toque; desde el código, la
 carpeta del proyecto. DEEPPREP_DATOS los manda a otra carpeta (para probar sin tocar los de verdad);
-POROFESOR_DATOS, el nombre de antes, también vale.
+POROFESOR_DATOS, el nombre de antes, también vale. El modo demo (--demo) usa siempre una carpeta temporal
+nueva, que se borra al salir: nunca la de tus datos ni la del proyecto.
 
 Hasta la 1.0.2 la app se llamaba Porofesor y guardaba los datos en %LOCALAPPDATA%\\Porofesor: la copia
 instalada los muda a la carpeta nueva al arrancar, antes de que nada abra las bases de datos o el registro.
@@ -35,6 +36,8 @@ PROGRAMA = Path(
 )
 # Lo que pasa al mudar los datos de Porofesor. Aún no hay registro abierto: __main__ lo apunta al abrirlo.
 AVISOS: list[str] = []
+# Las carpetas de datos del modo demo (en la carpeta temporal del sistema) empiezan así.
+PREFIJO_DEMO = "deepprep-demo-"
 
 
 def falta_mudar(viejos: Path, nuevos: Path) -> bool:
@@ -92,10 +95,23 @@ def mudar_datos(viejos: Path, nuevos: Path, intentos: int = 30, pausa: float = 0
     return nuevos
 
 
+def carpeta_demo() -> Path:
+    """Una carpeta temporal nueva para los datos del modo demo (la borra demo.borrar_carpeta al salir)."""
+    return Path(tempfile.mkdtemp(prefix=PREFIJO_DEMO))
+
+
+def es_carpeta_demo(carpeta: Path) -> bool:
+    """¿Es una carpeta de carpeta_demo()? Lo único que la demo se permite borrar."""
+    return carpeta.name.startswith(PREFIJO_DEMO) and carpeta.resolve().parent == Path(tempfile.gettempdir()).resolve()
+
+
 def elegir_datos(entorno: Mapping[str, str] | None = None, argv: Sequence[str] | None = None) -> Path:
     """La carpeta de datos de este proceso; si toca, antes muda ahí los de Porofesor."""
     entorno = os.environ if entorno is None else entorno
     argv = sys.argv if argv is None else argv
+    # La demo manda sobre todo lo demás, también sobre DEEPPREP_DATOS: no lee ni escribe datos de nadie.
+    if "--demo" in argv:
+        return carpeta_demo()
     propia = entorno.get("DEEPPREP_DATOS") or entorno.get("POROFESOR_DATOS")
     if propia:
         return Path(propia)
@@ -307,6 +323,15 @@ def configurar_registro() -> None:
         registro = open(RUTA_REGISTRO, "a", encoding="utf-8", buffering=1)  # noqa: SIM115  el registro dura lo que la app
         sys.stdout = sys.stderr = registro
     logging.basicConfig(level=logging.INFO, format=FORMATO_REGISTRO, datefmt="%Y-%m-%d %H:%M:%S", stream=sys.stderr)
+
+
+def cerrar_registro() -> None:
+    """Cierra deepprep.log si el registro va ahí (sin consola), para poder borrar su carpeta: la demo, al salir."""
+    logging.shutdown()
+    registro = sys.stderr
+    if registro is not None and getattr(registro, "name", None) == str(RUTA_REGISTRO):
+        sys.stdout = sys.stderr = None
+        registro.close()
 
 
 class Configuracion:

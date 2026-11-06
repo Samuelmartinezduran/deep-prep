@@ -60,6 +60,9 @@ def empaquetar():
             str(RAIZ / "deepprep" / "web" / "icono.ico"),
             "--add-data",
             f"{RAIZ / 'deepprep' / 'web'};deepprep/web",
+            # Los datos de ejemplo de la demo (DeepPrep.exe --demo), junto a deepprep/demo como en el código.
+            "--add-data",
+            f"{RAIZ / 'deepprep' / 'demo' / '*.json'};deepprep/demo",
             "--collect-all",
             "webview",
             "--collect-all",

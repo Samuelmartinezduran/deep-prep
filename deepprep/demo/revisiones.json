@@ -1,0 +1,219 @@
+{
+ "revisiones": [
+  {
+   "id": "EUW1_7000000001",
+   "puuid": "puuid-demo-07",
+   "hace_min": 37,
+   "panel": {
+    "gank": {
+     "linea": "top",
+     "veces": 3,
+     "n": 5
+    },
+    "lineas": [
+     {
+      "linea": "bot",
+      "veredicto": "Aquí se equivocan"
+     }
+    ]
+   },
+   "desfase": 14,
+   "lp": {
+    "lp": 22,
+    "nivel": "diamond",
+    "rank": "II",
+    "cambio": -19
+   },
+   "referencia": {
+    "n": 1,
+    "n_ref": 87,
+    "ref": "Ganan este duelo",
+    "filas": [
+     {
+      "que": "Muertes antes del 10",
+      "tu": "1,0",
+      "ref": "0,6",
+      "mejor": false
+     },
+     {
+      "que": "Peleas con tu rival antes del 6",
+      "tu": "0,0",
+      "ref": "0,4",
+      "mejor": null
+     },
+     {
+      "que": "CS al 10",
+      "tu": "74",
+      "ref": "68",
+      "mejor": true
+     },
+     {
+      "que": "Oro sobre tu rival al 10",
+      "tu": "-2085",
+      "ref": "+310",
+      "mejor": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "EUW1_7000000002",
+   "puuid": "puuid-demo-02",
+   "hace_min": 75,
+   "panel": {
+    "gank": {
+     "linea": "bot",
+     "veces": 4,
+     "n": 6
+    },
+    "lineas": [
+     {
+      "linea": "top",
+      "veredicto": "Aquí se equivocan"
+     }
+    ]
+   },
+   "desfase": 12,
+   "lp": {
+    "lp": 41,
+    "nivel": "diamond",
+    "rank": "II",
+    "cambio": 21
+   },
+   "referencia": {
+    "n": 1,
+    "n_ref": 64,
+    "ref": "Ganan este duelo",
+    "filas": [
+     {
+      "que": "Muertes antes del 10",
+      "tu": "1,0",
+      "ref": "0,8",
+      "mejor": null
+     },
+     {
+      "que": "Peleas con tu rival antes del 6",
+      "tu": "0,0",
+      "ref": "0,3",
+      "mejor": null
+     },
+     {
+      "que": "CS al 10",
+      "tu": "61",
+      "ref": "66",
+      "mejor": false
+     },
+     {
+      "que": "Oro sobre tu rival al 10",
+      "tu": "+2085",
+      "ref": "+420",
+      "mejor": true
+     }
+    ]
+   }
+  }
+ ],
+ "tendencias": {
+  "n": 138,
+  "sesion": [
+   {
+    "nombre": "Primera partida de la sesión",
+    "n": 48,
+    "v": 28
+   },
+   {
+    "nombre": "Después de ganar",
+    "n": 47,
+    "v": 27
+   },
+   {
+    "nombre": "Después de perder",
+    "n": 43,
+    "v": 19
+   }
+  ],
+  "franjas": [
+   {
+    "nombre": "Mañana (6-14 h)",
+    "n": 9,
+    "v": 5
+   },
+   {
+    "nombre": "Tarde (14-20 h)",
+    "n": 58,
+    "v": 34
+   },
+   {
+    "nombre": "Noche (20-24 h)",
+    "n": 52,
+    "v": 28
+   },
+   {
+    "nombre": "Madrugada (0-6 h)",
+    "n": 19,
+    "v": 7
+   }
+  ],
+  "duracion": [
+   {
+    "nombre": "Menos de 25 min",
+    "n": 31,
+    "v": 15
+   },
+   {
+    "nombre": "25 a 35 min",
+    "n": 79,
+    "v": 46
+   },
+   {
+    "nombre": "Más de 35 min",
+    "n": 28,
+    "v": 13
+   }
+  ],
+  "rivales": [
+   {
+    "nombre": "Maestro Yi",
+    "n": 9,
+    "v": 5,
+    "campeon": 11
+   },
+   {
+    "nombre": "Viego",
+    "n": 8,
+    "v": 5,
+    "campeon": 234
+   },
+   {
+    "nombre": "Lee Sin",
+    "n": 7,
+    "v": 4,
+    "campeon": 64
+   },
+   {
+    "nombre": "Graves",
+    "n": 6,
+    "v": 2,
+    "campeon": 104
+   },
+   {
+    "nombre": "Kindred",
+    "n": 5,
+    "v": 3,
+    "campeon": 203
+   },
+   {
+    "nombre": "Nidalee",
+    "n": 5,
+    "v": 2,
+    "campeon": 76
+   },
+   {
+    "nombre": "Talon",
+    "n": 4,
+    "v": 0,
+    "campeon": 91
+   }
+  ]
+ }
+}

@@ -1,4 +1,8 @@
-"""Arranque: py -m deepprep  (--sin-ventana: solo el servidor, sin ventanas)"""
+"""Arranque: py -m deepprep  (--sin-ventana: solo el servidor, sin ventanas)
+
+--demo: la app con una partida de ejemplo, sin el LoL ni clave de Riot (ver deepprep/demo). Con --sin-ventana, solo el
+servidor; --puerto N lo pone en ese puerto (si no, uno libre) y --escena seleccion|carga|juego elige con qué empieza.
+"""
 
 import json
 import logging
@@ -17,6 +21,9 @@ from .sistema import pedir_a_la_copia_en_marcha
 
 if TYPE_CHECKING:
     from .app import App
+    from .demo import AppDemo
+    from .servidor import Servidor
+    from .tipos import AppDelPanel
 
 logger = logging.getLogger(__name__)
 
@@ -49,11 +56,20 @@ def pedir_que_se_muestre(url: str) -> bool:
         return False
 
 
+def opcion(nombre: str) -> str | None:
+    """El valor que sigue a una opción de la línea de órdenes (--puerto 5252), o None."""
+    i = sys.argv.index(nombre) if nombre in sys.argv else -1
+    return sys.argv[i + 1] if 0 <= i < len(sys.argv) - 1 else None
+
+
 def main() -> None:
     if "--grabar" in sys.argv:
         _grabar()
         return
     config.configurar_registro()
+    if "--demo" in sys.argv:
+        _demo()
+        return
     for aviso in config.AVISOS:  # la mudanza de los datos de Porofesor, si la ha habido
         logger.info("%s", aviso)
 
@@ -104,10 +120,11 @@ def _terminar_actualizacion(actualizador: ModuleType) -> None:
     actualizador.terminar_actualizacion(sys.argv[i + 1], sys.argv[i + 2], modo)
 
 
-def _ventanas(app: "App", url: str) -> bool:
+def _ventanas(app: "AppDelPanel", url: str, demo: bool = False) -> bool:
     """Abre las ventanas propias (bloquea hasta que la app se cierra) y devuelve True.
 
     Sin pywebview, sin WebView2 o con un fallo de .NET abre el panel en el navegador y devuelve False: no hay overlay.
+    demo: la ventana de la demo, sin overlay; se cierra de verdad al cerrarla.
     """
     try:
         import ctypes
@@ -116,7 +133,8 @@ def _ventanas(app: "App", url: str) -> bool:
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Samuel.DeepPrep")
         from .ventanas import Ventanas
 
-        Ventanas(app, url).arrancar(oculta="--oculta" in sys.argv)
+        titulo = "Deep Prep · demo" if demo else "Deep Prep"
+        Ventanas(app, url, titulo=titulo, demo=demo).arrancar(oculta="--oculta" in sys.argv and not demo)
         return True
     except Exception as e:  # noqa: BLE001  sin pywebview, sin WebView2 o un fallo de .NET: panel en Chrome, sin overlay
         logger.warning("Sin ventanas propias (%r); abro el panel en el navegador y no habrá overlay", e)
@@ -135,6 +153,56 @@ def _seguir_mientras_haga_falta(app: "App") -> None:
         logger.info("Nadie mira el panel y el cliente está cerrado; cierro.")
     except KeyboardInterrupt:
         pass
+
+
+def _demo() -> None:
+    """La demo (--demo): la ventana de siempre con la partida de ejemplo de deepprep/demo.
+
+    Sin vigía del cliente del LoL, sin llamadas a Riot, sin grabación, recolector ni actualizaciones, sin instalarse
+    ni tocar accesos directos o el arranque con Windows. config.DATOS es una carpeta temporal nueva (la elige config al
+    ver --demo) y se borra al salir: al cerrar la ventana, desde Ajustes o, sin ventanas, cuando nadie mira el panel.
+    """
+    from . import demo, servidor
+
+    app = demo.AppDemo(config.DATOS, escena=opcion("--escena") or demo.ESCENA_INICIAL)
+    salida = threading.Event()
+    # «Cerrar Deep Prep del todo» (Ajustes) sin ventanas propias; con ellas, Ventanas lo cambia por cerrarlas.
+    app.al_salir = salida.set
+    try:
+        srv = servidor.crear(app, int(opcion("--puerto") or 0), post=app.rutas())
+    except (OSError, ValueError) as e:
+        logger.error("La demo no puede abrir su servidor: %r", e)
+        _cerrar_demo(None)
+        return
+    url = f"http://127.0.0.1:{srv.server_address[1]}/"
+    threading.Thread(target=srv.serve_forever, name="servidor", daemon=True).start()
+    logger.info("Deep Prep (demo) en %s; lo que guardes va a %s y se borra al salir", url, config.DATOS)
+    try:
+        if "--sin-ventana" in sys.argv or not _ventanas(app, url, demo=True):
+            _seguir_mientras_miren(app, salida)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        _cerrar_demo(srv)
+
+
+def _seguir_mientras_miren(app: "AppDemo", salida: threading.Event) -> None:
+    """Demo sin ventanas propias: sigue hasta que se pide salir o nadie mira el panel en MINUTOS_SIN_PANEL."""
+    while not salida.wait(5):
+        if time.time() - app.ultima_consulta > MINUTOS_SIN_PANEL * 60:
+            logger.info("Nadie mira el panel de la demo; cierro.")
+            return
+
+
+def _cerrar_demo(srv: "Servidor | None") -> None:
+    from . import demo
+
+    if srv:
+        srv.shutdown()
+        srv.server_close()
+    logger.info("Demo cerrada; borro %s", config.DATOS)
+    config.cerrar_registro()
+    demo.borrar_carpeta(config.DATOS)
 
 
 if __name__ == "__main__":

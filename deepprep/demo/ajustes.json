@@ -1,0 +1,33 @@
+{
+ "config": {
+  "cuentas": [
+   "Driftmark#DEMO",
+   "Halcyon#DEMO"
+  ],
+  "recordatorios": [
+   "Limpia hacia el siguiente objetivo.",
+   "Jungla rival: solo con visión y sin objetivo a menos de 90 s.",
+   "Ni Tab ni tienda con un enemigo en pantalla o un objetivo a medias."
+  ],
+  "notas": {
+   "91": "Tras su 6, nada de limpiar arriba sin visión: salta cualquier muro.",
+   "126": "Fuerte a nivel 3: si pide gank pronto, ir."
+  },
+  "comparar_con": "ganan",
+  "perfil_base": "",
+  "referencias": {
+   "131": "Larkspur#DEMO"
+  },
+  "grabar": true,
+  "grabacion_codificador": "auto",
+  "grabacion_max_gb": 50,
+  "overlay": true,
+  "atajo_overlay": "ctrl+tab",
+  "overlay_opacidad": 0.94,
+  "siempre_en_marcha": true
+ },
+ "partidas_de": {
+  "larkspur#demo": 47,
+  "nightjar#demo": 112
+ }
+}

@@ -72,6 +72,8 @@ namespaces = false
 [tool.setuptools.package-data]
 # El panel (HTML, JS, CSS, fuentes, iconos e imágenes) va dentro del paquete: config.RUTA_WEB lo busca ahí.
 deepprep = ["web/**/*"]
+# Los datos de ejemplo del modo demo (--demo): deepprep/demo los busca junto a su __init__.py.
+"deepprep.demo" = ["*.json"]
 
 [tool.setuptools.dynamic]
 version = { attr = "deepprep.__version__" }
@@ -166,6 +168,7 @@ module = [
     "deepprep.constantes",
     "deepprep.cuentas",
     "deepprep.ddragon",
+    "deepprep.demo",
     "deepprep.duelos",
     "deepprep.grabacion",
     "deepprep.inicio_windows",
@@ -219,7 +222,7 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Medido el 6/11/2026 con las 168 pruebas: 71,8 % (líneas + ramas). Subirlo según se añadan pruebas.
+# Medido el 6/11/2026 con las 187 pruebas: 73,1 % (líneas + ramas). Subirlo según se añadan pruebas.
 fail_under = 70
 precision = 1
 show_missing = true

@@ -1,0 +1,1267 @@
+{
+ "id": 7000000003,
+ "cola": "Clasificatoria solo/dúo",
+ "yo": {
+  "campeon": "Diana",
+  "splash": "/ddragon/splash/Diana.jpg"
+ },
+ "grieta": true,
+ "inicio": 1792002549267,
+ "origen": "propia",
+ "equipos": {
+  "aliado": [
+   {
+    "nombre": "Mistral",
+    "tag": "DEMO",
+    "campeon": "Jayce",
+    "icono": "/ddragon/campeon/Jayce.png",
+    "rol": "TOP",
+    "rol_txt": "top",
+    "soy_yo": false,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "diamond",
+      "rank": "I",
+      "txt": "Diamante I",
+      "lp": 64,
+      "v": 211,
+      "d": 188
+     },
+     "flex": null
+    },
+    "maestria": 1184503,
+    "mains": [
+     {
+      "nombre": "Jayce",
+      "puntos": 1184503
+     },
+     {
+      "nombre": "Swain",
+      "puntos": 96410
+     },
+     {
+      "nombre": "Zilean",
+      "puntos": 61220
+     }
+    ],
+    "muestra": {
+     "n": 18,
+     "v": 10
+    },
+    "camp": {
+     "n": 15,
+     "v": 9,
+     "kda": [
+      8.733333333333333,
+      6.333333333333333,
+      5.533333333333333
+     ]
+    },
+    "kda": [
+     8.166666666666666,
+     6.166666666666667,
+     5.166666666666667
+    ],
+    "racha": [
+     true,
+     false,
+     true,
+     true,
+     true,
+     true,
+     false,
+     true,
+     true,
+     false
+    ],
+    "etiquetas": [
+     {
+      "t": "OTP",
+      "tono": "fuerte",
+      "d": "15 de sus últimas 18 con este campeón"
+     }
+    ],
+    "grupo": "",
+    "cargando": false
+   },
+   {
+    "nombre": "Driftmark",
+    "tag": "DEMO",
+    "campeon": "Diana",
+    "icono": "/ddragon/campeon/Diana.png",
+    "rol": "JUNGLE",
+    "rol_txt": "jungla",
+    "soy_yo": true,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "diamond",
+      "rank": "II",
+      "txt": "Diamante II",
+      "lp": 22,
+      "v": 141,
+      "d": 127
+     },
+     "flex": null
+    },
+    "maestria": 486915,
+    "mains": [
+     {
+      "nombre": "Diana",
+      "puntos": 486915
+     },
+     {
+      "nombre": "Maestro Yi",
+      "puntos": 212640
+     },
+     {
+      "nombre": "Viego",
+      "puntos": 98300
+     }
+    ],
+    "muestra": {
+     "n": 17,
+     "v": 9
+    },
+    "camp": {
+     "n": 9,
+     "v": 6,
+     "kda": [
+      9.555555555555555,
+      4.777777777777778,
+      8.222222222222221
+     ]
+    },
+    "kda": [
+     9.235294117647058,
+     5.352941176470588,
+     7.411764705882353
+    ],
+    "racha": [
+     false,
+     true,
+     true,
+     false,
+     true,
+     false,
+     true,
+     true,
+     false,
+     true
+    ],
+    "etiquetas": [
+     {
+      "t": "Main",
+      "tono": "fuerte",
+      "d": "486k de maestría"
+     }
+    ],
+    "grupo": "",
+    "cargando": false
+   },
+   {
+    "nombre": "Orrery",
+    "tag": "DEMO",
+    "campeon": "Irelia",
+    "icono": "/ddragon/campeon/Irelia.png",
+    "rol": "MIDDLE",
+    "rol_txt": "mid",
+    "soy_yo": false,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "diamond",
+      "rank": "I",
+      "txt": "Diamante I",
+      "lp": 12,
+      "v": 96,
+      "d": 88
+     },
+     "flex": null
+    },
+    "maestria": 18240,
+    "mains": [
+     {
+      "nombre": "Yone",
+      "puntos": 171660
+     },
+     {
+      "nombre": "Yasuo",
+      "puntos": 90412
+     },
+     {
+      "nombre": "Akali",
+      "puntos": 40233
+     }
+    ],
+    "muestra": {
+     "n": 17,
+     "v": 7
+    },
+    "camp": {
+     "n": 0,
+     "v": 0,
+     "kda": null
+    },
+    "kda": [
+     6.176470588235294,
+     5.235294117647059,
+     6.647058823529412
+    ],
+    "racha": [
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     true,
+     false,
+     true,
+     true
+    ],
+    "etiquetas": [
+     {
+      "t": "Poco rodado",
+      "tono": "flojo",
+      "d": "18k de maestría"
+     },
+     {
+      "t": "Racha -3",
+      "tono": "flojo",
+      "d": "derrotas seguidas"
+     }
+    ],
+    "grupo": "",
+    "cargando": false
+   },
+   {
+    "nombre": "Petrichor",
+    "tag": "DEMO",
+    "campeon": "Vayne",
+    "icono": "/ddragon/campeon/Vayne.png",
+    "rol": "BOTTOM",
+    "rol_txt": "ADC",
+    "soy_yo": false,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "master",
+      "rank": "I",
+      "txt": "Maestro",
+      "lp": 87,
+      "v": 254,
+      "d": 231
+     },
+     "flex": null
+    },
+    "maestria": 96310,
+    "mains": [
+     {
+      "nombre": "Corki",
+      "puntos": 412000
+     },
+     {
+      "nombre": "Vayne",
+      "puntos": 96310
+     },
+     {
+      "nombre": "Ezreal",
+      "puntos": 88720
+     }
+    ],
+    "muestra": {
+     "n": 18,
+     "v": 9
+    },
+    "camp": {
+     "n": 0,
+     "v": 0,
+     "kda": null
+    },
+    "kda": [
+     7.166666666666667,
+     7.277777777777778,
+     8.61111111111111
+    ],
+    "racha": [
+     false,
+     false,
+     true,
+     false,
+     true,
+     false,
+     false,
+     true,
+     true,
+     true
+    ],
+    "etiquetas": [
+     {
+      "t": "Oxidado",
+      "tono": "flojo",
+      "d": "41 días sin jugarlo"
+     }
+    ],
+    "grupo": "",
+    "cargando": false
+   },
+   {
+    "nombre": "Starling",
+    "tag": "DEMO",
+    "campeon": "Janna",
+    "icono": "/ddragon/campeon/Janna.png",
+    "rol": "UTILITY",
+    "rol_txt": "support",
+    "soy_yo": false,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "diamond",
+      "rank": "I",
+      "txt": "Diamante I",
+      "lp": 78,
+      "v": 187,
+      "d": 160
+     },
+     "flex": null
+    },
+    "maestria": 934120,
+    "mains": [
+     {
+      "nombre": "Janna",
+      "puntos": 934120
+     },
+     {
+      "nombre": "Lulu",
+      "puntos": 120330
+     },
+     {
+      "nombre": "Karma",
+      "puntos": 64010
+     }
+    ],
+    "muestra": {
+     "n": 18,
+     "v": 11
+    },
+    "camp": {
+     "n": 17,
+     "v": 10,
+     "kda": [
+      2.0588235294117645,
+      4.411764705882353,
+      14.647058823529411
+     ]
+    },
+    "kda": [
+     2.1666666666666665,
+     4.666666666666667,
+     14.055555555555555
+    ],
+    "racha": [
+     true,
+     true,
+     false,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     false
+    ],
+    "etiquetas": [
+     {
+      "t": "OTP",
+      "tono": "fuerte",
+      "d": "17 de sus últimas 18 con este campeón"
+     }
+    ],
+    "grupo": "",
+    "cargando": false
+   }
+  ],
+  "rival": [
+   {
+    "nombre": "Wrenfield",
+    "tag": "DEMO",
+    "campeon": "Swain",
+    "icono": "/ddragon/campeon/Swain.png",
+    "rol": "TOP",
+    "rol_txt": "top",
+    "soy_yo": false,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "diamond",
+      "rank": "I",
+      "txt": "Diamante I",
+      "lp": 45,
+      "v": 233,
+      "d": 219
+     },
+     "flex": null
+    },
+    "maestria": 702880,
+    "mains": [
+     {
+      "nombre": "Swain",
+      "puntos": 702880
+     },
+     {
+      "nombre": "Brand",
+      "puntos": 140220
+     },
+     {
+      "nombre": "Vel'Koz",
+      "puntos": 51870
+     }
+    ],
+    "muestra": {
+     "n": 18,
+     "v": 9
+    },
+    "camp": {
+     "n": 14,
+     "v": 8,
+     "kda": [
+      6.214285714285714,
+      5.285714285714286,
+      9.571428571428571
+     ]
+    },
+    "kda": [
+     5.666666666666667,
+     5.222222222222222,
+     9.222222222222221
+    ],
+    "racha": [
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     true,
+     false,
+     true
+    ],
+    "etiquetas": [
+     {
+      "t": "OTP",
+      "tono": "fuerte",
+      "d": "14 de sus últimas 18 con este campeón"
+     },
+     {
+      "t": "Fuera de rol",
+      "tono": "flojo",
+      "d": "suele jugar support"
+     },
+     {
+      "t": "Racha -3",
+      "tono": "flojo",
+      "d": "derrotas seguidas"
+     }
+    ],
+    "grupo": "",
+    "cargando": false
+   },
+   {
+    "nombre": "Bramble",
+    "tag": "DEMO",
+    "campeon": "Talon",
+    "icono": "/ddragon/campeon/Talon.png",
+    "rol": "JUNGLE",
+    "rol_txt": "jungla",
+    "soy_yo": false,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "master",
+      "rank": "I",
+      "txt": "Maestro",
+      "lp": 156,
+      "v": 77,
+      "d": 39
+     },
+     "flex": null
+    },
+    "maestria": 58920,
+    "mains": [
+     {
+      "nombre": "Talon",
+      "puntos": 58920
+     },
+     {
+      "nombre": "Kha'Zix",
+      "puntos": 44100
+     },
+     {
+      "nombre": "Nidalee",
+      "puntos": 30715
+     }
+    ],
+    "muestra": {
+     "n": 16,
+     "v": 13
+    },
+    "camp": {
+     "n": 11,
+     "v": 10,
+     "kda": [
+      10.181818181818182,
+      5.090909090909091,
+      8.181818181818182
+     ]
+    },
+    "kda": [
+     9.125,
+     5.625,
+     8.1875
+    ],
+    "racha": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     false,
+     true,
+     true,
+     true,
+     false
+    ],
+    "etiquetas": [
+     {
+      "t": "OTP",
+      "tono": "fuerte",
+      "d": "11 de sus últimas 16 con este campeón"
+     },
+     {
+      "t": "Racha +5",
+      "tono": "fuerte",
+      "d": "victorias seguidas"
+     }
+    ],
+    "grupo": "",
+    "cargando": false
+   },
+   {
+    "nombre": "Cinderowl",
+    "tag": "DEMO",
+    "campeon": "Qiyana",
+    "icono": "/ddragon/campeon/Qiyana.png",
+    "rol": "MIDDLE",
+    "rol_txt": "mid",
+    "soy_yo": false,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "diamond",
+      "rank": "I",
+      "txt": "Diamante I",
+      "lp": 93,
+      "v": 121,
+      "d": 109
+     },
+     "flex": null
+    },
+    "maestria": 141560,
+    "mains": [
+     {
+      "nombre": "Qiyana",
+      "puntos": 141560
+     },
+     {
+      "nombre": "Sylas",
+      "puntos": 99010
+     },
+     {
+      "nombre": "LeBlanc",
+      "puntos": 61400
+     }
+    ],
+    "muestra": {
+     "n": 17,
+     "v": 8
+    },
+    "camp": {
+     "n": 6,
+     "v": 4,
+     "kda": [
+      11.5,
+      7.166666666666667,
+      4.0
+     ]
+    },
+    "kda": [
+     7.882352941176471,
+     6.705882352941177,
+     5.176470588235294
+    ],
+    "racha": [
+     false,
+     false,
+     true,
+     false,
+     true,
+     true,
+     false,
+     false,
+     true,
+     true
+    ],
+    "etiquetas": [],
+    "grupo": "",
+    "cargando": false
+   },
+   {
+    "nombre": "Rookseven",
+    "tag": "DEMO",
+    "campeon": "Kalista",
+    "icono": "/ddragon/campeon/Kalista.png",
+    "rol": "BOTTOM",
+    "rol_txt": "ADC",
+    "soy_yo": false,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "master",
+      "rank": "I",
+      "txt": "Maestro",
+      "lp": 34,
+      "v": 301,
+      "d": 279
+     },
+     "flex": null
+    },
+    "maestria": 1012340,
+    "mains": [
+     {
+      "nombre": "Kalista",
+      "puntos": 1012340
+     },
+     {
+      "nombre": "Draven",
+      "puntos": 152330
+     },
+     {
+      "nombre": "Lucian",
+      "puntos": 98012
+     }
+    ],
+    "muestra": {
+     "n": 17,
+     "v": 10
+    },
+    "camp": {
+     "n": 11,
+     "v": 6,
+     "kda": [
+      12.454545454545455,
+      7.090909090909091,
+      5.7272727272727275
+     ]
+    },
+    "kda": [
+     11.294117647058824,
+     6.9411764705882355,
+     6.352941176470588
+    ],
+    "racha": [
+     false,
+     true,
+     true,
+     false,
+     true,
+     false,
+     true,
+     false,
+     true,
+     false
+    ],
+    "etiquetas": [
+     {
+      "t": "OTP",
+      "tono": "fuerte",
+      "d": "11 de sus últimas 17 con este campeón"
+     }
+    ],
+    "grupo": "",
+    "cargando": false
+   },
+   {
+    "nombre": "Marrow",
+    "tag": "DEMO",
+    "campeon": "Leona",
+    "icono": "/ddragon/campeon/Leona.png",
+    "rol": "UTILITY",
+    "rol_txt": "support",
+    "soy_yo": false,
+    "oculto": false,
+    "liga": {
+     "solo": {
+      "nivel": "diamond",
+      "rank": "II",
+      "txt": "Diamante II",
+      "lp": 70,
+      "v": 143,
+      "d": 131
+     },
+     "flex": null
+    },
+    "maestria": 77430,
+    "mains": [
+     {
+      "nombre": "Ashe",
+      "puntos": 120550
+     },
+     {
+      "nombre": "Leona",
+      "puntos": 77430
+     },
+     {
+      "nombre": "Nautilus",
+      "puntos": 50230
+     }
+    ],
+    "muestra": {
+     "n": 16,
+     "v": 9
+    },
+    "camp": {
+     "n": 1,
+     "v": 0,
+     "kda": [
+      0.0,
+      9.0,
+      18.0
+     ]
+    },
+    "kda": [
+     1.5625,
+     4.1875,
+     12.5
+    ],
+    "racha": [
+     true,
+     true,
+     true,
+     false,
+     true,
+     false,
+     false,
+     true,
+     true,
+     false
+    ],
+    "etiquetas": [
+     {
+      "t": "Racha +3",
+      "tono": "fuerte",
+      "d": "victorias seguidas"
+     }
+    ],
+    "grupo": "",
+    "cargando": false
+   }
+  ]
+ },
+ "jungla": {
+  "nombre": "Bramble",
+  "campeon": "Talon",
+  "icono": "/ddragon/campeon/Talon.png",
+  "n": 13,
+  "n_campeon": 11,
+  "n_lineas": 8,
+  "tarjetas": [
+   {
+    "titulo": "Inicio",
+    "valor": "Rojo en 5 de 8",
+    "detalle": "Sin patrón claro. Hoy su rojo cae en el lado superior. Al 3:00 sigue en el lado de su primer buff en 6 de 8.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Primer gank",
+    "valor": "min 4:33 · top 4 · mid 1 · bot 2",
+    "detalle": "Primera kill o asistencia en una línea antes del 10, en 7 de 8 partidas.",
+    "tono": "neutro"
+   },
+   {
+    "titulo": "Invades",
+    "valor": "Roba 14,6 monstruos por partida",
+    "detalle": "Pisa la jungla rival antes del 8 en 5 de 8. Referencia en Diamante-Master: 10 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Objetivos",
+    "valor": "Primer dragón en 10 de 13 (min 8:19)",
+    "detalle": "Larvas: 3,2 por partida.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Si se adelanta",
+    "valor": "Por delante al 10 gana 3 de 3; por detrás, 1 de 3",
+    "detalle": "10,2/5,1/8,2 de media con este campeón, 25% del daño de su equipo.",
+    "tono": "ojo"
+   },
+   {
+    "titulo": "Muertes tempranas",
+    "valor": "1,9 antes del 10",
+    "detalle": "Media de 8 partidas con línea de tiempo.",
+    "tono": "neutro"
+   }
+  ],
+  "cargando": false,
+  "mapa": {
+   "2": [
+    [
+     6250,
+     11880
+    ],
+    [
+     6580,
+     12210
+    ],
+    [
+     6400,
+     12340
+    ],
+    [
+     6720,
+     10730
+    ],
+    [
+     7100,
+     10680
+    ],
+    [
+     7630,
+     9570
+    ],
+    [
+     7580,
+     9510
+    ],
+    [
+     5480,
+     10340
+    ]
+   ],
+   "3": [
+    [
+     8030,
+     9460
+    ],
+    [
+     7850,
+     9590
+    ],
+    [
+     4150,
+     9540
+    ],
+    [
+     4530,
+     9490
+    ],
+    [
+     5140,
+     10700
+    ],
+    [
+     6490,
+     8140
+    ],
+    [
+     11120,
+     8160
+    ],
+    [
+     10778,
+     6680
+    ]
+   ],
+   "4": [
+    [
+     3460,
+     10820
+    ],
+    [
+     3150,
+     10540
+    ],
+    [
+     2330,
+     11890
+    ],
+    [
+     12480,
+     6620
+    ],
+    [
+     12430,
+     6560
+    ],
+    [
+     10680,
+     4940
+    ],
+    [
+     10410,
+     4860
+    ],
+    [
+     7640,
+     7390
+    ]
+   ],
+   "5": [
+    [
+     1950,
+     11940
+    ],
+    [
+     2830,
+     12790
+    ],
+    [
+     1440,
+     11500
+    ],
+    [
+     13690,
+     14040
+    ],
+    [
+     9880,
+     4540
+    ],
+    [
+     6610,
+     7760
+    ],
+    [
+     4140,
+     7840
+    ],
+    [
+     7030,
+     11010
+    ]
+   ],
+   "6": [
+    [
+     6470,
+     12010
+    ],
+    [
+     7630,
+     9570
+    ],
+    [
+     7580,
+     9510
+    ],
+    [
+     14080,
+     13740
+    ],
+    [
+     10850,
+     8080
+    ],
+    [
+     4640,
+     9690
+    ],
+    [
+     10560,
+     5320
+    ],
+    [
+     3650,
+     6540
+    ]
+   ]
+  }
+ },
+ "lineas": [
+  {
+   "linea": "top",
+   "veredicto": "Aquí se equivocan",
+   "tono": "bien",
+   "debilidad": 0.6,
+   "diferencia": 0.42,
+   "rival": [
+    "Swain va fuera de rol",
+    "Swain lleva 3 derrotas seguidas"
+   ],
+   "aliado": []
+  },
+  {
+   "linea": "mid",
+   "veredicto": "Igualada",
+   "tono": "neutro",
+   "debilidad": -0.03,
+   "diferencia": -0.33,
+   "rival": [],
+   "aliado": [
+    "Irelia lleva 3 derrotas seguidas",
+    "Irelia casi no ha jugado este campeón"
+   ]
+  },
+  {
+   "linea": "bot",
+   "veredicto": "Aquí sufre tu equipo",
+   "tono": "ojo",
+   "debilidad": -0.38,
+   "diferencia": -0.64,
+   "rival": [
+    "Leona apenas muere antes del 15 (1,5)"
+   ],
+   "aliado": [
+    "Vayne lleva 41 días sin jugar este campeón"
+   ]
+  }
+ ],
+ "gank": {
+  "linea": "top",
+  "veces": 4,
+  "n": 7
+ },
+ "historial": {
+  "n": 138,
+  "campeon": {
+   "n": 59,
+   "v": 36,
+   "racha": [
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    false,
+    true,
+    false
+   ]
+  },
+  "vs": [
+   {
+    "campeon": 91,
+    "nombre": "Talon",
+    "pos": "JUNGLE",
+    "n": 7,
+    "v": 1,
+    "n_mio": 1,
+    "v_mio": 0,
+    "icono": "/ddragon/campeon/Talon.png"
+   },
+   {
+    "campeon": 89,
+    "nombre": "Leona",
+    "pos": "UTILITY",
+    "n": 6,
+    "v": 2,
+    "n_mio": 3,
+    "v_mio": 2,
+    "icono": "/ddragon/campeon/Leona.png"
+   },
+   {
+    "campeon": 246,
+    "nombre": "Qiyana",
+    "pos": "MIDDLE",
+    "n": 8,
+    "v": 4,
+    "n_mio": 4,
+    "v_mio": 2,
+    "icono": "/ddragon/campeon/Qiyana.png"
+   },
+   {
+    "campeon": 50,
+    "nombre": "Swain",
+    "pos": "TOP",
+    "n": 5,
+    "v": 4,
+    "n_mio": 1,
+    "v_mio": 1,
+    "icono": "/ddragon/campeon/Swain.png"
+   },
+   {
+    "campeon": 429,
+    "nombre": "Kalista",
+    "pos": "BOTTOM",
+    "n": 2,
+    "v": 2,
+    "n_mio": 0,
+    "v_mio": 0,
+    "icono": "/ddragon/campeon/Kalista.png"
+   }
+  ],
+  "vs_jungla": {
+   "nombre": "Talon",
+   "n": 4,
+   "v": 0,
+   "n_mio": 1,
+   "v_mio": 0
+  },
+  "conocidos": [],
+  "alcance": "temporada",
+  "cola_txt": " de solo/dúo",
+  "mi_campeon": "Diana"
+ },
+ "avisos": [
+  {
+   "tono": "ojo",
+   "texto": "Talon gana 3 de 3 cuando va por delante al minuto 10."
+  },
+  {
+   "tono": "ojo",
+   "texto": "Talon saca 3,0 kills en solitario por partida."
+  },
+  {
+   "tono": "ojo",
+   "texto": "Contra Talon en jungla llevas 0V 4D."
+  },
+  {
+   "tono": "ojo",
+   "texto": "Talon (jungla) ha ganado 10 de sus últimas 11 con ese campeón."
+  },
+  {
+   "tono": "neutro",
+   "texto": "Rivales con poco rodaje o fuera de rol: Swain (top, fuera de rol)."
+  },
+  {
+   "tono": "neutro",
+   "texto": "Aliados con poco rodaje o fuera de rol: Irelia (mid, poco rodaje)."
+  }
+ ],
+ "plan": [
+  "Más errores esperados en top: Swain va fuera de rol.",
+  "Bot es donde sufre tu equipo.",
+  "Su primer gank va a top en 4 de 7."
+ ],
+ "bans": [
+  {
+   "nombre": "LeBlanc",
+   "icono": "/ddragon/campeon/Leblanc.png"
+  },
+  {
+   "nombre": "Akali",
+   "icono": "/ddragon/campeon/Akali.png"
+  },
+  {
+   "nombre": "Varus",
+   "icono": "/ddragon/campeon/Varus.png"
+  },
+  {
+   "nombre": "Pyke",
+   "icono": "/ddragon/campeon/Pyke.png"
+  },
+  {
+   "nombre": "Shaco",
+   "icono": "/ddragon/campeon/Shaco.png"
+  },
+  {
+   "nombre": "Locke",
+   "icono": "/ddragon/campeon/Locke.png"
+  },
+  {
+   "nombre": "Nasus",
+   "icono": "/ddragon/campeon/Nasus.png"
+  },
+  {
+   "nombre": "Yunara",
+   "icono": "/ddragon/campeon/Yunara.png"
+  },
+  {
+   "nombre": "Zed",
+   "icono": "/ddragon/campeon/Zed.png"
+  },
+  {
+   "nombre": "Lee Sin",
+   "icono": "/ddragon/campeon/LeeSin.png"
+  }
+ ],
+ "recordatorios": [],
+ "notas": [],
+ "progreso": {
+  "hechas": 270,
+  "total": 270
+ },
+ "terminada": false,
+ "duelo": {
+  "n": 214,
+  "wr": 47,
+  "datos": [
+   {
+    "texto": "Diana gana el 38% de las peleas con Talon antes de su 6; desde el 6, el 57%.",
+    "detalle": "96 y 141 peleas de 2 a 4 jugadores antes del 15"
+   },
+   {
+    "texto": "Diana con +500 de oro sobre Talon al 10 gana el 68% de las partidas; con −500, el 31%.",
+    "detalle": "58 y 71 partidas"
+   },
+   {
+    "texto": "Diana gana el 41% de las partidas que acaban antes del 25 y el 56% de las que pasan del 32.",
+    "detalle": "62 y 70 partidas"
+   },
+   {
+    "texto": "Larvas: 2,4 en las que gana Diana, 1,1 en las que pierde.",
+    "detalle": "101 victorias y 113 derrotas"
+   }
+  ],
+  "build": {
+   "runa": "Electrocutar",
+   "secundaria": "Brujería",
+   "objeto": "Cinturón cohete hextech",
+   "minuto": "11,8",
+   "wr_objeto": 51,
+   "n_objeto": 142,
+   "maximiza": "Q > W > E"
+  },
+  "poco": false,
+  "tu": {
+   "n": 31,
+   "n_ref": 101,
+   "ref": "Ganan este duelo",
+   "filas": [
+    {
+     "que": "Muertes antes del 10",
+     "tu": "1,3",
+     "ref": "0,6",
+     "mejor": false
+    },
+    {
+     "que": "Peleas con tu rival antes del 6",
+     "tu": "0,9",
+     "ref": "0,4",
+     "mejor": null
+    },
+    {
+     "que": "CS al 10",
+     "tu": "58",
+     "ref": "64",
+     "mejor": false
+    },
+    {
+     "que": "Oro sobre tu rival al 10",
+     "tu": "-180",
+     "ref": "+240",
+     "mejor": false
+    }
+   ]
+  },
+  "a": "Diana",
+  "b": "Talon",
+  "icono_a": "/ddragon/campeon/Diana.png",
+  "icono_b": "/ddragon/campeon/Talon.png",
+  "pos": "jungla",
+  "en_pool": true
+ }
+}

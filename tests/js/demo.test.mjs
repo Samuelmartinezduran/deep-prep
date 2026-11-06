@@ -1,11 +1,17 @@
-// La barra del modo demo como texto (y lo poco que toca de la página).
+// La barra del modo demo como texto (y lo poco que toca de la página), y las vistas con los datos de la demo
+// (deepprep/demo/*.json) tal y como los manda la app.
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, test } from "node:test";
 
 import { elegirEscena, ESCENAS, escenaActual, htmlDemo, pintarDemo } from "../../deepprep/web/js/demo.js";
 import { estado } from "../../deepprep/web/js/estado.js";
+import { pintarOverlay } from "../../deepprep/web/js/overlay.js";
+import { pintarPanel } from "../../deepprep/web/js/panel.js";
+import { pintarSeleccion } from "../../deepprep/web/js/seleccion.js";
 import { atributos, textoDe } from "./ayuda.mjs";
 
+const leer = (nombre) => JSON.parse(readFileSync(new URL(`../../deepprep/demo/${nombre}`, import.meta.url), "utf8"));
 const activas = (html) => [...html.matchAll(/<button class="activa" data-escena="([a-z]+)" aria-pressed="true">/g)].map((m) => m[1]);
 
 // Una página de mentira con lo que usa la barra: la caja #demo y la explicación #demo-txt.
@@ -110,5 +116,45 @@ describe("barra del modo demo", () => {
     assert.equal(await elegirEscena("seleccion"), null);
     assert.equal(explicacion.textContent, "Esa escena no existe.");
     assert.equal(estado.actual.demo.escena, "carga");
+  });
+});
+
+describe("vistas con los datos de la demo", () => {
+  const panel = leer("panel.json");
+  const seleccion = leer("seleccion.json");
+  const base = { modo: "carga", reloj: null, cuota: { usadas: 0, tope: 96, espera: 0 }, overlay: { activo: true, atajo: "ctrl+tab" } };
+
+  test("pantalla de carga: los diez, el duelo, el mapa del jungla y el plan", () => {
+    const html = pintarPanel({ ...base, panel });
+    assert.equal((html.match(/class="fila (yo)?"/g) || []).length, 10);
+    assert.match(html, /<h1>Diana<span class="hero-rol">Jungla<\/span><\/h1>/);
+    assert.match(html, /Datos completos/);
+    assert.match(html, /Tu duelo · jungla/);
+    assert.match(html, /Antes de empezar/);
+    assert.equal((html.match(/class="punto-mapa rival"/g) || []).length, panel.jungla.mapa["3"].length);
+    assert.ok(textoDe(html).includes("#DEMO"));
+  });
+
+  test("selección de campeón: tu pool contra Talon y lo que van eligiendo", () => {
+    const html = pintarSeleccion(seleccion);
+    assert.match(html, /Tu pool contra Talon/);
+    assert.equal((html.match(/class="pool-fila"/g) || []).length, seleccion.pool.filas.length);
+    assert.match(html, /Contra lo que van eligiendo/);
+  });
+
+  test("el overlay con la partida de ejemplo", () => {
+    const html = pintarOverlay({ ...base, panel });
+    assert.equal((html.match(/class="ov-fila (yo)?"/g) || []).length, 10);
+    assert.match(html, /Pantalla de carga/);
+  });
+
+  test("ningún jugador de la demo es de verdad: todos #DEMO", () => {
+    const jugadores = [...panel.equipos.aliado, ...panel.equipos.rival];
+    assert.deepEqual([...new Set(jugadores.map((f) => f.tag))], ["DEMO"]);
+    for (const nombre of ["panel.json", "seleccion.json", "partida.json", "revisiones.json", "ajustes.json"]) {
+      const texto = readFileSync(new URL(`../../deepprep/demo/${nombre}`, import.meta.url), "utf8");
+      for (const [, tag] of texto.matchAll(/[A-Za-z]+#([A-Za-z0-9]+)/g)) assert.equal(tag.toUpperCase(), "DEMO", nombre);
+      for (const [, puuid] of texto.matchAll(/"puuid":\s*"([^"]+)"/g)) assert.match(puuid, /^puuid-demo-\d+$/, nombre);
+    }
   });
 });
