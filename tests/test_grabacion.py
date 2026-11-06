@@ -14,6 +14,7 @@ from unittest import mock
 from deepprep import grabacion as g
 from deepprep import recolector as rec
 from deepprep import revisiones
+from deepprep.base_duelos import BaseDuelos
 from tests import registro_de
 
 
@@ -46,10 +47,14 @@ class Registro(unittest.TestCase):
             g.RUTA_LOG = Path(d) / "grabacion.log"
             try:
                 g.RUTA_LOG.write_text("GRABANDO en C:\\Videos\\LoL-coach\\2026-10-14_partida2\nPantalla 0\n", encoding="utf-8")
-                self.assertEqual(g._carpeta_del_registro(solo_en_curso=True).name, "2026-10-14_partida2")
+                en_curso = g._carpeta_del_registro(solo_en_curso=True)
+                assert en_curso is not None
+                self.assertEqual(en_curso.name, "2026-10-14_partida2")
                 g.RUTA_LOG.write_text(g.RUTA_LOG.read_text(encoding="utf-8") + "TERMINADO: 30 min\n", encoding="utf-8")
                 self.assertIsNone(g._carpeta_del_registro(solo_en_curso=True))
-                self.assertEqual(g._carpeta_del_registro().name, "2026-10-14_partida2")
+                ultima = g._carpeta_del_registro()
+                assert ultima is not None
+                self.assertEqual(ultima.name, "2026-10-14_partida2")
             finally:
                 g.RUTA_LOG = original
 
@@ -88,7 +93,7 @@ class Cerrojo(unittest.TestCase):
     def test_el_recolector_tampoco_lo_deja_abierto(self):
         ruta = self.ruta.with_name("recolector.lock")
         with mock.patch.object(rec, "RUTA_CERROJO", ruta), mock.patch.object(rec.config, "cargar", dict):
-            r = rec.Recolector(None, str, set(), list, regiones=())
+            r = rec.Recolector(BaseDuelos(":memory:"), str, set(), list, regiones=())
             with open(ruta, "a") as otro, registro_de("deepprep.recolector") as registro:
                 msvcrt.locking(otro.fileno(), msvcrt.LK_NBLCK, 1)
                 self.assertFalse(r.arrancar())

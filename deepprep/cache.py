@@ -5,8 +5,11 @@ parar (cada partida que miras trae las de diez jugadores). Las demás se vuelven
 """
 
 from collections import OrderedDict
+from pathlib import Path
+from typing import Any
 
 from .almacen import BaseSQLite, desempaquetar, empaquetar
+from .tipos import Linea, Partida
 
 # Unos 18 KB por partida y 65 KB por línea de tiempo en memoria: caben de sobra tus partidas de la temporada y
 # las de varias partidas seguidas sin pasar de unos 55 MB.
@@ -17,26 +20,26 @@ MAX_LINEAS = 300
 class _Recientes:
     """Diccionario que se queda con los `maximo` últimos usados. No es seguro entre hilos: lo protege el de Cache."""
 
-    def __init__(self, maximo):
+    def __init__(self, maximo: int) -> None:
         self.maximo = maximo
-        self._datos = OrderedDict()
+        self._datos: OrderedDict[str, Any] = OrderedDict()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._datos)
 
-    def get(self, clave):
+    def get(self, clave: str) -> Any:
         valor = self._datos.get(clave)
         if valor is not None:
             self._datos.move_to_end(clave)
         return valor
 
-    def poner(self, clave, valor):
+    def poner(self, clave: str, valor: Any) -> None:
         self._datos[clave] = valor
         self._datos.move_to_end(clave)
         while len(self._datos) > self.maximo:
             self._datos.popitem(last=False)
 
-    def clear(self):
+    def clear(self) -> None:
         self._datos.clear()
 
 
@@ -51,15 +54,15 @@ class Cache(BaseSQLite):
         CREATE TABLE IF NOT EXISTS lineas (id TEXT PRIMARY KEY, datos BLOB NOT NULL);
     """
 
-    def __init__(self, ruta):
+    def __init__(self, ruta: str | Path) -> None:
         super().__init__(ruta)
         self._partidas = _Recientes(MAX_PARTIDAS)
         self._lineas = _Recientes(MAX_LINEAS)
 
     # --- partidas ------------------------------------------------------------------
-    def partida(self, id_):
+    def partida(self, id_: str) -> Partida | None:
         with self._lock:
-            red = self._partidas.get(id_)
+            red: Partida | None = self._partidas.get(id_)
             if red is not None:
                 return red
             fila = self._db.execute("SELECT datos FROM partidas WHERE id=?", (id_,)).fetchone()
@@ -69,7 +72,7 @@ class Cache(BaseSQLite):
             self._partidas.poner(id_, red)
             return red
 
-    def guardar_partida(self, red):
+    def guardar_partida(self, red: Partida) -> None:
         with self._lock:
             self._partidas.poner(red["id"], red)
             self._db.execute(
@@ -82,7 +85,7 @@ class Cache(BaseSQLite):
             )
             self._db.commit()
 
-    def partidas_de(self, puuid, desde=0, limite=1000):
+    def partidas_de(self, puuid: str, desde: int = 0, limite: int = 1000) -> list[Partida]:
         """Partidas guardadas de un jugador, de la más reciente a la más antigua."""
         with self._lock:
             ids = [
@@ -95,9 +98,9 @@ class Cache(BaseSQLite):
         return [p for p in (self.partida(i) for i in ids) if p]
 
     # --- líneas de tiempo ----------------------------------------------------------
-    def linea(self, id_):
+    def linea(self, id_: str) -> Linea | None:
         with self._lock:
-            red = self._lineas.get(id_)
+            red: Linea | None = self._lineas.get(id_)
             if red is not None:
                 return red
             fila = self._db.execute("SELECT datos FROM lineas WHERE id=?", (id_,)).fetchone()
@@ -107,13 +110,13 @@ class Cache(BaseSQLite):
             self._lineas.poner(id_, red)
             return red
 
-    def guardar_linea(self, red):
+    def guardar_linea(self, red: Linea) -> None:
         with self._lock:
             self._lineas.poner(red["id"], red)
             self._db.execute("INSERT OR REPLACE INTO lineas (id, datos) VALUES (?,?)", (red["id"], empaquetar(red)))
             self._db.commit()
 
-    def vaciar(self):
+    def vaciar(self) -> None:
         """Borra todo. Hace falta si cambia la clave de aplicación, porque los PUUID dependen de ella."""
         with self._lock:
             self._partidas.clear()

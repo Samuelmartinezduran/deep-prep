@@ -1,9 +1,15 @@
 """La selección de campeón: tu duelo, tu pool contra su campeón, tu historial y tus notas, antes de empezar."""
 
 import time
+from collections.abc import Callable, Collection, Iterable
 
 from . import analisis as an
+from .comparador import Comparador
 from .constantes import NOMBRE_LIGA
+from .ddragon import Datos
+from .lcu import Cliente as ClienteLoL
+from .partidas import Partidas
+from .tipos import Json
 
 
 class Seleccion:
@@ -12,26 +18,34 @@ class Seleccion:
     cuentas: tus cuentas (puuid -> 'Nombre#TAG'). notas_de(campeones, rivales): tus notas de esos campeones.
     """
 
-    def __init__(self, lcu, datos, cuentas, partidas, comparador, notas_de):
+    def __init__(
+        self,
+        lcu: ClienteLoL,
+        datos: Datos,
+        cuentas: dict[str, str],
+        partidas: Partidas,
+        comparador: Comparador,
+        notas_de: Callable[[Iterable[int], Collection[int]], list[Json]],
+    ) -> None:
         self.lcu = lcu
         self.datos = datos
         self.cuentas = cuentas
         self.partidas = partidas
         self.comparador = comparador
         self.notas_de = notas_de
-        self.actual = None
-        self._clave = None
+        self.actual: Json | None = None
+        self._clave: tuple[int, tuple[int, ...], int, str] | None = None
 
-    def cerrar(self):
+    def cerrar(self) -> None:
         """Ya no hay selección (se ha salido de ella o el cliente está cerrado)."""
         self.actual = None
 
-    def leer(self):
+    def leer(self) -> Json | None:
         """Lee la selección del cliente; si no ha cambiado desde la última vez, se queda con lo que ya había."""
         self.actual = self._leer()
         return self.actual
 
-    def _leer(self):
+    def _leer(self) -> Json | None:
         s = self.lcu.seleccion()
         if not s:
             return None
@@ -57,5 +71,5 @@ class Seleccion:
             if s["mio"]
             else None,
             "historial": h,
-            "notas": self.notas_de([s["mio"], *s["rivales"]], rivales=set(s["rivales"])),
+            "notas": self.notas_de([s["mio"], *s["rivales"]], set(s["rivales"])),
         }

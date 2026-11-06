@@ -3,8 +3,15 @@
 import itertools
 import statistics
 from collections import Counter
+from collections.abc import Collection, Iterable, Mapping
+from typing import Any
 
 from .constantes import COLAS_GRIETA, DIA_MS, MIN
+from .tipos import Etiqueta, Json, Jugador, Linea, Partida, Registro, Tarjeta
+
+Juego = tuple[Partida, Jugador]  # una partida y el jugador que interesa en ella
+ConLinea = tuple[Partida, Jugador, Linea]  # lo mismo, con la línea de tiempo de esa partida
+RolesCampeon = Mapping[int, Mapping[str, float]]  # campeón -> {posición: frecuencia}
 
 POSICIONES = ("TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY")
 NOMBRE_POS = {"TOP": "top", "JUNGLE": "jungla", "MIDDLE": "mid", "BOTTOM": "ADC", "UTILITY": "support"}
@@ -46,11 +53,11 @@ CH_CAMPOS = (
 
 
 # --- reducción de las respuestas de Riot ---------------------------------------------
-def reducir_partida(m):
+def reducir_partida(m: Json) -> Partida:
     """Se queda con lo que usa el panel (una partida completa pesa ~80 KB)."""
     info = m["info"]
     duracion = info.get("gameDuration", 0)
-    jug = []
+    jug: list[Jugador] = []
     for p in info["participants"]:
         ch = p.get("challenges") or {}
         jug.append(
@@ -77,7 +84,7 @@ def reducir_partida(m):
                 "ch": {k: round(ch[k], 3) for k in CH_CAMPOS if isinstance(ch.get(k), (int, float))},
             }
         )
-    equipos = {}
+    equipos: dict[str, Json] = {}
     for t in info.get("teams", []):
         obj = t.get("objectives", {})
         equipos[str(t["teamId"])] = {
@@ -97,11 +104,12 @@ def reducir_partida(m):
     }
 
 
-def reducir_linea(t):
+def reducir_linea(t: Json) -> Linea:
     """De la línea de tiempo (~850 KB) guarda posiciones y oro por minuto hasta el 15, kills y monstruos."""
     info = t["info"]
     pos, est = estado_por_minuto(info["frames"][:16])
-    kills, monstruos = [], []
+    kills: list[list[Any]] = []
+    monstruos: list[list[Any]] = []
     for f in info["frames"]:
         for e in f.get("events", []):
             if e["type"] == "CHAMPION_KILL" and e["timestamp"] < 20 * MIN:
@@ -118,9 +126,10 @@ def reducir_linea(t):
     }
 
 
-def estado_por_minuto(frames):
+def estado_por_minuto(frames: list[Json]) -> tuple[dict[str, list[list[int]]], dict[str, list[list[int]]]]:
     """({pid: [[x, y], ...]}, {pid: [[oro, experiencia, CS, nivel], ...]}): un elemento por minuto de los frames dados."""
-    pos, est = {}, {}
+    pos: dict[str, list[list[int]]] = {}
+    est: dict[str, list[list[int]]] = {}
     for f in frames:
         for pid, pf in f.get("participantFrames", {}).items():
             p = pf.get("position") or {}
@@ -136,7 +145,7 @@ def estado_por_minuto(frames):
     return pos, est
 
 
-def kill_reducida(e):
+def kill_reducida(e: Json) -> list[Any]:
     """[ms, x, y, asesino, víctima, asistentes] de un evento CHAMPION_KILL."""
     p = e.get("position") or {}
     return [
@@ -149,7 +158,7 @@ def kill_reducida(e):
     ]
 
 
-def monstruo_reducido(e):
+def monstruo_reducido(e: Json) -> list[Any]:
     """[ms, tipo, subtipo, quién lo mata, su equipo] de un evento ELITE_MONSTER_KILL."""
     return [
         e["timestamp"],
@@ -161,33 +170,34 @@ def monstruo_reducido(e):
 
 
 # --- utilidades ------------------------------------------------------------------------
-def num(x, decimales=1):
+def num(x: float, decimales: int = 1) -> str:
     return f"{x:.{decimales}f}".replace(".", ",")
 
 
-def mmss(ms):
+def mmss(ms: float) -> str:
     s = int(ms // 1000)
     return f"{s // 60}:{s % 60:02d}"
 
 
-def media(valores):
+def media(valores: Iterable[float]) -> float:
     valores = list(valores)
     return sum(valores) / len(valores) if valores else 0.0
 
 
-def jugador_en(partida, puuid):
-    for j in partida["jug"]:
+def jugador_en(partida: Partida, puuid: str | None) -> Jugador | None:
+    jugadores: list[Jugador] = partida["jug"]
+    for j in jugadores:
         if j["puuid"] == puuid:
             return j
     return None
 
 
-def validas(partidas):
+def validas(partidas: Iterable[Partida]) -> list[Partida]:
     """Partidas de la Grieta que no son remake."""
     return [m for m in partidas if not m["remake"] and m["cola"] in COLAS_GRIETA]
 
 
-def equipo_de_pid(pid):
+def equipo_de_pid(pid: int | str) -> int:
     return 100 if int(pid) <= 5 else 200
 
 
@@ -197,13 +207,13 @@ SUMA_X, SUMA_Y = 14740, 14820
 MAPA_MINUTOS = (2, 3, 4, 5, 6)
 
 
-def espejo(x, y):
+def espejo(x: int, y: int) -> tuple[int, int]:
     return SUMA_X - x, SUMA_Y - y
 
 
-def mapa_posiciones(con_linea, equipo_ahora):
+def mapa_posiciones(con_linea: Iterable[tuple[object, Jugador, Linea]], equipo_ahora: int) -> dict[str, list[list[int]]]:
     """{minuto: [[x, y], ...]} de un jugador en sus partidas, todas llevadas al lado del mapa que le toca hoy."""
-    mapa = {}
+    mapa: dict[str, list[list[int]]] = {}
     for _, j, l in con_linea:
         pos = l["pos"].get(str(j["pid"])) or []
         girar = equipo_de_pid(j["pid"]) != equipo_ahora
@@ -219,16 +229,16 @@ def mapa_posiciones(con_linea, equipo_ahora):
 _R2 = 2**0.5
 
 
-def _diagonales(x, y):
+def _diagonales(x: float, y: float) -> tuple[float, float]:
     """Distancia con signo a la línea de mid (positivo = lado superior) y al río (positivo = mitad roja)."""
     return (y - x) / _R2, (x + y - 14900) / _R2
 
 
-def _en_base(x, y):
+def _en_base(x: float, y: float) -> bool:
     return (x < 3800 and y < 3800) or (x > 11000 and y > 11000)
 
 
-def zona(x, y):
+def zona(x: float, y: float) -> tuple[str, str, int]:
     """Devuelve (tipo, lado, mitad): tipo base/top/mid/bot/rio/jungla, lado 'sup'/'inf', mitad 100/200."""
     d_mid, d_rio = _diagonales(x, y)
     lado = "sup" if d_mid > 0 else "inf"
@@ -248,7 +258,7 @@ def zona(x, y):
     return tipo, lado, mitad
 
 
-def linea_de_kill(x, y):
+def linea_de_kill(x: float, y: float) -> str:
     """Línea a la que pertenece una kill, con bandas más anchas que zona() porque los ganks acaban fuera de la calle."""
     d_mid, _ = _diagonales(x, y)
     if _en_base(x, y):
@@ -262,13 +272,13 @@ def linea_de_kill(x, y):
     return "jungla"
 
 
-def lado_del_buff(buff, equipo):
+def lado_del_buff(buff: str, equipo: int) -> str:
     """En qué lado del mapa cae cada buff según el equipo: el azul del equipo azul está arriba, el del rojo abajo."""
     arriba = (buff == "azul") == (equipo == 100)
     return "sup" if arriba else "inf"
 
 
-def inicio_jungla(linea, pid):
+def inicio_jungla(linea: Linea, pid: int) -> str | None:
     """Buff por el que empieza el jungla ('rojo', 'azul'), 'invade' o None si no se puede saber.
 
     Al 1:00 el jungla está parado en su primer campo; al 2:00 ya va por el tercero y
@@ -288,7 +298,7 @@ def inicio_jungla(linea, pid):
     return None
 
 
-def lado_al(linea, pid, minuto):
+def lado_al(linea: Linea, pid: int, minuto: int) -> str | None:
     """Lado del mapa ('sup'/'inf') en el que está el jugador en ese minuto, o None si está en base."""
     pos = linea["pos"].get(str(pid)) or []
     if len(pos) <= minuto:
@@ -297,7 +307,7 @@ def lado_al(linea, pid, minuto):
     return None if tipo == "base" else lado
 
 
-def primer_gank(linea, pid):
+def primer_gank(linea: Linea, pid: int | str) -> tuple[int, str] | None:
     """(ms, línea) de la primera kill o asistencia del jugador en una línea antes del minuto 10."""
     pid = int(pid)
     for t, x, y, asesino, _victima, asistentes in linea["kills"]:
@@ -311,18 +321,21 @@ def primer_gank(linea, pid):
     return None
 
 
-def muertes_antes(linea, pid, minuto):
+def muertes_antes(linea: Linea, pid: int | str, minuto: int) -> int:
     pid = int(pid)
     return sum(1 for k in linea["kills"] if k[4] == pid and k[0] < minuto * MIN)
 
 
-def oro_al(linea, pid, minuto):
+def oro_al(linea: Linea, pid: int, minuto: int) -> int | None:
     est = linea["est"].get(str(pid)) or []
-    return est[minuto][0] if len(est) > minuto else None
+    oro: int | None = est[minuto][0] if len(est) > minuto else None
+    return oro
 
 
 # --- roles en la partida en vivo ----------------------------------------------------------
-def asignar_roles(equipo, roles_campeon, historiales=None):
+def asignar_roles(
+    equipo: list[Json], roles_campeon: RolesCampeon, historiales: dict[str, Counter[str]] | None = None
+) -> list[str]:
     """Reparte las cinco posiciones entre los cinco jugadores de un equipo.
 
     equipo: lista de dicts con 'campeon', 's1', 's2' y 'puuid'.
@@ -334,13 +347,13 @@ def asignar_roles(equipo, roles_campeon, historiales=None):
         return [""] * len(equipo)
     historiales = historiales or {}
 
-    def puntos(j, pos):
+    def puntos(j: Json, pos: str) -> float:
         tasas = roles_campeon.get(j["campeon"]) or {}
         total = sum(tasas.values())
-        s = tasas.get(pos, 0) / total if total else 0.2
+        s: float = tasas.get(pos, 0) / total if total else 0.2
         if pos == "JUNGLE":
             s += 2.0 if SMITE in (j.get("s1"), j.get("s2")) else -2.0
-        hist = historiales.get(j.get("puuid"))
+        hist = historiales.get(j.get("puuid") or "")
         if hist:
             jugadas = sum(hist.values())
             if jugadas:
@@ -352,7 +365,7 @@ def asignar_roles(equipo, roles_campeon, historiales=None):
     return [POSICIONES[mejor[i]] for i in range(5)]
 
 
-def rival_probable(rivales, pos, roles_campeon):
+def rival_probable(rivales: list[int], pos: str, roles_campeon: RolesCampeon) -> int | None:
     """En la selección no se ven las posiciones rivales: el que más se juega en esa posición.
 
     Con los cinco elegidos se reparten las posiciones entre todos; con menos, gana el más típico de la
@@ -364,7 +377,7 @@ def rival_probable(rivales, pos, roles_campeon):
         reparto = asignar_roles([{"campeon": c} for c in rivales], roles_campeon)
         return next((c for c, p in zip(rivales, reparto, strict=True) if p == pos), None)
 
-    def cuota(c):
+    def cuota(c: int) -> float:
         tasas = roles_campeon.get(c) or {}
         total = sum(tasas.values())
         return tasas.get(pos, 0) / total if total else 0
@@ -374,13 +387,12 @@ def rival_probable(rivales, pos, roles_campeon):
 
 
 # --- resumen de un jugador ------------------------------------------------------------------
-def resumen_jugador(puuid, partidas, campeon, lineas=None):
+def resumen_jugador(puuid: str, partidas: list[Partida], campeon: int, lineas: dict[str, Linea] | None = None) -> Json:
     """Estadísticas de un jugador sobre su muestra de partidas recientes (la más reciente primero)."""
     lineas = lineas or {}
-    juegos = [(m, jugador_en(m, puuid)) for m in validas(partidas)]
-    juegos = [(m, j) for m, j in juegos if j]
+    juegos: list[Juego] = [(m, j) for m in validas(partidas) if (j := jugador_en(m, puuid))]
     n = len(juegos)
-    res = {"n": n, "v": sum(1 for _, j in juegos if j["gana"]), "racha": [j["gana"] for _, j in juegos[:10]]}
+    res: Json = {"n": n, "v": sum(1 for _, j in juegos if j["gana"]), "racha": [j["gana"] for _, j in juegos[:10]]}
     racha = 0
     for _, j in juegos:
         if j["gana"] != juegos[0][1]["gana"]:
@@ -397,7 +409,7 @@ def resumen_jugador(puuid, partidas, campeon, lineas=None):
     res["roles"] = dict(Counter(j["pos"] for _, j in juegos if j["pos"]))
     res["kda"] = [media(j[c] for _, j in juegos) for c in ("k", "d", "a")] if n else None
 
-    def ch(campo, lista=None):
+    def ch(campo: str, lista: list[Juego] | None = None) -> list[float]:
         return [j["ch"][campo] for _, j in (lista or juegos) if campo in j["ch"]]
 
     # Riot solo marca la ventaja de línea cuando es clara (~15% de las partidas), así que
@@ -418,41 +430,40 @@ def resumen_jugador(puuid, partidas, campeon, lineas=None):
 
     tempranas = []
     for m, j in juegos:
-        linea = lineas.get(m["id"])
-        if linea:
-            tempranas.append(muertes_antes(linea, j["pid"], 15))
+        tl = lineas.get(m["id"])
+        if tl:
+            tempranas.append(muertes_antes(tl, j["pid"], 15))
     res["muertes15"] = {"n": len(tempranas), "media": media(tempranas)}
     return res
 
 
-def rol_principal(res):
-    roles = res.get("roles") or {}
-    return max(roles, key=roles.get) if roles else ""
+def rol_principal(res: Json) -> str:
+    roles: dict[str, int] = res.get("roles") or {}
+    return max(roles, key=lambda r: roles[r]) if roles else ""
 
 
-def fuera_de_rol(res, rol):
+def fuera_de_rol(res: Json, rol: str) -> bool:
     """Con muestra suficiente, el rol de hoy aparece en menos del 15% de sus partidas."""
     roles = res.get("roles") or {}
     total = sum(roles.values())
     return bool(rol) and total >= 8 and roles.get(rol, 0) / total < 0.15
 
 
-def etiquetas(res, rol, maestria, ahora_ms):
+def etiquetas(res: Json, rol: str, maestria: Json | None, ahora_ms: int) -> list[Etiqueta]:
     """Etiquetas cortas del jugador. tono: 'fuerte', 'flojo' o 'neutro' (sobre el jugador, no sobre ti)."""
-    out = []
+    out: list[Etiqueta] = []
     n = res["n"]
     camp = res["camp"]
     puntos = (maestria or {}).get("championPoints")
     ultimo_uso = (maestria or {}).get("lastPlayTime")
     total = (maestria or {}).get("total")
-    # Con poca maestría en toda la cuenta, que tenga poca en este campeón no dice nada.
-    cuenta_nueva = total is not None and total < MAESTRIA_CUENTA_NUEVA
 
     if n >= 8 and camp["n"] / n >= 0.6:
         out.append({"t": "OTP", "tono": "fuerte", "d": f"{camp['n']} de sus últimas {n} con este campeón"})
     elif puntos is not None and puntos >= 300000:
         out.append({"t": "Main", "tono": "fuerte", "d": f"{puntos // 1000}k de maestría"})
-    if cuenta_nueva:
+    # Con poca maestría en toda la cuenta, que tenga poca en este campeón no dice nada.
+    if total is not None and total < MAESTRIA_CUENTA_NUEVA:
         out.append(
             {
                 "t": "Cuenta nueva",
@@ -487,20 +498,20 @@ def etiquetas(res, rol, maestria, ahora_ms):
     return out
 
 
-def premades(equipo, muestras):
+def premades(equipo: list[str], muestras: dict[str, list[Partida]]) -> dict[str, int]:
     """Parejas o grupos que vienen juntos: comparten equipo en 2 o más partidas recientes.
 
     equipo: lista de puuids del mismo equipo. muestras: {puuid: [partidas]}.
     Devuelve {puuid: número de grupo}.
     """
-    juntos = Counter()
-    vistas = set()
+    juntos: Counter[tuple[str, str]] = Counter()
+    vistas: set[str] = set()
     for puuid in equipo:
         for m in muestras.get(puuid, []):
             if m["id"] in vistas:
                 continue
             vistas.add(m["id"])
-            por_equipo = {}
+            por_equipo: dict[int, list[str]] = {}
             for j in m["jug"]:
                 if j["puuid"] in equipo:
                     por_equipo.setdefault(j["equipo"], []).append(j["puuid"])
@@ -509,7 +520,7 @@ def premades(equipo, muestras):
                     juntos[(a, b)] += 1
     padre = {p: p for p in equipo}
 
-    def raiz(p):
+    def raiz(p: str) -> str:
         while padre[p] != p:
             p = padre[p]
         return p
@@ -517,10 +528,10 @@ def premades(equipo, muestras):
     for (a, b), veces in juntos.items():
         if veces >= 2:
             padre[raiz(a)] = raiz(b)
-    grupos = {}
+    grupos: dict[str, list[str]] = {}
     for p in equipo:
         grupos.setdefault(raiz(p), []).append(p)
-    out = {}
+    out: dict[str, int] = {}
     for i, miembros in enumerate(g for g in grupos.values() if len(g) > 1):
         for p in miembros:
             out[p] = i + 1
@@ -528,17 +539,16 @@ def premades(equipo, muestras):
 
 
 # --- perfil del jungla rival ---------------------------------------------------------------
-def perfil_jungla(puuid, partidas, lineas, campeon, equipo_ahora):
+def perfil_jungla(puuid: str, partidas: list[Partida], lineas: dict[str, Linea], campeon: int, equipo_ahora: int) -> Json:
     """Tendencias de un jungla a partir de sus partidas de jungla y de sus líneas de tiempo.
 
     Devuelve datos crudos y 'tarjetas' ya redactadas para el panel.
     'tono' va desde tu punto de vista: 'ojo' es algo de lo que cuidarte, 'bien' algo que te favorece.
     """
-    juegos = [(m, jugador_en(m, puuid)) for m in validas(partidas)]
-    juegos = [(m, j) for m, j in juegos if j and j["pos"] == "JUNGLE"]
+    juegos: list[Juego] = [(m, j) for m in validas(partidas) if (j := jugador_en(m, puuid)) and j["pos"] == "JUNGLE"]
     con_campeon = [(m, j) for m, j in juegos if j["campeon"] == campeon]
     con_linea = [(m, j, lineas[m["id"]]) for m, j in juegos if m["id"] in lineas]
-    perfil = {
+    perfil: Json = {
         "n": len(juegos),
         "n_campeon": len(con_campeon),
         "n_lineas": len(con_linea),
@@ -574,10 +584,10 @@ def perfil_jungla(puuid, partidas, lineas, campeon, equipo_ahora):
     return perfil
 
 
-def _inicio_del_clear(con_linea, equipo_ahora):
+def _inicio_del_clear(con_linea: list[ConLinea], equipo_ahora: int) -> tuple[Tarjeta | None, Json | None]:
     """Por qué buff empieza y si al 3:00 ya ha cruzado de lado: (tarjeta, resumen), o (None, None) sin datos."""
-    inicios = Counter()
-    cruza = []  # ¿al 3:00 está en el lado contrario al de su primer buff?
+    inicios: Counter[str] = Counter()
+    cruza: list[bool] = []  # ¿al 3:00 está en el lado contrario al de su primer buff?
     for _, j, l in con_linea:
         buff = inicio_jungla(l, j["pid"])
         if not buff:
@@ -602,7 +612,7 @@ def _inicio_del_clear(con_linea, equipo_ahora):
             detalle += f" Al 3:00 sigue en el lado de su primer buff en {len(cruza) - sum(cruza)} de {len(cruza)}."
     if inicios["invade"]:
         detalle += f" Empezó en jungla rival en {inicios['invade']}."
-    tarjeta = {
+    tarjeta: Tarjeta = {
         "titulo": "Inicio",
         "valor": f"{buff.capitalize()} en {veces} de {total_inicios}",
         "detalle": detalle if marcado else "Sin patrón claro. " + detalle,
@@ -611,12 +621,12 @@ def _inicio_del_clear(con_linea, equipo_ahora):
     return tarjeta, {"buff": buff, "veces": veces, "n": total_inicios, "lado": lado, "marcado": marcado}
 
 
-def _primer_gank_con_premio(con_linea):
+def _primer_gank_con_premio(con_linea: list[ConLinea]) -> tuple[Tarjeta, dict[str, int]]:
     """(tarjeta, {línea: veces}) de la primera kill o asistencia en una línea antes del 10, en cada partida."""
     ganks = [g for g in (primer_gank(l, j["pid"]) for _, j, l in con_linea) if g]
     por_linea = Counter(g[1] for g in ganks)
     if not ganks:
-        tarjeta = {
+        tarjeta: Tarjeta = {
             "titulo": "Primer gank",
             "valor": "Ninguno antes del 10",
             "detalle": f"En {len(con_linea)} partidas no sacó kill ni asistencia en línea antes del 10.",
@@ -634,10 +644,10 @@ def _primer_gank_con_premio(con_linea):
     return tarjeta, dict(por_linea)
 
 
-def _early(con_linea):
+def _early(con_linea: list[ConLinea]) -> tuple[Counter[str], int]:
     """Dónde pasa el early: (Counter de los minutos 3 a 8 por lado del mapa, en cuántas partidas pisa la jungla
     contraria entre el 2 y el 7)."""
-    lados = Counter()
+    lados: Counter[str] = Counter()
     pisa = 0
     for _, j, l in con_linea:
         equipo = equipo_de_pid(j["pid"])
@@ -653,7 +663,7 @@ def _early(con_linea):
     return lados, pisa
 
 
-def _lado_del_early(lados):
+def _lado_del_early(lados: Counter[str]) -> Tarjeta | None:
     if sum(lados.values()) < 10:
         return None
     lado, veces = lados.most_common(1)[0]
@@ -669,12 +679,12 @@ def _lado_del_early(lados):
     }
 
 
-def _invades(juegos, con_linea, pisa):
+def _invades(juegos: list[Juego], con_linea: list[ConLinea], pisa: int) -> tuple[Tarjeta, Json]:
     """(tarjeta, resumen) de cuánto pisa y roba de la jungla contraria."""
     # En Diamante-Master la mediana es de 10 monstruos rivales por partida y el cuartil alto, 18.
     robados = media(j["ch"].get("enemyJungleMonsterKills", 0) for _, j in juegos)
     pronto = pisa / len(con_linea)
-    tarjeta = {
+    tarjeta: Tarjeta = {
         "titulo": "Invades",
         "valor": f"Roba {num(robados)} monstruos por partida",
         "detalle": (
@@ -685,7 +695,7 @@ def _invades(juegos, con_linea, pisa):
     return tarjeta, {"veces": pisa, "n": len(con_linea), "robados": robados}
 
 
-def _objetivos(juegos):
+def _objetivos(juegos: list[Juego]) -> Tarjeta:
     primer_dragon = [j["ch"]["earliestDragonTakedown"] for _, j in juegos if j["ch"].get("earliestDragonTakedown")]
     primero = sum(1 for m, j in juegos if (m["equipos"].get(str(j["equipo"]), {}).get("obj", {}).get("dragon") or [0])[0])
     larvas = media(j["ch"].get("voidMonsterKill", 0) for _, j in juegos)
@@ -700,9 +710,10 @@ def _objetivos(juegos):
     }
 
 
-def _si_se_adelanta(juegos, con_campeon, con_linea):
+def _si_se_adelanta(juegos: list[Juego], con_campeon: list[Juego], con_linea: list[ConLinea]) -> tuple[Tarjeta, Json]:
     """(tarjeta, snowball): qué pasa cuando va por delante o por detrás al 10, y cómo rinde."""
-    delante, detras = [], []
+    delante: list[bool] = []
+    detras: list[bool] = []
     for m, j, l in con_linea:
         rival = next((r for r in m["jug"] if r["pos"] == "JUNGLE" and r["equipo"] != j["equipo"]), None)
         if not rival:
@@ -726,14 +737,14 @@ def _si_se_adelanta(juegos, con_campeon, con_linea):
         "solo": media(j["ch"].get("soloKills", 0) for _, j in base),
     }
     if not (delante or detras):
-        tarjeta = {
+        tarjeta: Tarjeta = {
             "titulo": "Rendimiento",
             "valor": f"{num(k)}/{num(d)}/{num(a)} de media {con_que}",
             "detalle": f"{round(dano * 100)}% del daño de su equipo.",
             "tono": "neutro",
         }
         return tarjeta, snowball
-    partes = []
+    partes: list[str] = []
     if delante:
         partes.append(f"por delante al 10 gana {sum(delante)} de {len(delante)}")
     if detras:
@@ -748,7 +759,7 @@ def _si_se_adelanta(juegos, con_campeon, con_linea):
     return tarjeta, snowball
 
 
-def _muertes_tempranas(con_linea):
+def _muertes_tempranas(con_linea: list[ConLinea]) -> Tarjeta | None:
     tempranas = [muertes_antes(l, j["pid"], 10) for _, j, l in con_linea]
     if not tempranas:
         return None
@@ -762,13 +773,13 @@ def _muertes_tempranas(con_linea):
 
 
 # --- dónde va a haber errores -----------------------------------------------------------------
-def fuerza(res, rol, primera_vez=False):
+def fuerza(res: Json, rol: str, primera_vez: bool | None = False) -> tuple[float, list[str]]:
     """Puntuación de lo sólido que es un jugador en su línea; 0 es normal, positivo es fuerte.
 
     Devuelve (puntuación, motivos) con frases cortas que explican la nota.
     """
     s = 0.0
-    motivos = []
+    motivos: list[str] = []
     linea = res["linea"]
     if linea["n"] >= 4:
         s += (linea["v"] - linea["d"]) / linea["n"] * 1.5
@@ -797,17 +808,19 @@ def fuerza(res, rol, primera_vez=False):
     return s, motivos
 
 
-def lineas_de_juego(aliados, rivales):
+def lineas_de_juego(aliados: dict[str, Json], rivales: dict[str, Json]) -> list[Json]:
     """Ordena top, mid y bot por lo que promete el rival de esa línea a fallar.
 
     aliados/rivales: {posición: {"nombre", "campeon", "res", "primera_vez"}}.
     """
     grupos = {"top": ("TOP",), "mid": ("MIDDLE",), "bot": ("BOTTOM", "UTILITY")}
-    out = []
+    out: list[Json] = []
     for linea, posiciones in grupos.items():
-        lado = {}
+        lado: dict[str, Json] = {}
         for clave, equipo in (("aliado", aliados), ("rival", rivales)):
-            notas, motivos, hay_datos = [], [], False
+            notas: list[float] = []
+            motivos: list[str] = []
+            hay_datos = False
             for pos in posiciones:
                 j = equipo.get(pos)
                 if not j or not j.get("res") or not j["res"]["n"]:
@@ -844,7 +857,15 @@ def lineas_de_juego(aliados, rivales):
 
 
 # --- historial propio ----------------------------------------------------------------------
-def mi_historial(mis_puuids, mis_partidas, mi_campeon, rivales, presentes, ahora_ms, mi_pos=""):
+def mi_historial(
+    mis_puuids: Collection[str],
+    mis_partidas: list[Partida],
+    mi_campeon: int,
+    rivales: list[Json],
+    presentes: dict[str, str],
+    ahora_ms: int,
+    mi_pos: str = "",
+) -> Json:
     """Qué dice tu propio historial de esta partida.
 
     mi_pos: tu posición; el rival de esa posición es tu duelo directo (vs_directo).
@@ -853,12 +874,12 @@ def mi_historial(mis_puuids, mis_partidas, mi_campeon, rivales, presentes, ahora
     rivales: lista de {"campeon", "pos", "nombre_campeon"}.
     presentes: {puuid: nombre visible} de los otros nueve jugadores de la partida.
     """
-    juegos = []
+    juegos: list[Juego] = []
     for m in validas(mis_partidas):
         yo = next((j for j in m["jug"] if j["puuid"] in mis_puuids), None)
         if yo:
             juegos.append((m, yo))
-    out = {"n": len(juegos), "campeon": None, "vs": [], "vs_directo": None, "conocidos": []}
+    out: Json = {"n": len(juegos), "campeon": None, "vs": [], "vs_directo": None, "conocidos": []}
     if not juegos:
         return out
 
@@ -876,11 +897,11 @@ def mi_historial(mis_puuids, mis_partidas, mi_campeon, rivales, presentes, ahora
     return out
 
 
-def _victorias(juegos):
+def _victorias(juegos: list[Juego]) -> int:
     return sum(1 for _, yo in juegos if yo["gana"])
 
 
-def _contra(r, contra, mi_campeon):
+def _contra(r: Json, contra: list[Juego], mi_campeon: int) -> Json:
     """Tus partidas contra ese campeón rival (en cualquier posición) y, de ellas, las de tu campeón de hoy."""
     mio = [(m, yo) for m, yo in contra if yo["campeon"] == mi_campeon]
     return {
@@ -894,7 +915,7 @@ def _contra(r, contra, mi_campeon):
     }
 
 
-def _duelo_directo(r, contra, mi_campeon, mi_pos):
+def _duelo_directo(r: Json, contra: list[Juego], mi_campeon: int, mi_pos: str) -> Json:
     """Tu duelo directo: solo cuentan las partidas en las que los dos ibais en esa posición."""
     duelo = [
         (m, yo)
@@ -913,9 +934,9 @@ def _duelo_directo(r, contra, mi_campeon, mi_pos):
     }
 
 
-def _conocidos(juegos, presentes, ahora_ms):
+def _conocidos(juegos: list[Juego], presentes: dict[str, str], ahora_ms: int) -> list[Json]:
     """Los de hoy con los que ya has jugado: la última vez (contigo o contra ti, y si ganaste) y cuántas veces."""
-    conocidos = []
+    conocidos: list[Json] = []
     for puuid, nombre in presentes.items():
         for m, yo in juegos:
             otro = jugador_en(m, puuid)
@@ -937,9 +958,9 @@ def _conocidos(juegos, presentes, ahora_ms):
 MAX_POOL = 8
 
 
-def pool_de(partidas, puuids, minimo=5):
+def pool_de(partidas: Iterable[Partida], puuids: Collection[str], minimo: int = 5) -> list[tuple[int, str]]:
     """Tus campeones por posición con al menos 'minimo' partidas: [(campeón, posición)], de más a menos jugado."""
-    c = Counter()
+    c: Counter[tuple[int, str]] = Counter()
     for m in partidas:
         yo = next((j for j in m["jug"] if j["puuid"] in puuids), None)
         if yo and yo["pos"] and not m.get("remake"):
@@ -947,18 +968,26 @@ def pool_de(partidas, puuids, minimo=5):
     return [k for k, n in c.most_common(MAX_POOL) if n >= minimo]
 
 
-def pool_contra(pool, pos, rival, registros, partidas, mias, minimo):
+def pool_contra(
+    pool: list[tuple[int, str]],
+    pos: str,
+    rival: int,
+    registros: dict[int, list[Registro]],
+    partidas: list[Partida],
+    mias: Collection[str],
+    minimo: int,
+) -> list[Json]:
     """Tus campeones de esa posición contra el campeón rival: opciones con datos, no una elección.
 
     pool: [(campeón, posición)] de más a menos jugado. registros: {campeón: [registros de Master+ de ese duelo]}.
     partidas: tus partidas de la temporada. Solo se da el % de Master+ con 'minimo' partidas o más.
     """
-    filas = []
+    filas: list[Json] = []
     for a, p in pool:
         if p != pos:
             continue
         regs = registros.get(a) or []
-        fila = {"campeon": a, "n": len(regs), "v": sum(r["g"] for r in regs), "yo_n": 0, "yo_v": 0, "vs_n": 0, "vs_v": 0}
+        fila: Json = {"campeon": a, "n": len(regs), "v": sum(r["g"] for r in regs), "yo_n": 0, "yo_v": 0, "vs_n": 0, "vs_v": 0}
         for m in validas(partidas):
             j = next((x for x in m["jug"] if x["puuid"] in mias), None)
             if not j or j["campeon"] != a or j["pos"] != pos:
@@ -980,7 +1009,7 @@ NIVELES_ORDEN = ("IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIA
 DIVISIONES = {"IV": 0, "III": 1, "II": 2, "I": 3}
 
 
-def valor_liga(nivel, division, lp):
+def valor_liga(nivel: str, division: str, lp: int) -> int | None:
     """Puntos totales en la escalera (Hierro IV 0 LP = 0), para restar LP aunque se cambie de división.
     No es un MMR: solo cuenta lo que se ve en la clasificación oficial."""
     nivel = nivel.upper()

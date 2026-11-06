@@ -89,6 +89,7 @@ class Analisis(unittest.TestCase):
         self.assertLessEqual(len(r["datos"]), 4)
         self.assertEqual((r["build"]["runa"], r["build"]["objeto"], r["build"]["maximiza"]), ("R8010", "O3100", "Q > W > E"))
         c = du.comparar([registro(False, antes, m10=2)] * 4, [x for x in regs if x["g"]], "JUNGLE", "Ganan este duelo")
+        assert c is not None
         tu = {f["que"]: f for f in c["filas"]}
         self.assertEqual((c["ref"], c["n"], c["n_ref"]), ("Ganan este duelo", 4, 12))
         self.assertEqual(
@@ -109,8 +110,11 @@ class Analisis(unittest.TestCase):
             [d["texto"] for d in r["datos"]],
         )
         c = du.comparar([reg(False, -5)] * 4, regs[:12], "MIDDLE", "Faker")
+        assert c is not None
         self.assertIn({"que": "CS sobre tu rival al 10", "tu": "-5", "ref": "+15", "mejor": False}, c["filas"])
-        self.assertNotIn("CS al 10", [f["que"] for f in du.comparar(regs, regs, "UTILITY", "X")["filas"]])
+        apoyo = du.comparar(regs, regs, "UTILITY", "X")
+        assert apoyo is not None
+        self.assertNotIn("CS al 10", [f["que"] for f in apoyo["filas"]])
         self.assertFalse(any("Larvas" in d["texto"] or "dragón" in d["texto"] for d in r["datos"]))
         en_mid = [dict(x, muertes=[[5.0, 1, "mid", "sup", True]] * 2) for x in regs]
         self.assertFalse(

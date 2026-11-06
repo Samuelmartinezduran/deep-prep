@@ -7,8 +7,16 @@ from pathlib import Path
 
 from deepprep import analisis as an
 from deepprep import revision as rv
+from deepprep.tipos import Json, Jugador, Linea, Partida
 
 DATOS = Path(__file__).parent / "datos"
+
+
+def revisar(*args, **kw) -> Json:
+    """rv.revisar, que en estas pruebas siempre encuentra al jugador."""
+    r = rv.revisar(*args, **kw)
+    assert r is not None
+    return r
 
 
 def cargar(nombre):
@@ -17,6 +25,10 @@ def cargar(nombre):
 
 
 class Revision(unittest.TestCase):
+    partida: Partida
+    linea: Linea
+    yo: Jugador
+
     @classmethod
     def setUpClass(cls):
         cls.partida = an.reducir_partida(cargar("partida.json.gz"))
@@ -24,7 +36,7 @@ class Revision(unittest.TestCase):
         cls.yo = next(j for j in cls.partida["jug"] if j["campeon"] == 131)  # Diana
 
     def test_muertes_objetivos_y_comparacion(self):
-        r = rv.revisar(self.partida, self.linea, self.yo["puuid"], lambda c: f"C{c}", desfase_s=20)
+        r = revisar(self.partida, self.linea, self.yo["puuid"], lambda c: f"C{c}", desfase_s=20)
         json.dumps(r)
         self.assertEqual(len(r["muertes"]), self.yo["d"])
         self.assertEqual(r["kda"], [self.yo["k"], self.yo["d"], self.yo["a"]])
@@ -40,7 +52,7 @@ class Revision(unittest.TestCase):
 
     def test_prevision_contra_lo_que_paso(self):
         panel = {"gank": {"linea": "top", "veces": 3, "n": 5}, "lineas": [{"linea": "bot", "veredicto": "Aquí se equivocan"}]}
-        r = rv.revisar(self.partida, self.linea, self.yo["puuid"], str, panel=panel)
+        r = revisar(self.partida, self.linea, self.yo["puuid"], str, panel=panel)
         temas = [f["tema"] for f in r["prevision"]]
         self.assertEqual(temas, ["Primer gank del jungla rival", "Rival de bot con más errores"])
         self.assertTrue(all(isinstance(f["acierto"], bool) for f in r["prevision"]))
@@ -48,16 +60,16 @@ class Revision(unittest.TestCase):
     def test_en_otra_posicion_se_compara_con_tu_rival_de_linea(self):
         adc = next(j for j in self.partida["jug"] if j["pos"] == "BOTTOM" and j["equipo"] == self.yo["equipo"])
         rival = next(j for j in self.partida["jug"] if j["pos"] == "BOTTOM" and j["equipo"] != adc["equipo"])
-        r = rv.revisar(self.partida, self.linea, adc["puuid"], lambda c: f"C{c}")
+        r = revisar(self.partida, self.linea, adc["puuid"], lambda c: f"C{c}")
         self.assertEqual(r["comparacion"]["rival"], f"C{rival['campeon']}")
 
     def test_sin_estar_en_la_partida(self):
         self.assertIsNone(rv.revisar(self.partida, self.linea, "nadie", str))
 
     def test_muertes_de_despues_de_relanzar_ffmpeg(self):
-        relanzado = min(m["ms"] for m in rv.revisar(self.partida, self.linea, self.yo["puuid"], str)["muertes"]) + 1000
+        relanzado = min(m["ms"] for m in revisar(self.partida, self.linea, self.yo["puuid"], str)["muertes"]) + 1000
         series = {1: 20, 2: -relanzado / 1000}  # la serie 2 empieza justo después de la primera muerte
-        r = rv.revisar(self.partida, self.linea, self.yo["puuid"], str, desfase_s=series)
+        r = revisar(self.partida, self.linea, self.yo["puuid"], str, desfase_s=series)
         primera, *resto = r["muertes"]
         self.assertTrue(primera["video"]["archivo"].startswith("r01_seg_"))
         self.assertTrue(resto)
@@ -98,6 +110,7 @@ class Tendencias(unittest.TestCase):
         lista = [partida(0, True, 21), partida(1, False, 22), partida(2, False, 23), partida(3, True, 10)]
         horas = {m["creacion"]: m["hora"] for m in lista}
         t = rv.tendencias(list(reversed(lista)), {"yo"}, lambda c: f"C{c}", lambda ms: horas[ms])
+        assert t is not None
         sesion = {f["nombre"]: (f["v"], f["n"]) for f in t["sesion"]}
         self.assertEqual(sesion["Primera partida de la sesión"], (1, 1))
         self.assertEqual(sesion["Después de ganar"], (0, 1))
@@ -112,6 +125,7 @@ class Tendencias(unittest.TestCase):
             jug=[dict(lista[0]["jug"][0], pos="BOTTOM", campeon=29), dict(lista[0]["jug"][1], pos="BOTTOM", campeon=22)],
         )
         t = rv.tendencias([*list(reversed(lista)), adc], {"yo"}, lambda c: f"C{c}", lambda ms: 12)
+        assert t is not None
         self.assertEqual({f["nombre"] for f in t["rivales"]}, {"C64 (jungla)", "C22 (ADC)"})
         self.assertIsNone(rv.tendencias([], {"yo"}, str, lambda ms: 0))
 

@@ -14,6 +14,8 @@ import sys
 import threading
 import time
 from collections import deque
+from collections.abc import Callable, Collection, Iterable
+from typing import IO
 
 from . import analisis as an
 from . import config
@@ -21,6 +23,7 @@ from . import duelos as du
 from .base_duelos import BaseDuelos
 from .constantes import DURACION_MINIMA_S, SOLO_DUO
 from .riot import ClaveInvalida, Cliente, ErrorRiot
+from .tipos import Cancelada, Json, Partida
 
 logger = logging.getLogger(__name__)
 
@@ -39,17 +42,17 @@ class Recolector:
 
     def __init__(
         self,
-        base,
-        leer_clave,
-        legendarios,
-        pool,
-        mis_partidas=list,
-        mis_puuids=lambda: set(),
-        cliente_europa=None,
-        puede_europa=lambda: False,
-        regiones=REGIONES,
-        referencias=list,
-    ):
+        base: BaseDuelos,
+        leer_clave: Callable[[], str],
+        legendarios: Collection[int],
+        pool: Callable[[], list[tuple[int, str]]],
+        mis_partidas: Callable[[], list[Partida]] = list,
+        mis_puuids: Callable[[], set[str]] = lambda: set(),
+        cliente_europa: Cliente | None = None,
+        puede_europa: Callable[[], bool] = lambda: False,
+        regiones: Iterable[tuple[str, str]] = REGIONES,
+        referencias: Callable[[], list[Json]] = list,
+    ) -> None:
         self.base = base
         self.legendarios = legendarios
         self.pool = pool
@@ -61,12 +64,12 @@ class Recolector:
         self.clientes = [Cliente(dict(cfg, plataforma=p, region=r), leer_clave) for p, r in regiones]
         self.cliente_europa = cliente_europa
         self.parar = threading.Event()
-        self.estado = {"nuevas": 0, "error": ""}
-        self._cerrojo = None
+        self.estado: Json = {"nuevas": 0, "error": ""}
+        self._cerrojo: IO[str] | None = None
 
     # --- arranque: solo un recolector a la vez (la app o el suelto) --------------------------------
-    def arrancar(self):
-        cerrojo = None
+    def arrancar(self) -> bool:
+        cerrojo: IO[str] | None = None
         try:
             cerrojo = open(RUTA_CERROJO, "w")  # noqa: SIM115  se queda abierto y cogido mientras viva el recolector
             msvcrt.locking(cerrojo.fileno(), msvcrt.LK_NBLCK, 1)
@@ -82,7 +85,7 @@ class Recolector:
             threading.Thread(target=self._bucle, args=(self.cliente_europa, True), name="recolector-europe", daemon=True).start()
         return True
 
-    def _bucle(self, cliente, europa):
+    def _bucle(self, cliente: Cliente, europa: bool) -> None:
         while not self.parar.is_set():
             try:
                 if europa:
@@ -101,12 +104,12 @@ class Recolector:
                 logger.exception("Recolector %s: %r", cliente.region, e)
                 self.parar.wait(60)
 
-    def _cancelada(self, europa):
+    def _cancelada(self, europa: bool) -> Cancelada | None:
         """En EUW, lo que pide el recolector se deja a medias en cuanto el panel necesita la cuota."""
         return (lambda: not self.puede_europa()) if europa else None
 
     # --- tus partidas (EUW) -----------------------------------------------------------------------------
-    def _mias(self, cliente):
+    def _mias(self, cliente: Cliente) -> None:
         """Línea de tiempo de tus clasificatorias con los campeones de tu pool, para tus números."""
         pool = set(self.pool())
         puuids = self.mis_puuids()
@@ -121,10 +124,10 @@ class Recolector:
             self._bajar(cliente, m["id"], True, europa=True)
 
     # --- partidas de Master+ ---------------------------------------------------------------------------
-    def _semillas(self, cliente, europa):
+    def _semillas(self, cliente: Cliente, europa: bool) -> list[str]:
         """Jugadores de Master+ de la plataforma; de paso se apunta el nivel de cada uno (para compararte con Challenger)."""
         clave = f"ligas:{cliente.plataforma}"
-        ligas = self.base.kv_get(clave, max_edad=86400)
+        ligas: dict[str, str] | None = self.base.kv_get(clave, max_edad=86400)
         if not ligas:
             ligas = {}
             for liga in LIGAS:
@@ -133,7 +136,7 @@ class Recolector:
             self.base.kv_set(clave, ligas)
         return list(ligas)
 
-    def _referencias(self, cliente, europa):
+    def _referencias(self, cliente: Cliente, europa: bool) -> None:
         """Partidas recientes de tus jugadores de referencia que juegan en esta región (cada 6 horas)."""
         region = cliente.region.split(".")[0]
         desde = int(time.time()) - DIAS * 86400
@@ -150,18 +153,18 @@ class Recolector:
                 suyo = next((p for p in (m or {}).get("info", {}).get("participants", []) if p["puuid"] == ref["puuid"]), None)
                 # campeon None: perfil de base, valen todas sus partidas.
                 otro = ref["campeon"] is not None and suyo and suyo["championId"] != ref["campeon"]
-                if not suyo or otro or m["info"].get("gameDuration", 0) < DURACION_MINIMA_S:
+                if m is None or not suyo or otro or m["info"].get("gameDuration", 0) < DURACION_MINIMA_S:
                     self.base.marcar(id_, False)
                     continue
                 self._bajar(cliente, id_, False, europa, partida=m)
             self.base.kv_set(f"ref_al_dia:{ref['puuid']}", len(ids))
 
-    def _vuelta(self, cliente, europa):
+    def _vuelta(self, cliente: Cliente, europa: bool) -> None:
         """Recorre jugadores de Master+; cuando sale alguien con un campeón de tu pool, sigue su historial."""
         semillas = self._semillas(cliente, europa)
         random.shuffle(semillas)
-        seguir = deque()  # jugadores que juegan un campeón de tu pool en su posición
-        seguidos = set()
+        seguir: deque[str] = deque()  # jugadores que juegan un campeón de tu pool en su posición
+        seguidos: set[str] = set()
         desde = int(time.time()) - DIAS * 86400
         while (seguir or semillas) and not self.parar.is_set():
             if europa and not self.puede_europa():
@@ -190,7 +193,7 @@ class Recolector:
                         seguidos.add(p["puuid"])
                         seguir.append(p["puuid"])
 
-    def _bajar(self, cliente, id_, mia, europa, partida=None):
+    def _bajar(self, cliente: Cliente, id_: str, mia: bool, europa: bool, partida: Json | None = None) -> None:
         partida = partida or cliente.partida(id_, fondo=europa, cancelada=self._cancelada(europa))
         linea = cliente.linea(id_, fondo=europa, cancelada=self._cancelada(europa)) if partida else None
         if not (partida and linea):
@@ -208,7 +211,7 @@ class Recolector:
             self.base.marcar(id_, False)
 
 
-def main():
+def main() -> None:
     """Recolector suelto, sin la app (p. ej. para llenar la base de noche)."""
     from .app import crear_app
 

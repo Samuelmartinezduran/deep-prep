@@ -8,10 +8,12 @@ por delante, qué hacen distinto los que ganan, dónde se muere, si escala, y tu
 
 import statistics
 from collections import Counter
-from typing import NamedTuple
+from collections.abc import Callable, Collection, Iterable
+from typing import Any, NamedTuple
 
 from . import analisis as an
 from .constantes import DURACION_MINIMA_S, MIN
+from .tipos import Json, Registro
 
 POSICIONES = an.POSICIONES
 # Peleas "pequeñas": las dos del duelo implicadas y como mucho cuatro jugadores en total.
@@ -23,9 +25,13 @@ MIN_PARTIDAS = 12
 MIN_PELEAS = 10
 MIN_GRUPO = 8
 
+# Un dato de un duelo: (peso, texto, detalle), y "habito" al final en lo que hacen distinto los que ganan.
+Dato = tuple[float, str, str] | tuple[float, str, str, str]
+Medida = Callable[[Registro], float | None]  # lo que se mide de cada registro (None si no lo tiene)
+
 
 # --- extracción (de la partida y la línea de tiempo de Riot a registros pequeños) --------------------
-def _zona(pos, equipo):
+def _zona(pos: Json, equipo: int) -> list[Any]:
     tipo, lado, mitad = an.zona(pos.get("x", 0), pos.get("y", 0))
     return [tipo, lado, mitad == equipo]
 
@@ -33,13 +39,13 @@ def _zona(pos, equipo):
 class _Eventos(NamedTuple):
     """Lo que interesa de los eventos de la línea de tiempo, sacado en un solo recorrido."""
 
-    kills: list  # (ms, asesino, víctima, implicados, posición, {pid: nivel} en ese momento)
-    compras: dict  # pid -> [primer objeto legendario, minuto]
-    habilidades: dict  # pid -> habilidades (1-4) en el orden en que las sube
-    monstruos: list  # (ms, tipo, equipo que lo mata)
+    kills: list[tuple[Any, ...]]  # (ms, asesino, víctima, implicados, posición, {pid: nivel} en ese momento)
+    compras: dict[int, list[float]]  # pid -> [primer objeto legendario, minuto]
+    habilidades: dict[int, list[int]]  # pid -> habilidades (1-4) en el orden en que las sube
+    monstruos: list[tuple[int, str, int]]  # (ms, tipo, equipo que lo mata)
 
 
-def extraer(partida, linea, legendarios):
+def extraer(partida: Json, linea: Json, legendarios: Collection[int]) -> list[Registro]:
     """Diez registros (uno por jugador con rival de posición) de una partida de la Grieta.
 
     legendarios: ids de objetos que cuentan como primer objeto completo.
@@ -58,12 +64,12 @@ def extraer(partida, linea, legendarios):
     return [_registro(pos, a, b, info, version, frames, eventos, pid_equipo) for pos, a, b in parejas]
 
 
-def _parejas(jug):
+def _parejas(jug: list[Json]) -> list[tuple[str, Json, Json]]:
     """(posición, jugador, su rival) de cada posición con un jugador por equipo, desde los dos lados."""
-    por_pos = {}
+    por_pos: dict[tuple[int, str], list[Json]] = {}
     for p in jug:
         por_pos.setdefault((p["teamId"], p.get("teamPosition") or ""), []).append(p)
-    parejas = []
+    parejas: list[tuple[str, Json, Json]] = []
     for pos in POSICIONES:
         azul, rojo = por_pos.get((100, pos), []), por_pos.get((200, pos), [])
         if len(azul) == 1 and len(rojo) == 1:
@@ -71,7 +77,7 @@ def _parejas(jug):
     return parejas
 
 
-def _eventos(frames, jug, legendarios):
+def _eventos(frames: list[Json], jug: list[Json], legendarios: Collection[int]) -> _Eventos:
     nivel = {p["participantId"]: 1 for p in jug}
     eventos = _Eventos([], {}, {}, [])
     for f in frames:
@@ -93,22 +99,26 @@ def _eventos(frames, jug, legendarios):
     return eventos
 
 
-def _marco(frames, minuto, pid):
+def _marco(frames: list[Json], minuto: int, pid: int) -> Json | None:
     if minuto >= len(frames):
         return None
-    return frames[minuto]["participantFrames"].get(str(pid))
+    marco: Json | None = frames[minuto]["participantFrames"].get(str(pid))
+    return marco
 
 
-def _cs(f):
-    return f.get("minionsKilled", 0) + f.get("jungleMinionsKilled", 0)
+def _cs(f: Json) -> int:
+    cs: int = f.get("minionsKilled", 0) + f.get("jungleMinionsKilled", 0)
+    return cs
 
 
-def _registro(pos, a, b, info, version, frames, eventos, pid_equipo):
+def _registro(
+    pos: str, a: Json, b: Json, info: Json, version: str, frames: list[Json], eventos: _Eventos, pid_equipo: dict[int, int]
+) -> Registro:
     """El registro del duelo de a contra b, visto desde a."""
     A, B, eq = a["participantId"], b["participantId"], a["teamId"]
     f10 = _marco(frames, 10, A)
     peleas, muertes, m10, ka10 = _peleas_y_muertes(eventos.kills, A, B, eq, pid_equipo)
-    r = {
+    r: Registro = {
         "pos": pos,
         "a": a["championId"],
         "b": b["championId"],
@@ -131,9 +141,9 @@ def _registro(pos, a, b, info, version, frames, eventos, pid_equipo):
     return r
 
 
-def _diferencias(frames, A, B):
+def _diferencias(frames: list[Json], A: int, B: int) -> dict[str, list[int]]:
     """{minuto: [oro, experiencia, CS]} de a menos b a los 5, 10 y 15."""
-    dif = {}
+    dif: dict[str, list[int]] = {}
     for minuto in (5, 10, 15):
         fa, fb = _marco(frames, minuto, A), _marco(frames, minuto, B)
         if fa and fb:
@@ -141,9 +151,13 @@ def _diferencias(frames, A, B):
     return dif
 
 
-def _peleas_y_muertes(kills, A, B, eq, pid_equipo):
+def _peleas_y_muertes(
+    kills: list[tuple[Any, ...]], A: int, B: int, eq: int, pid_equipo: dict[int, int]
+) -> tuple[list[list[Any]], list[list[Any]], int, int]:
     """(peleas pequeñas entre los dos, muertes de a, muertes antes del 10, kills y asistencias antes del 10)."""
-    peleas, muertes, m10, ka10 = [], [], 0, 0
+    peleas: list[list[Any]] = []
+    muertes: list[list[Any]] = []
+    m10 = ka10 = 0
     for ts, _killer, victima, implicados, posicion, niveles in kills:
         if ts < FIN_PELEAS and A in implicados and B in implicados and len(implicados) <= MAX_IMPLICADOS:
             gana = pid_equipo.get(victima) != eq
@@ -156,7 +170,7 @@ def _peleas_y_muertes(kills, A, B, eq, pid_equipo):
     return peleas, muertes, m10, ka10
 
 
-def _orden_habilidades(orden):
+def _orden_habilidades(orden: list[int]) -> str:
     """'QWE>WQE': las tres primeras que sube y cuál maximiza antes (por cuántos puntos tiene al nivel 11)."""
     if not orden:
         return ""
@@ -165,22 +179,23 @@ def _orden_habilidades(orden):
     return primeras + ">" + "".join(maximiza)
 
 
-def _runa(p):
+def _runa(p: Json) -> list[int] | None:
     """[runa clave, rama secundaria] o None."""
     estilos = (p.get("perks") or {}).get("styles") or []
     return [estilos[0]["selections"][0]["perk"], estilos[1]["style"]] if len(estilos) >= 2 else None
 
 
-def _arriba(f):
+def _arriba(f: Json) -> bool:
     """¿Está por encima de la diagonal de mid (en la mitad de arriba del mapa)?"""
-    return (f.get("position") or {}).get("y", 0) > (f.get("position") or {}).get("x", 0)
+    arriba: bool = (f.get("position") or {}).get("y", 0) > (f.get("position") or {}).get("x", 0)
+    return arriba
 
 
-def _de_jungla(frames, monstruos, A, B, eq):
+def _de_jungla(frames: list[Json], monstruos: list[tuple[int, str, int]], A: int, B: int, eq: int) -> Json:
     """Lo que solo se mira en jungla: larvas, primer dragón y si empezaron por el mismo lado."""
     propios = [m for m in monstruos if m[2] == eq]
     dragones = [m for m in monstruos if m[1] == "DRAGON"]
-    extra = {
+    extra: Json = {
         "larvas": sum(1 for m in propios if m[1] == "HORDE"),
         "drag1": int(dragones[0][2] == eq) if dragones else None,
     }
@@ -192,26 +207,26 @@ def _de_jungla(frames, monstruos, A, B, eq):
 
 
 # --- análisis de un duelo ---------------------------------------------------------------------------------
-def _pct(v, n):
+def _pct(v: float, n: int) -> int:
     return round(100 * v / n) if n else 0
 
 
-def _media(xs):
-    xs = [x for x in xs if x is not None]
-    return statistics.fmean(xs) if xs else None
+def _media(xs: Iterable[float | None]) -> float | None:
+    con_dato = [x for x in xs if x is not None]
+    return statistics.fmean(con_dato) if con_dato else None
 
 
-def _efecto(ganan, pierden):
+def _efecto(ganan: list[float | None], pierden: list[float | None]) -> float:
     """Diferencia entre medias en desviaciones típicas (d de Cohen): >0,3 ya se nota."""
-    ganan, pierden = [x for x in ganan if x is not None], [x for x in pierden if x is not None]
-    if len(ganan) < MIN_GRUPO or len(pierden) < MIN_GRUPO:
+    g, p = [x for x in ganan if x is not None], [x for x in pierden if x is not None]
+    if len(g) < MIN_GRUPO or len(p) < MIN_GRUPO:
         return 0.0
-    todo = ganan + pierden
+    todo = g + p
     sd = statistics.pstdev(todo)
-    return (statistics.fmean(ganan) - statistics.fmean(pierden)) / sd if sd else 0.0
+    return (statistics.fmean(g) - statistics.fmean(p)) / sd if sd else 0.0
 
 
-def nombre_zona(z):
+def nombre_zona(z: list[Any]) -> str:
     tipo, lado, propia = z
     arriba = "de arriba" if lado == "sup" else "de abajo"
     if tipo == "jungla":
@@ -220,14 +235,23 @@ def nombre_zona(z):
         return f"el río {arriba}"
     if tipo == "base":
         return "tu base" if propia else "su base"
-    return {"top": "la línea de top", "mid": "mid", "bot": "la línea de bot"}.get(tipo, tipo)
+    nombre: str = {"top": "la línea de top", "mid": "mid", "bot": "la línea de bot"}.get(tipo, tipo)
+    return nombre
 
 
-def _num(x, dec=1):
+def _num(x: float, dec: int = 1) -> str:
     return an.num(x, dec)
 
 
-def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre_runa=str):
+def analizar(
+    registros: list[Registro],
+    mios: list[Registro],
+    nombre_a: str,
+    nombre_b: str,
+    pos: str,
+    nombre_objeto: Callable[[int], str] = str,
+    nombre_runa: Callable[[int], str] = str,
+) -> Json:
     """Lo que dicen los registros de un duelo (a contra b en pos), con tus partidas al lado.
 
     registros: los de Master+ (desde el lado de a). mios: tus registros con ese campeón en esa posición
@@ -241,7 +265,7 @@ def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre
     pierden = [r for r in registros if not r["g"]]
     peleas = [p for r in registros for p in r["peleas"]]
     # (peso, texto, detalle), y "habito" al final en lo que hacen distinto los que ganan.
-    datos = [
+    datos: list[Dato] = [
         *_peleas_por_nivel(peleas, nombre_a, nombre_b),
         *_un_nivel_mas(peleas, nombre_a, nombre_b),
         *_por_delante_al_10(registros, nombre_a, nombre_b),
@@ -258,7 +282,7 @@ def analizar(registros, mios, nombre_a, nombre_b, pos, nombre_objeto=str, nombre
     }
 
 
-def _elegidos(datos):
+def _elegidos(datos: list[Dato]) -> list[Dato]:
     """Los cuatro datos que más pesan. Lo que hacen distinto los que ganan es lo más aprovechable: al menos uno
     entra siempre."""
     datos.sort(key=lambda d: d[0], reverse=True)
@@ -269,12 +293,12 @@ def _elegidos(datos):
     return elegidos
 
 
-def _ganadas(lista, i):
+def _ganadas(lista: list[Any], i: int | str) -> int:
     """Porcentaje de las peleas (i=3) o partidas ("g") de la lista que acaban bien para a."""
     return _pct(sum(x[i] for x in lista), len(lista))
 
 
-def _peleas_por_nivel(peleas, nombre_a, nombre_b):
+def _peleas_por_nivel(peleas: list[list[Any]], nombre_a: str, nombre_b: str) -> list[Dato]:
     """1. Peleas entre los dos antes y después del 6 (o todas juntas, si no hay bastantes de cada)."""
     antes = [p for p in peleas if p[1] < 6]
     despues = [p for p in peleas if p[1] >= 6]
@@ -299,7 +323,7 @@ def _peleas_por_nivel(peleas, nombre_a, nombre_b):
     return []
 
 
-def _un_nivel_mas(peleas, nombre_a, nombre_b):
+def _un_nivel_mas(peleas: list[list[Any]], nombre_a: str, nombre_b: str) -> list[Dato]:
     """Cuánto cambian las peleas con un nivel de ventaja."""
     ventaja = [p for p in peleas if p[1] > p[2]]
     igual = [p for p in peleas if p[1] == p[2]]
@@ -317,7 +341,7 @@ def _un_nivel_mas(peleas, nombre_a, nombre_b):
     ]
 
 
-def _por_delante_al_10(registros, nombre_a, nombre_b):
+def _por_delante_al_10(registros: list[Registro], nombre_a: str, nombre_b: str) -> list[Dato]:
     """2. Cuánto pesa ir por delante al 10."""
     con10 = [r for r in registros if "10" in r["dif"]]
     delante = [r for r in con10 if r["dif"]["10"][0] >= 500]
@@ -334,7 +358,7 @@ def _por_delante_al_10(registros, nombre_a, nombre_b):
     ]
 
 
-def _si_escala(registros, nombre_a):
+def _si_escala(registros: list[Registro], nombre_a: str) -> list[Dato]:
     """3. Si escala o se decide pronto."""
     cortas = [r for r in registros if r["dur"] < 25]
     largas = [r for r in registros if r["dur"] >= 32]
@@ -353,29 +377,33 @@ def _si_escala(registros, nombre_a):
 
 
 # Lo que se mide de cada registro (None si ese registro no lo tiene), para los hábitos y para compararte.
-def _muertes_10(r):
-    return r["m10"]
+def _muertes_10(r: Registro) -> int:
+    muertes: int = r["m10"]
+    return muertes
 
 
-def _peleas_antes_del_6(r):
+def _peleas_antes_del_6(r: Registro) -> int:
     return sum(1 for p in r["peleas"] if p[1] < 6)
 
 
-def _cs_10(r):
-    return r["cs10"]
+def _cs_10(r: Registro) -> int | None:
+    cs: int | None = r["cs10"]
+    return cs
 
 
-def _cs_sobre_el_rival_10(r):
-    return (r["dif"].get("10") or [None] * 3)[2]
+def _cs_sobre_el_rival_10(r: Registro) -> int | None:
+    cs: int | None = (r["dif"].get("10") or [None] * 3)[2]
+    return cs
 
 
-def _oro_sobre_el_rival_10(r):
-    return (r["dif"].get("10") or [None])[0]
+def _oro_sobre_el_rival_10(r: Registro) -> int | None:
+    oro: int | None = (r["dif"].get("10") or [None])[0]
+    return oro
 
 
-def _habitos_de(pos, nombre_b):
+def _habitos_de(pos: str, nombre_b: str) -> list[tuple[str, Medida, int | None]]:
     """Lo que se mira de cada registro: (qué es, cómo se saca, decimales; None si es un porcentaje)."""
-    habitos = [
+    habitos: list[tuple[str, Medida, int | None]] = [
         ("muertes antes del 10", _muertes_10, 1),
         (f"peleas con {nombre_b} antes del 6", _peleas_antes_del_6, 1),
         ("kills y asistencias antes del 10", lambda r: r["ka10"], 1),
@@ -389,16 +417,18 @@ def _habitos_de(pos, nombre_b):
     return habitos
 
 
-def _habitos(ganan, pierden, nombre_a, nombre_b, pos):
+def _habitos(ganan: list[Registro], pierden: list[Registro], nombre_a: str, nombre_b: str, pos: str) -> list[Dato]:
     """4. Qué hacen distinto los que ganan este duelo: los dos hábitos que más se notan."""
-    candidatos = []
+    candidatos: list[tuple[float, str, Medida, int | None]] = []
     for nombre, fn, dec in _habitos_de(pos, nombre_b):
         d = _efecto([fn(r) for r in ganan], [fn(r) for r in pierden])
         if abs(d) >= 0.3:
             candidatos.append((abs(d), nombre, fn, dec))
-    datos = []
+    datos: list[Dato] = []
     for d, nombre, fn, dec in sorted(candidatos, reverse=True)[:2]:
         mg, mp = _media(fn(r) for r in ganan), _media(fn(r) for r in pierden)
+        if mg is None or mp is None:  # no pasa: _efecto ya ha visto bastantes datos en los dos grupos
+            continue
         if dec is None:
             texto = (
                 f"Primer dragón para tu equipo: {round(100 * mg)}% en las que gana {nombre_a}, "
@@ -413,7 +443,7 @@ def _habitos(ganan, pierden, nombre_a, nombre_b, pos):
     return datos
 
 
-def _donde_muere(registros, nombre_a, nombre_b, pos):
+def _donde_muere(registros: list[Registro], nombre_a: str, nombre_b: str, pos: str) -> list[Dato]:
     """5. Dónde muere a con b de por medio."""
     muertes = [m for r in registros for m in r["muertes"] if m[1]]
     if len(muertes) < MIN_PELEAS:
@@ -434,7 +464,7 @@ def _donde_muere(registros, nombre_a, nombre_b, pos):
     ]
 
 
-def _build(registros, nombre_objeto, nombre_runa):
+def _build(registros: list[Registro], nombre_objeto: Callable[[int], str], nombre_runa: Callable[[int], str]) -> Json | None:
     """Lo más jugado en este duelo y cómo le va. Va aparte y en pequeño."""
     runas = Counter(tuple(r["runa"]) for r in registros if r.get("runa"))
     objetos = Counter(r["item"][0] for r in registros if r.get("item"))
@@ -455,9 +485,9 @@ def _build(registros, nombre_objeto, nombre_runa):
     }
 
 
-def metricas(pos):
+def metricas(pos: str) -> list[tuple[str, Medida, int, bool]]:
     """Lo que se compara entre tú y tu referencia: (nombre, función del registro, decimales, con signo)."""
-    filas = [
+    filas: list[tuple[str, Medida, int, bool]] = [
         ("Muertes antes del 10", _muertes_10, 1, False),
         ("Peleas con tu rival antes del 6", _peleas_antes_del_6, 1, False),
     ]
@@ -469,23 +499,28 @@ def metricas(pos):
     return filas
 
 
-def comparar(mios, referencia, pos, nombre_ref, minimo=MIN_GRUPO):
+def comparar(mios: list[Registro], referencia: list[Registro], pos: str, nombre_ref: str, minimo: int = MIN_GRUPO) -> Json | None:
     """Tus medias al lado de las de tu referencia (los que ganan el duelo, Challenger, un jugador...).
 
     Con una sola partida tuya sirve para la revisión: tu partida contra lo que hace tu referencia.
     """
     if not mios or len(referencia) < minimo:
         return None
-    filas = []
+    filas: list[Json] = []
     for nombre, fn, dec, con_signo in metricas(pos):
         t, g = _media(fn(r) for r in mios), _media(fn(r) for r in referencia)
         if t is not None and g is not None:
-            fmt = (lambda x: f"{x:+.0f}") if con_signo else (lambda x, d=dec: _num(x, d))
-            filas.append({"que": nombre, "tu": fmt(t), "ref": fmt(g), "mejor": _mejor(nombre, t, g)})
+            tu, ref = _formato(t, dec, con_signo), _formato(g, dec, con_signo)
+            filas.append({"que": nombre, "tu": tu, "ref": ref, "mejor": _mejor(nombre, t, g)})
     return {"n": len(mios), "n_ref": len(referencia), "ref": nombre_ref, "filas": filas}
 
 
-def _mejor(nombre, tu, ref):
+def _formato(x: float, dec: int, con_signo: bool) -> str:
+    """Una media para la tabla: con signo y sin decimales (lo que va sobre el rival), o con sus decimales."""
+    return f"{x:+.0f}" if con_signo else _num(x, dec)
+
+
+def _mejor(nombre: str, tu: float, ref: float) -> bool | None:
     """Si tu número es mejor (True), peor (False) o parecido (None) que el de tu referencia."""
     if nombre.startswith("Muertes"):
         dif = ref - tu

@@ -60,7 +60,12 @@ class Cuota(unittest.TestCase):
         lim, reloj = limitador()
         lim.tope_fondo = 0
         vueltas = []
-        self.assertFalse(lim.adquirir("h", fondo=True, cancelada=lambda: vueltas.append(1) or len(vueltas) > 3))
+
+        def cancelada():
+            vueltas.append(1)
+            return len(vueltas) > 3
+
+        self.assertFalse(lim.adquirir("h", fondo=True, cancelada=cancelada))
         self.assertEqual(lim.estado("h")["usadas"], 0)
 
     def test_cancelar_mientras_espera(self):

@@ -6,6 +6,7 @@ import unittest
 import urllib.error
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 from deepprep import config, servidor
 from deepprep.app import App
@@ -96,15 +97,15 @@ class GrabadorFalso:
 
 class LolFalso:
     ruta = Path("C:/no-existe")
-    region = None  # plataforma que dice el cliente (None = no responde)
-    fase = None
+    region: str | None = None  # plataforma que dice el cliente (None = no responde)
+    fase: str | None = None
 
     def plataforma(self):
         return self.region
 
-    eleccion = None
+    eleccion: dict[str, Any] | None = None
     mapa_id = 11
-    segundos = None  # reloj del juego: None en la pantalla de carga
+    segundos: float | None = None  # reloj del juego: None en la pantalla de carga
 
     def reloj(self):
         return self.segundos
@@ -558,7 +559,7 @@ class Clave(unittest.TestCase):
         app, riot, _ = montar()
         self.assertFalse(app.poner_clave("hola")["ok"])
         riot.clave_mala = True
-        guardar, config.guardar_clave = config.guardar_clave, lambda c: None
+        guardar, config.guardar_clave = config.guardar_clave, lambda clave: None
         try:
             self.assertEqual(app.poner_clave("RGAPI-nueva"), {"ok": True, "pendiente": True})
             self.assertFalse(app.estado()["clave"]["ok"])
@@ -572,6 +573,8 @@ class Clave(unittest.TestCase):
 
 class Web(unittest.TestCase):
     PUERTO = 5959
+    app: App
+    srv: servidor.Servidor
 
     @classmethod
     def setUpClass(cls):

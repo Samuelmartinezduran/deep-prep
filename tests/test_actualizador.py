@@ -7,6 +7,7 @@ import tempfile
 import time
 import unittest
 import zipfile
+from collections.abc import Callable
 from pathlib import Path
 from unittest import mock
 
@@ -23,6 +24,9 @@ def zip_con_exe():
 
 class AppFalsa:
     fase, modo, grabador, revisando, al_salir = None, "previa", None, 0, None
+    # Solo si la prueba los pone (el actualizador los mira con getattr).
+    ventana_visible: Callable[[], bool]
+    ultima_consulta: float
 
 
 class Actualizador(unittest.TestCase):
@@ -63,6 +67,7 @@ class Actualizador(unittest.TestCase):
         with mock.patch.object(act, "_get", self.github("v9.9.9", zip_con_exe())):
             self.assertTrue(a.comprobar())
         self.assertEqual((a.estado["nueva"], a.estado["lista"]), ("9.9.9", True))
+        assert a._carpeta_nueva is not None
         self.assertTrue((a._carpeta_nueva / "DeepPrep.exe").is_file())
 
     def test_no_instala_si_la_huella_no_cuadra(self):
@@ -126,7 +131,9 @@ class Novedades(unittest.TestCase):
                 act.NOVEDADES.write_text(json.dumps({"version": "0.0.1", "notas": "vieja"}), encoding="utf-8")
                 self.assertIsNone(a.novedades())  # de otra versión: no se enseña
                 act.NOVEDADES.write_text(json.dumps({"version": __version__, "notas": "- algo"}), encoding="utf-8")
-                self.assertEqual(a.novedades()["notas"], "- algo")
+                novedades = a.novedades()
+                assert novedades is not None
+                self.assertEqual(novedades["notas"], "- algo")
                 self.assertFalse(a._faltan_novedades())  # ya están: no se vuelven a pedir
                 a.novedades_vistas()
                 self.assertIsNone(a.novedades())

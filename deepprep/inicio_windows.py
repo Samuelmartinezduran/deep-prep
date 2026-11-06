@@ -20,11 +20,11 @@ ACCESO = Path(
 ACCESO_VIEJO = ACCESO.with_name("Porofesor.lnk")
 
 
-def activo():
+def activo() -> bool:
     return ACCESO.exists()
 
 
-def poner(encendido):
+def poner(encendido: bool) -> str:
     """Crea o quita el acceso directo. Devuelve un texto de error o ''."""
     if not encendido:
         try:
@@ -32,6 +32,7 @@ def poner(encendido):
         except OSError as e:
             return f"No se pudo quitar el arranque con Windows: {e}"
         return ""
+    pyw: str | None
     if config.CONGELADA:
         pyw, argumentos = sys.executable, "--oculta"
     else:

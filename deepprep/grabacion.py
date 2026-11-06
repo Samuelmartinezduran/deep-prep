@@ -21,10 +21,13 @@ import subprocess
 import sys
 import threading
 import time
+from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import IO, Any
 
 from . import config
 from .sistema import SIN_VENTANA
+from .tipos import Cfg
 
 logger = logging.getLogger(__name__)
 
@@ -49,21 +52,21 @@ CPU = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "26", "-pix_fmt", "yuv
 
 # --- lo que usa la app ------------------------------------------------------------------------------
 class Grabador:
-    def __init__(self, cfg):
+    def __init__(self, cfg: Cfg) -> None:
         self.cfg = cfg
-        self._proceso = None
+        self._proceso: subprocess.Popen[bytes] | None = None
         self._lock = threading.Lock()
         self._medida = (0.0, -1)  # (cuándo, bytes) de la última vez que se midió el vídeo
         self._crecio = 0.0
 
-    def activa(self):
+    def activa(self) -> bool:
         return (self._proceso is not None and self._proceso.poll() is None) or _cerrojo_ocupado()
 
-    def armar(self, extra=()):
+    def armar(self, extra: Sequence[str] = ()) -> None:
         """Deja un grabador esperando a la partida. No bloquea."""
         threading.Thread(target=self._armar, name="grabador", daemon=True).start()
 
-    def _armar(self):
+    def _armar(self) -> None:
         with self._lock:
             if self.activa():
                 logger.info("No lanzo otro grabador: ya hay uno en marcha")
@@ -91,14 +94,14 @@ class Grabador:
             self._crecio = time.time()
             logger.info("Grabador lanzado")
 
-    def carpeta_reciente(self, horas=3):
+    def carpeta_reciente(self, horas: float = 3) -> Path | None:
         """Carpeta de la última grabación según el registro, si es de las últimas horas."""
         carpeta = _carpeta_del_registro()
         if not carpeta or not carpeta.is_dir() or time.time() - carpeta.stat().st_mtime > horas * 3600:
             return None
         return carpeta
 
-    def estado(self):
+    def estado(self) -> dict[str, Any] | None:
         """None si no hay grabación; si la hay, la carpeta (vacía mientras espera al juego) y si se ha parado."""
         if not self.activa():
             return None
@@ -114,7 +117,7 @@ class Grabador:
         return {"carpeta": str(carpeta), "parada": ahora - self._crecio > SEGUNDOS_SIN_CRECER}
 
 
-def _carpeta_del_registro(solo_en_curso=False):
+def _carpeta_del_registro(solo_en_curso: bool = False) -> Path | None:
     try:
         texto = RUTA_LOG.read_text(encoding="utf-8", errors="replace")
     except OSError:
@@ -125,7 +128,7 @@ def _carpeta_del_registro(solo_en_curso=False):
     return Path(m.group(1).strip())
 
 
-def inicio_de_series(carpeta):
+def inicio_de_series(carpeta: str | Path) -> dict[int, float]:
     """{serie: cuándo empezó (segundos del reloj)} de cada serie de trozos que hay en una grabación.
 
     ffmpeg se relanza a media partida si se corta (p. ej. al cambiar la resolución) y cada arranque es otra
@@ -137,7 +140,7 @@ def inicio_de_series(carpeta):
         apuntadas = {int(n): float(t) for n, t in json.loads((carpeta / SERIES).read_text(encoding="utf-8")).items()}
     except (OSError, ValueError, TypeError, AttributeError):
         apuntadas = {}
-    series = {}
+    series: dict[int, float] = {}
     for primero in carpeta.glob("r*_seg_000.mkv"):
         m = re.fullmatch(r"r(\d+)_seg_000\.mkv", primero.name)
         if not m:
@@ -150,7 +153,7 @@ def inicio_de_series(carpeta):
     return series
 
 
-def _cerrojo_ocupado():
+def _cerrojo_ocupado() -> bool:
     """El proceso de grabación tiene cogido el cerrojo mientras vive."""
     try:
         with open(RUTA_CERROJO, "a") as f:
@@ -164,7 +167,7 @@ def _cerrojo_ocupado():
         return False
 
 
-def _bytes_de(carpeta):
+def _bytes_de(carpeta: str | Path) -> int:
     # El tamaño que da el listado de la carpeta va atrasado en el trozo que se está escribiendo;
     # hay que abrir cada archivo para saber cuánto ocupa de verdad.
     total = 0
@@ -178,7 +181,7 @@ def _bytes_de(carpeta):
 
 
 # --- piezas del proceso de grabación -------------------------------------------------------------------
-def buscar_ffmpeg():
+def buscar_ffmpeg() -> str | None:
     """El ffmpeg que va con la app empaquetada; si no, el instalado con winget o el del PATH."""
     candidatos = [config.RAIZ / "ffmpeg" / "ffmpeg.exe"]
     if getattr(sys, "frozen", False):
@@ -197,14 +200,15 @@ class _GUID(ctypes.Structure):
     _fields_ = [("a", ctypes.c_ulong), ("b", ctypes.c_ushort), ("c", ctypes.c_ushort), ("d", ctypes.c_ubyte * 8)]
 
 
-def carpeta_videos():
+def carpeta_videos() -> Path:
     """Vídeos del usuario (aunque esté movida a OneDrive u otro disco)."""
     videos = _GUID(0x18989B1D, 0x99B5, 0x455B, (ctypes.c_ubyte * 8)(0x84, 0x1C, 0xAB, 0x7C, 0x74, 0xE4, 0xDD, 0xFC))
     ruta = ctypes.c_wchar_p()
     try:
         if ctypes.windll.shell32.SHGetKnownFolderPath(ctypes.byref(videos), 0, None, ctypes.byref(ruta)) == 0:
             try:
-                return Path(ruta.value)
+                if ruta.value:
+                    return Path(ruta.value)
             finally:
                 ctypes.windll.ole32.CoTaskMemFree(ruta)
     except (OSError, AttributeError):
@@ -212,8 +216,9 @@ def carpeta_videos():
     return Path.home() / "Videos"
 
 
-def ventana_juego():
-    return ctypes.windll.user32.FindWindowW(CLASE_JUEGO, None)
+def ventana_juego() -> int:
+    ventana: int = ctypes.windll.user32.FindWindowW(CLASE_JUEGO, None)
+    return ventana
 
 
 class _DescSalida(ctypes.Structure):
@@ -228,18 +233,18 @@ class _DescSalida(ctypes.Structure):
     ]
 
 
-def _metodo(obj, indice, *tipos):
+def _metodo(obj: Any, indice: int, *tipos: Any) -> Any:
     """El método número indice de la tabla de un objeto COM (DXGI no tiene otra forma de llamarse desde ctypes)."""
     tabla = ctypes.cast(obj, ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p)))[0]
     return ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, *tipos)(tabla[indice])
 
 
-def _soltar(obj):
+def _soltar(obj: Any) -> None:
     if obj:
         _metodo(obj, 2)(obj)  # Release
 
 
-def salida_del_juego():
+def salida_del_juego() -> int:
     """Número de pantalla (salida DXGI de la gráfica principal) en la que está el juego; 0 si no se sabe.
 
     ffmpeg (ddagrab) numera las pantallas así, que no siempre coincide con el orden de Windows.
@@ -276,7 +281,7 @@ def salida_del_juego():
     return 0
 
 
-def elegir_codificador(ffmpeg, modo):
+def elegir_codificador(ffmpeg: str, modo: str) -> tuple[str, list[str]]:
     """(nombre, argumentos) del codificador: el de la gráfica que funcione o, si no, el procesador."""
     if modo == "cpu":
         return "procesador", CPU
@@ -305,7 +310,7 @@ def elegir_codificador(ffmpeg, modo):
     return "procesador", CPU
 
 
-def limpiar(base, max_gb, actual=None):
+def limpiar(base: Path, max_gb: float, actual: Path | None = None) -> list[str]:
     """Borra las partidas grabadas más viejas hasta que todas juntas ocupen menos de max_gb."""
     if not max_gb or max_gb <= 0:
         return []
@@ -314,7 +319,7 @@ def limpiar(base, max_gb, actual=None):
     total = sum(tam.values()) + (
         sum(f.stat().st_size for f in actual.rglob("*") if f.is_file()) if actual and actual.is_dir() else 0
     )
-    borradas = []
+    borradas: list[str] = []
     for c in carpetas:
         if total <= max_gb * 1024**3:
             break
@@ -324,7 +329,7 @@ def limpiar(base, max_gb, actual=None):
     return borradas
 
 
-def apuntar_serie(carpeta, serie, cuando):
+def apuntar_serie(carpeta: str | Path, serie: int, cuando: float) -> None:
     """Apunta en series.json de la grabación cuándo empezó una serie (segundos del reloj)."""
     ruta = Path(carpeta) / SERIES
     try:
@@ -338,7 +343,7 @@ def apuntar_serie(carpeta, serie, cuando):
 
 
 # --- el proceso de grabación ("deepprep --grabar") -------------------------------------------------------
-def grabar(cfg, espera_min=5, max_min=100, prueba_seg=0):
+def grabar(cfg: Cfg, espera_min: float = 5, max_min: float = 100, prueba_seg: float = 0) -> None:
     """Espera a la partida, la graba y para al acabar. Escribe lo que hace en grabacion.log.
 
     prueba_seg: graba ese rato sin esperar al juego (para comprobar que funciona).
@@ -352,7 +357,7 @@ def grabar(cfg, espera_min=5, max_min=100, prueba_seg=0):
         _grabar(cfg, espera_min, max_min, prueba_seg)
 
 
-def _grabar(cfg, espera_min, max_min, prueba_seg):
+def _grabar(cfg: Cfg, espera_min: float, max_min: float, prueba_seg: float) -> None:
     with open(RUTA_LOG, "w", encoding="utf-8", buffering=1) as log:
         ffmpeg = buscar_ffmpeg()
         if not ffmpeg:
@@ -371,10 +376,10 @@ def _grabar(cfg, espera_min, max_min, prueba_seg):
 
         empezo = time.time()
 
-        def seguir():
+        def seguir() -> bool:
             if prueba_seg:
                 return time.time() - empezo < prueba_seg
-            return ventana_juego() and not stop.exists() and time.time() - empezo < max_min * 60
+            return bool(ventana_juego()) and not stop.exists() and time.time() - empezo < max_min * 60
 
         # ffmpeg se corta si cambia la resolución: se relanza mientras dure la partida (cada arranque, otra serie).
         for arranque in range(1, 200):
@@ -387,7 +392,7 @@ def _grabar(cfg, espera_min, max_min, prueba_seg):
         log.write(f"TERMINADO: {round((time.time() - empezo) / 60, 1)} min\n")
 
 
-def _esperar_al_juego(espera_min):
+def _esperar_al_juego(espera_min: float) -> bool:
     """Espera a que se abra la ventana del juego. False si en espera_min minutos no ha empezado ninguna partida."""
     inicio = time.time()
     while not ventana_juego():
@@ -397,7 +402,7 @@ def _esperar_al_juego(espera_min):
     return True
 
 
-def _carpeta_nueva(prueba_seg):
+def _carpeta_nueva(prueba_seg: float) -> tuple[Path, Path]:
     """(Vídeos\\LoL-coach, la carpeta de esta grabación): AAAA-MM-DD_partidaN, o AAAA-MM-DD_prueba en una prueba."""
     base = carpeta_videos() / "LoL-coach"
     base.mkdir(parents=True, exist_ok=True)
@@ -411,7 +416,7 @@ def _carpeta_nueva(prueba_seg):
     return base, carpeta
 
 
-def _orden_grabacion(ffmpeg, salida, args, carpeta, arranque):
+def _orden_grabacion(ffmpeg: str, salida: int, args: list[str], carpeta: Path, arranque: int) -> list[str]:
     """ffmpeg grabando la pantalla salida en trozos de 5 minutos: rNN_seg_000.mkv, rNN_seg_001.mkv..."""
     return [
         ffmpeg,
@@ -438,7 +443,7 @@ def _orden_grabacion(ffmpeg, salida, args, carpeta, arranque):
     ]
 
 
-def _grabar_serie(orden, carpeta, arranque, log, seguir):
+def _grabar_serie(orden: list[str], carpeta: Path, arranque: int, log: IO[str], seguir: Callable[[], bool]) -> None:
     """Graba una serie de trozos hasta que ffmpeg se corte o ya no haya que seguir (y entonces lo cierra bien)."""
     cuando = time.time()
     p = subprocess.Popen(

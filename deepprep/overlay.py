@@ -11,7 +11,9 @@ import ctypes
 import ctypes.wintypes as wt
 import logging
 import time
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -41,9 +43,9 @@ CLASE_JUEGO = "RiotWindowClass"
 MODO_SIN_BORDES = "2"
 
 
-def parsear_atajo(texto):
+def parsear_atajo(texto: str | None) -> list[int] | None:
     """'ctrl+tab' -> [0x11, 0x09]; None si alguna tecla no se entiende."""
-    vks = []
+    vks: list[int] = []
     for parte in (texto or "").lower().replace(" ", "").split("+"):
         if parte in TECLAS:
             vks.append(TECLAS[parte])
@@ -56,12 +58,12 @@ def parsear_atajo(texto):
     return vks or None
 
 
-def debe_verse(modo, pulsado):
+def debe_verse(modo: str, pulsado: bool) -> bool:
     """En la pantalla de carga se ve solo; ya jugando, solo mientras se mantiene el atajo."""
     return modo == "carga" or (modo == "juego" and pulsado)
 
 
-def modo_ventana(ruta_lol):
+def modo_ventana(ruta_lol: str | Path) -> str | None:
     """WindowMode del juego ('0' pantalla completa, '1' ventana, '2' sin bordes) o None si no se sabe."""
     cfg = configparser.ConfigParser(strict=False, interpolation=None)
     try:
@@ -74,26 +76,34 @@ def modo_ventana(ruta_lol):
 class Controlador:
     """Decide en cada momento si el overlay se ve. Las piezas de Windows se inyectan para poder probarlo."""
 
-    def __init__(self, app, ventana, tecla_pulsada=None, juego_abierto=None, reloj=time.monotonic):
+    def __init__(
+        self,
+        app: Any,
+        ventana: Any,
+        tecla_pulsada: Callable[[int], bool] | None = None,
+        juego_abierto: Callable[[], bool] | None = None,
+        reloj: Callable[[], float] = time.monotonic,
+    ) -> None:
+        """app: la app (su configuración, fase y modo); ventana: algo con mostrar() y ocultar() (y opacidad())."""
         self.app = app
         self.ventana = ventana
-        self._atajo = None
+        self._atajo: str | None = None
         self._opacidad = app.cfg.get("overlay_opacidad")
-        self.vks = None
+        self.vks: list[int] | None = None
         self._pulsada = tecla_pulsada or _tecla_pulsada
         self._juego_abierto = juego_abierto or (lambda: rect_del_juego() is not None)
         self._reloj = reloj
         self.visible = False
         self._ultimo_modo = 0.0
-        self._modo_juego = None  # WindowMode leído al entrar en partida
+        self._modo_juego: str | None = None  # WindowMode leído al entrar en partida
 
-    def puede(self):
+    def puede(self) -> bool:
         """Encima de una pantalla completa exclusiva el juego se minimizaría: solo con ventana sin bordes."""
         if not self.app.cfg.get("overlay", True):
             return False
         return self._modo_juego == MODO_SIN_BORDES
 
-    def paso(self):
+    def paso(self) -> None:
         app = self.app
         ahora = self._reloj()
         # Los ajustes se pueden cambiar con la app abierta.
@@ -110,14 +120,14 @@ class Controlador:
             app.actualizar_modo()
             if app.modo != "previa" and antes == "previa":
                 self._modo_juego = modo_ventana(app.lcu.ruta)
-        pulsado = bool(self.vks) and all(self._pulsada(vk) for vk in self.vks)
+        pulsado = bool(self.vks and all(self._pulsada(vk) for vk in self.vks))
         # Sin la ventana del juego (se ha cerrado o aún no existe) no hay nada que tapar.
         quiere = self.puede() and debe_verse(app.modo, pulsado) and self._juego_abierto()
         if quiere != self.visible:
             self.visible = quiere
             self.ventana.mostrar() if quiere else self.ventana.ocultar()
 
-    def bucle(self, pausa=0.03):
+    def bucle(self, pausa: float = 0.03) -> None:
         if self._modo_juego is None:
             self._modo_juego = modo_ventana(self.app.lcu.ruta)
         while True:
@@ -130,7 +140,8 @@ class Controlador:
 
 
 # --- Windows ------------------------------------------------------------------------------------
-_u32 = ctypes.windll.user32 if hasattr(ctypes, "windll") else None
+# user32 de Windows (fuera de Windows, None: así el módulo se puede importar para probar Controlador).
+_u32: Any = ctypes.windll.user32 if hasattr(ctypes, "windll") else None
 GWL_EXSTYLE = -20
 WS_EX_TRANSPARENT, WS_EX_TOOLWINDOW, WS_EX_LAYERED, WS_EX_NOACTIVATE = 0x20, 0x80, 0x80000, 0x8000000
 SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE, SWP_SHOWWINDOW = 0x1, 0x2, 0x10, 0x40
@@ -147,11 +158,11 @@ if _u32:
     _u32.FindWindowW.argtypes = [wt.LPCWSTR, wt.LPCWSTR]
 
 
-def _tecla_pulsada(vk):
+def _tecla_pulsada(vk: int) -> bool:
     return bool(_u32.GetAsyncKeyState(vk) & 0x8000)
 
 
-def rect_del_juego():
+def rect_del_juego() -> tuple[int, int, int, int] | None:
     """(x, y, ancho, alto) de la ventana del juego, o None si no está abierta."""
     hwnd = _u32.FindWindowW(CLASE_JUEGO, None)
     if not hwnd:
@@ -165,7 +176,7 @@ def rect_del_juego():
 class VentanaWin32:
     """Ventana de Windows ya creada (la del overlay): siempre encima, sin foco, transparente al ratón."""
 
-    def __init__(self, hwnd, ancho, alto, opacidad):
+    def __init__(self, hwnd: int, ancho: int, alto: int, opacidad: float) -> None:
         self.hwnd = wt.HWND(hwnd)
         self.ancho, self.alto = ancho, alto
         ex = _u32.GetWindowLongPtrW(self.hwnd, GWL_EXSTYLE)
@@ -174,20 +185,20 @@ class VentanaWin32:
         )
         self.opacidad(opacidad)
 
-    def opacidad(self, valor):
+    def opacidad(self, valor: float) -> None:
         _u32.SetLayeredWindowAttributes(self.hwnd, 0, max(60, min(255, int(255 * valor))), LWA_ALPHA)
 
-    def _colocar(self):
+    def _colocar(self) -> None:
         # Centrada sobre el juego, algo por debajo del borde de arriba (deja ver el marcador del juego).
         juego = rect_del_juego() or (0, 0, _u32.GetSystemMetrics(0), _u32.GetSystemMetrics(1))
         x = juego[0] + (juego[2] - self.ancho) // 2
         y = juego[1] + max(0, int(juego[3] * 0.07))
         _u32.SetWindowPos(self.hwnd, HWND_TOPMOST, x, y, self.ancho, self.alto, SWP_NOACTIVATE)
 
-    def mostrar(self):
+    def mostrar(self) -> None:
         self._colocar()
         _u32.ShowWindow(self.hwnd, SW_SHOWNOACTIVATE)
         _u32.SetWindowPos(self.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW)
 
-    def ocultar(self):
+    def ocultar(self) -> None:
         _u32.ShowWindow(self.hwnd, SW_HIDE)

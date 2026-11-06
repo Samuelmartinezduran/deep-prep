@@ -3,8 +3,12 @@
 import json
 import logging
 import urllib.request
+from typing import TYPE_CHECKING, Any
 
 from .riot import USER_AGENT
+
+if TYPE_CHECKING:
+    from .cache import Cache
 
 logger = logging.getLogger(__name__)
 
@@ -17,30 +21,30 @@ URL_ROLES = "https://cdn.merakianalytics.com/riot/lol/resources/latest/en-US/cha
 DIA = 86400
 
 
-def _descargar(url):
+def _descargar(url: str) -> Any:
     pet = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(pet, timeout=20) as resp:
         return json.loads(resp.read())
 
 
 class Datos:
-    def __init__(self, cache):
+    def __init__(self, cache: "Cache") -> None:
         self.version = ""
-        self.campeones = {}  # id -> {"nombre", "clave"}
-        self.roles = {}  # id -> {posición: frecuencia relativa}
-        self.objetos = {}  # id -> nombre
-        self.legendarios = set()  # ids de objetos completos (los que cuentan como "primer objeto")
-        self.runas = {}  # id de runa o de rama -> nombre
+        self.campeones: dict[int, dict[str, str]] = {}  # id -> {"nombre", "clave"}
+        self.roles: dict[int, dict[str, float]] = {}  # id -> {posición: frecuencia relativa}
+        self.objetos: dict[int, str] = {}  # id -> nombre
+        self.legendarios: set[int] = set()  # ids de objetos completos (los que cuentan como "primer objeto")
+        self.runas: dict[int, str] = {}  # id de runa o de rama -> nombre
         self._cargar(cache)
 
-    def _cargar(self, cache):
+    def _cargar(self, cache: "Cache") -> None:
         guardado = cache.kv_get("ddragon", max_edad=DIA / 2)
         if not guardado or "objetos" not in guardado:
             try:
                 version = _descargar(URL_VERSIONES)[0]
                 datos = _descargar(URL_CAMPEONES.format(v=version))["data"]
                 objetos = _descargar(URL_OBJETOS.format(v=version))["data"]
-                runas = {}
+                runas: dict[int, str] = {}
                 for rama in _descargar(URL_RUNAS.format(v=version)):
                     runas[rama["id"]] = rama["name"]
                     for fila in rama["slots"]:
@@ -82,20 +86,20 @@ class Datos:
                 logger.warning("No hay datos de roles por campeón (%s); los roles saldrán del historial", e)
         self.roles = {int(k): v for k, v in roles.items()}
 
-    def nombre(self, id_):
+    def nombre(self, id_: int) -> str:
         return self.campeones.get(id_, {}).get("nombre", f"Campeón {id_}")
 
-    def objeto(self, id_):
+    def objeto(self, id_: int) -> str:
         return self.objetos.get(id_, f"Objeto {id_}")
 
-    def runa(self, id_):
+    def runa(self, id_: int) -> str:
         return self.runas.get(id_, f"Runa {id_}")
 
-    def icono(self, id_):
+    def icono(self, id_: int) -> str:
         # Lo sirve el servidor local desde disco (lo baja de Data Dragon la primera vez).
         c = self.campeones.get(id_)
         return f"/ddragon/campeon/{c['clave']}.png" if c and self.version else ""
 
-    def splash(self, id_):
+    def splash(self, id_: int) -> str:
         c = self.campeones.get(id_)
         return f"/ddragon/splash/{c['clave']}.jpg" if c else ""

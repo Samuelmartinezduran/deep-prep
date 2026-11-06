@@ -1,11 +1,14 @@
 """Tus duelos medidos en partidas de Master+ y con quién se comparan tus números (tu referencia)."""
 
 import time
-from typing import Any
 
 from . import analisis as an
 from . import duelos as du
-from .riot import REGION_DE, ErrorRiot
+from .base_duelos import BaseDuelos
+from .ddragon import Datos
+from .partidas import Partidas
+from .riot import REGION_DE, Cliente, ErrorRiot
+from .tipos import Cfg, Json, Registro
 
 # Con quién se comparan tus números en el duelo y en la revisión (ajuste "comparar_con").
 COMPARAR_CON = {
@@ -25,21 +28,23 @@ class Comparador:
     cfg: la configuración en uso (la de Configuracion.valores). cuentas: tus cuentas (puuid -> 'Nombre#TAG').
     """
 
-    def __init__(self, cfg, duelos, cliente, datos, cuentas, partidas):
+    def __init__(
+        self, cfg: Cfg, duelos: BaseDuelos, cliente: Cliente, datos: Datos, cuentas: dict[str, str], partidas: Partidas
+    ) -> None:
         self.cfg = cfg
         self.duelos = duelos
         self.cliente = cliente
         self.datos = datos
         self.cuentas = cuentas
         self.partidas = partidas
-        self._hechos: dict[tuple[int, str, int], tuple[float, dict[str, Any]]] = {}
+        self._hechos: dict[tuple[int, str, int], tuple[float, Json]] = {}
 
-    def olvidar(self):
+    def olvidar(self) -> None:
         """Los ajustes han cambiado (con quién te comparas): los duelos ya calculados no valen."""
         self._hechos.clear()
 
     # --- duelos de Master+ ---------------------------------------------------------------------
-    def duelo(self, a, pos, b):
+    def duelo(self, a: int, pos: str, b: int | None) -> Json | None:
         """Tu campeón contra su rival directo: lo que dicen las partidas de Master+ y tus números al lado."""
         if not (a and b and pos):
             return None
@@ -67,7 +72,7 @@ class Comparador:
         self._hechos[clave] = (time.time(), res)
         return res
 
-    def pool_contra(self, pos, rival, cola=None):
+    def pool_contra(self, pos: str, rival: int | None, cola: int | None = None) -> Json | None:
         """Tu pool de esa posición contra el campeón rival (selección de campeón)."""
         if not (pos and rival):
             return None
@@ -87,7 +92,7 @@ class Comparador:
         }
 
     # --- jugadores de referencia ------------------------------------------------------------------
-    def resolver_referencia(self, rid):
+    def resolver_referencia(self, rid: str) -> str:
         """Busca la cuenta y su servidor; devuelve un texto de error o ''."""
         if self.duelos.kv_get(f"ref:{rid.lower()}"):
             return ""
@@ -113,22 +118,22 @@ class Comparador:
         )
         return ""
 
-    def para_el_recolector(self):
+    def para_el_recolector(self) -> list[Json]:
         """Los jugadores de referencia con su región y el campeón con el que te comparas (None en el perfil de base:
         interesan todas sus partidas)."""
         pares: list[tuple[int | None, str]] = [(int(c), rid) for c, rid in (self.cfg.get("referencias") or {}).items()]
         if self.cfg.get("comparar_con") == "perfil" and self.cfg.get("perfil_base"):
             pares.append((None, self.cfg["perfil_base"]))
-        out = []
+        out: list[Json] = []
         for campeon, rid in pares:
             info = self.duelos.kv_get(f"ref:{rid.lower()}")
             if info:
                 out.append({"puuid": info["puuid"], "region": REGION_DE[info["plataforma"]], "campeon": campeon})
         return out
 
-    def partidas_de_referencias(self):
+    def partidas_de_referencias(self) -> tuple[dict[str, int | None], int | None]:
         """Para los ajustes: ({campeón: partidas guardadas de su referencia}, partidas guardadas del perfil de base)."""
-        partidas = {}
+        partidas: dict[str, int | None] = {}
         for campeon, rid in (self.cfg.get("referencias") or {}).items():
             info = self.duelos.kv_get(f"ref:{rid.lower()}")
             partidas[campeon] = len(self.duelos.de({info["puuid"]}, int(campeon), None)) if info else None
@@ -137,7 +142,7 @@ class Comparador:
         perfil_partidas = len(self.duelos.vistas_de(info["puuid"])) if info else None
         return partidas, perfil_partidas
 
-    def referencia(self, a, pos, b, registros=None):
+    def referencia(self, a: int, pos: str, b: int, registros: list[Registro] | None = None) -> tuple[list[Registro], str]:
         """(registros de tu referencia, cómo se llama) para comparar tus números con ese campeón y posición."""
         rid = (self.cfg.get("referencias") or {}).get(str(a))
         if rid:

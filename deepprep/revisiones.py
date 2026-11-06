@@ -6,15 +6,23 @@ import logging
 import os
 import threading
 import time
+from collections.abc import Callable, Mapping
 from pathlib import Path
+from typing import Any
 
 from . import analisis as an
 from . import clips
 from . import duelos as du
 from . import revision as rv
+from .base_duelos import BaseDuelos
+from .cache import Cache
+from .comparador import Comparador
 from .constantes import LIGA_COLA, SOLO_DUO
+from .ddragon import Datos
 from .grabacion import buscar_ffmpeg, inicio_de_series
-from .riot import ErrorRiot
+from .partidas import Partidas
+from .riot import Cliente, ErrorRiot
+from .tipos import Json, Linea, Panel, Resultado, Revision
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +31,7 @@ MAX_REVISIONES = 100
 CLAVES_INDICE = ("id", "fecha", "cola", "duracion", "gana", "campeon", "campeon_id", "kda", "icono")
 
 
-def desfase(carpeta, inicio_ms):
+def desfase(carpeta: Path | None, inicio_ms: int | None) -> dict[int, float] | None:
     """Por cada serie de la grabación, segundos grabados antes del 0:00 de la partida: {serie: s}, o None.
 
     La grabación empieza en la pantalla de carga; si ffmpeg se relanza a media partida (p. ej. al cambiar la
@@ -43,7 +51,17 @@ class Revisor:
     cuentas: tus cuentas (puuid -> 'Nombre#TAG'). en_partida: si se está jugando otra (los clips esperan a que acabe).
     """
 
-    def __init__(self, cache, cliente, datos, duelos, comparador, cuentas, partidas, en_partida):
+    def __init__(
+        self,
+        cache: Cache,
+        cliente: Cliente,
+        datos: Datos,
+        duelos: BaseDuelos,
+        comparador: Comparador,
+        cuentas: dict[str, str],
+        partidas: Partidas,
+        en_partida: Callable[[], bool],
+    ) -> None:
         self.cache = cache
         self.cliente = cliente
         self.datos = datos
@@ -53,12 +71,14 @@ class Revisor:
         self.partidas = partidas
         self._en_partida = en_partida
         self.revisando = 0  # revisiones esperando a que Riot publique la partida (no actualizar mientras)
-        self.ultima = None  # id de la última revisión post-partida terminada
+        self.ultima: str | None = None  # id de la última revisión post-partida terminada
 
-    def en_segundo_plano(self, game_id, puuid, panel, carpeta):
+    def en_segundo_plano(self, game_id: int, puuid: str, panel: Panel, carpeta: Path | None) -> None:
         threading.Thread(target=self.revisar, args=(game_id, puuid, panel, carpeta), name="revision", daemon=True).start()
 
-    def revisar(self, game_id, puuid, panel, carpeta, intentos=20, pausa=60):
+    def revisar(
+        self, game_id: int, puuid: str, panel: Panel | None, carpeta: Path | None, intentos: int = 20, pausa: float = 60
+    ) -> Revision | None:
         """Espera a que Riot publique la partida (tarda unos minutos), la revisa y la guarda."""
         self.revisando += 1
         try:
@@ -66,10 +86,13 @@ class Revisor:
         finally:
             self.revisando -= 1
 
-    def _revisar_partida(self, game_id, puuid, panel, carpeta, intentos, pausa):
+    def _revisar_partida(
+        self, game_id: int, puuid: str, panel: Panel | None, carpeta: Path | None, intentos: int, pausa: float
+    ) -> Revision | None:
         # El host es "euw1.api.riotgames.com"; el id de la partida empieza por "EUW1_".
         id_ = f"{self.cliente.plataforma.split('.')[0].upper()}_{game_id}"
-        crudo = linea = None
+        crudo: Json | None = None
+        linea: Json | None = None
         for intento in range(intentos):
             try:
                 crudo = self.cliente.partida(id_, fondo=True)
@@ -108,7 +131,7 @@ class Revisor:
             threading.Thread(target=self.hacer_clips, args=(rev["id"], desfase_s), name="clips", daemon=True).start()
         return rev
 
-    def guardar(self, rev):
+    def guardar(self, rev: Revision) -> None:
         self.cache.kv_set(f"revision:{rev['id']}", rev)
         indice = [r for r in (self.cache.kv_get("revisiones") or []) if r["id"] != rev["id"]]
         fila = {k: rev[k] for k in CLAVES_INDICE}
@@ -124,7 +147,7 @@ class Revisor:
             except OSError as e:
                 logger.warning("No se pudo guardar la revisión junto a la grabación: %s", e)
 
-    def cambio_lp(self, puuid, panel, cola):
+    def cambio_lp(self, puuid: str, panel: Panel | None, cola: int) -> Json | None:
         """Tu liga después de la partida y, si la de antes es de justo una partida atrás, los LP ganados o perdidos."""
         tipo = LIGA_COLA.get(cola)
         if not tipo:
@@ -144,7 +167,7 @@ class Revisor:
             "v": liga.get("wins", 0),
             "d": liga.get("losses", 0),
         }
-        out = {"lp": despues["lp"], "nivel": despues["nivel"].lower(), "rank": despues["rank"]}
+        out: Json = {"lp": despues["lp"], "nivel": despues["nivel"].lower(), "rank": despues["rank"]}
         yo = next((f for f in ((panel or {}).get("equipos") or {}).get("aliado", []) if f.get("soy_yo")), None)
         antes = ((yo or {}).get("liga") or {}).get("solo" if cola == SOLO_DUO else "flex")
         if antes and "rank" in antes and despues["v"] + despues["d"] - antes["v"] - antes["d"] == 1:
@@ -154,23 +177,25 @@ class Revisor:
                 out["cambio"] = b - a
         return out
 
-    def hacer_clips(self, id_, desfase_s):
+    def hacer_clips(self, id_: str, desfase_s: Mapping[int, float]) -> None:
         """Recorta cada muerte de la grabación. Si empieza otra partida, espera a que acabe para no quitarle rendimiento."""
         ffmpeg = buscar_ffmpeg()
         if not ffmpeg:
             return
         rev = self.una(id_)
-        for i, m in enumerate(rev["muertes"] if rev else []):
+        if not rev:
+            return
+        for i, m in enumerate(rev["muertes"]):
             while self._en_partida():
                 time.sleep(30)
             ruta = clips.recortar(ffmpeg, rev["carpeta"], i, m, desfase_s)
             if ruta:
                 m["clip"] = str(ruta)
-        if rev and any(m.get("clip") for m in rev["muertes"]):
+        if any(m.get("clip") for m in rev["muertes"]):
             self.guardar(rev)
             logger.info("Clips de las muertes de %s listos", id_)
 
-    def abrir_clip(self, id_, i):
+    def abrir_clip(self, id_: str, i: Any) -> Resultado:
         rev = self.una(id_) or {}
         muertes = rev.get("muertes") or []
         ruta = Path(muertes[i].get("clip") or "") if isinstance(i, int) and 0 <= i < len(muertes) else None
@@ -179,7 +204,7 @@ class Revisor:
         os.startfile(ruta)
         return {"ok": True}
 
-    def abrir_carpeta(self, id_):
+    def abrir_carpeta(self, id_: str) -> Resultado:
         rev = self.una(id_) or {}
         carpeta = Path(rev.get("carpeta") or "")
         if not rev.get("carpeta") or not carpeta.is_dir():
@@ -187,7 +212,7 @@ class Revisor:
         os.startfile(carpeta)
         return {"ok": True}
 
-    def rellenar(self):
+    def rellenar(self) -> None:
         """Las revisiones de antes del mapa de muertes no guardaban dónde moriste: se completa una vez."""
         if self.cache.kv_get("relleno_muertes_v1"):
             return
@@ -215,7 +240,7 @@ class Revisor:
             self.cache.kv_set(f"revision:{rev['id']}", rev)
         self.cache.kv_set("relleno_muertes_v1", True)
 
-    def _referencia(self, crudo, linea, puuid):
+    def _referencia(self, crudo: Json, linea: Linea | Json, puuid: str) -> Json | None:
         try:
             registros = du.extraer(crudo, linea, self.datos.legendarios)
         except (KeyError, TypeError, IndexError):
@@ -228,9 +253,12 @@ class Revisor:
         ref, nombre = self.comparador.referencia(mio["a"], mio["pos"], mio["b"])
         return du.comparar([mio], ref, mio["pos"], nombre, minimo=3)
 
-    def lista(self):
+    def lista(self) -> Json:
         """Tus revisiones guardadas, las tendencias de la temporada y el mapa de tus muertes."""
-        hora = lambda ms: datetime.datetime.fromtimestamp(ms / 1000).hour  # noqa: E731
+
+        def hora(ms: int) -> int:
+            return datetime.datetime.fromtimestamp(ms / 1000).hour
+
         lista = self.cache.kv_get("revisiones") or []
         return {
             "lista": lista,
@@ -238,5 +266,6 @@ class Revisor:
             "muertes": rv.mapa_muertes(self.una(f["id"]) for f in lista),
         }
 
-    def una(self, id_):
-        return self.cache.kv_get(f"revision:{id_}")
+    def una(self, id_: str) -> Revision | None:
+        rev: Revision | None = self.cache.kv_get(f"revision:{id_}")
+        return rev

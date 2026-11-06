@@ -2,9 +2,12 @@
 
 import logging
 import time
+from collections.abc import Callable
 
 from . import config
-from .riot import ClaveInvalida, ErrorRiot
+from .cache import Cache
+from .riot import ClaveInvalida, Cliente, ErrorRiot
+from .tipos import Json, Resultado
 
 logger = logging.getLogger(__name__)
 
@@ -19,17 +22,23 @@ class Cuentas:
     no vale y se vacía. al_recuperar_clave se llama cuando una clave rechazada vuelve a valer.
     """
 
-    def __init__(self, configuracion, cache, cliente, al_recuperar_clave=lambda: None):
+    def __init__(
+        self,
+        configuracion: config.Configuracion,
+        cache: Cache,
+        cliente: Cliente,
+        al_recuperar_clave: Callable[[], None] = lambda: None,
+    ) -> None:
         self.configuracion = configuracion
         self.cfg = configuracion.valores
         self.cache = cache
         self.cliente = cliente
-        self.propias = {}  # puuid -> "Nombre#TAG" de las cuentas propias
+        self.propias: dict[str, str] = {}  # puuid -> "Nombre#TAG" de las cuentas propias
         self.error_clave = ""
         self.ultima_prueba = 0.0  # última vez que se probó la clave
         self._al_recuperar = al_recuperar_clave
 
-    def comprobar_clave(self):
+    def comprobar_clave(self) -> None:
         """Prueba la clave con la cuenta principal. Si el PUUID ha cambiado, la caché ya no vale."""
         self.ultima_prueba = time.time()
         if not self.cfg["cuentas"]:
@@ -50,7 +59,7 @@ class Cuentas:
         for rid in self.cfg["cuentas"][1:]:
             self.apuntar(rid)
 
-    def reprobar_clave(self, ahora):
+    def reprobar_clave(self, ahora: float) -> bool:
         """Con la clave rechazada, la vuelve a probar si ya toca. False si aún no toca; si sigue sin valer, lanza."""
         if ahora - self.ultima_prueba < REINTENTO_CLAVE_S:
             return False
@@ -58,11 +67,11 @@ class Cuentas:
         self.clave_recuperada()
         return True
 
-    def clave_recuperada(self):
+    def clave_recuperada(self) -> None:
         self.error_clave = ""
         self._al_recuperar()
 
-    def poner_clave(self, clave):
+    def poner_clave(self, clave: str) -> Resultado:
         clave = clave.strip()
         if not clave.startswith("RGAPI-"):
             return {"ok": False, "error": "Eso no parece una clave de Riot (empiezan por RGAPI-)."}
@@ -77,12 +86,12 @@ class Cuentas:
         self.clave_recuperada()
         return {"ok": True}
 
-    def _registrar(self, rid, cuenta):
+    def _registrar(self, rid: str, cuenta: Json) -> tuple[str, str]:
         visible = f"{cuenta.get('gameName', rid.partition('#')[0])}#{cuenta.get('tagLine', rid.partition('#')[2])}"
         self.cache.kv_set(f"cuenta:{rid.lower()}", {"puuid": cuenta["puuid"], "rid": visible})
         return cuenta["puuid"], visible
 
-    def resolver(self, rid):
+    def resolver(self, rid: str) -> tuple[str, str] | None:
         """Riot ID -> (puuid, 'Nombre#TAG') o None si no existe."""
         guardada = self.cache.kv_get(f"cuenta:{rid.lower()}")
         if guardada:
@@ -93,7 +102,7 @@ class Cuentas:
         cuenta = self.cliente.cuenta_por_riot_id(nombre.strip(), tag.strip())
         return self._registrar(rid, cuenta) if cuenta else None
 
-    def apuntar(self, rid, recordar=False):
+    def apuntar(self, rid: str, recordar: bool = False) -> str | None:
         """Resuelve una cuenta propia y la apunta como tal; con recordar, también en config.json. Devuelve su PUUID."""
         r = self.resolver(rid)
         if not r:

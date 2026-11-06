@@ -6,9 +6,12 @@ duelo, con funciones puras, está en duelos.py.
 
 import json
 import time
+from collections.abc import Collection, Iterable
+from pathlib import Path
 
 from . import config
 from .almacen import BaseSQLite, desempaquetar, empaquetar
+from .tipos import Registro
 
 RUTA_DB = config.DATOS / "duelos.db"
 
@@ -24,20 +27,20 @@ class BaseDuelos(BaseSQLite):
         CREATE TABLE IF NOT EXISTS vista (id TEXT PRIMARY KEY, util INTEGER, ts REAL);
     """
 
-    def __init__(self, ruta=RUTA_DB):
+    def __init__(self, ruta: str | Path = RUTA_DB) -> None:
         # El recolector y la app la usan a la vez desde dos procesos (con el recolector suelto): se espera más.
         super().__init__(ruta, espera=30)
 
-    def vista(self, id_):
+    def vista(self, id_: str) -> bool:
         with self._lock:
             return self._db.execute("SELECT 1 FROM vista WHERE id=?", (id_,)).fetchone() is not None
 
-    def marcar(self, id_, util):
+    def marcar(self, id_: str, util: bool) -> None:
         with self._lock:
             self._db.execute("INSERT OR REPLACE INTO vista VALUES (?,?,?)", (id_, int(util), time.time()))
             self._db.commit()
 
-    def guardar(self, id_, registros):
+    def guardar(self, id_: str, registros: list[Registro]) -> None:
         with self._lock:
             self._db.executemany(
                 "INSERT OR REPLACE INTO reg VALUES (?,?,?,?,?,?)",
@@ -46,19 +49,19 @@ class BaseDuelos(BaseSQLite):
             self._db.execute("INSERT OR REPLACE INTO vista VALUES (?,?,?)", (id_, 1, time.time()))
             self._db.commit()
 
-    def duelo(self, a, pos, b, excluir=()):
+    def duelo(self, a: int, pos: str, b: int, excluir: Collection[str] = ()) -> list[Registro]:
         """Registros de a contra b en pos (de cualquiera menos de las cuentas en excluir); '_p' es el jugador."""
         with self._lock:
             filas = self._db.execute("SELECT puuid, datos FROM reg WHERE a=? AND pos=? AND b=?", (a, pos, b)).fetchall()
         return [dict(desempaquetar(d), _p=p) for p, d in filas if p not in excluir]
 
-    def campeon(self, a, pos, puuids):
+    def campeon(self, a: int, pos: str, puuids: Collection[str | None]) -> list[Registro]:
         """Registros de ese campeón en esa posición (contra cualquiera) de los jugadores en puuids."""
         with self._lock:
             filas = self._db.execute("SELECT puuid, datos FROM reg WHERE a=? AND pos=?", (a, pos)).fetchall()
         return [dict(desempaquetar(d), _p=p) for p, d in filas if p in puuids]
 
-    def posicion(self, pos, puuids):
+    def posicion(self, pos: str, puuids: Collection[str | None]) -> list[Registro]:
         """Registros en esa posición (con cualquier campeón) de los jugadores en puuids."""
         marcas = ",".join("?" * len(puuids))
         with self._lock:
@@ -67,22 +70,22 @@ class BaseDuelos(BaseSQLite):
             ).fetchall()
         return [dict(desempaquetar(d), _p=p) for p, d in filas]
 
-    def vistas_de(self, puuid):
+    def vistas_de(self, puuid: str) -> list[str]:
         """Partidas guardadas de un jugador (cualquier campeón y posición)."""
         with self._lock:
             return [i for (i,) in self._db.execute("SELECT DISTINCT id FROM reg WHERE puuid=?", (puuid,)).fetchall()]
 
-    def niveles(self):
+    def niveles(self) -> dict[str, str]:
         """{puuid: 'CHALLENGER' | 'GRANDMASTER' | 'MASTER'} de las ligas que ha mirado el recolector."""
         with self._lock:
             filas = self._db.execute("SELECT valor FROM kv WHERE clave LIKE 'ligas:%'").fetchall()
-        out = {}
+        out: dict[str, str] = {}
         for (valor,) in filas:
             out.update(json.loads(valor))
         return out
 
-    def de(self, puuids, a, pos):
-        """Tus registros con ese campeón en esa posición, contra cualquiera."""
+    def de(self, puuids: Iterable[str | None], a: int, pos: str | None) -> list[Registro]:
+        """Tus registros con ese campeón en esa posición (o en cualquiera, sin pos), contra cualquiera."""
         puuids = list(puuids)
         if not puuids:
             return []
@@ -94,12 +97,12 @@ class BaseDuelos(BaseSQLite):
             ).fetchall()
         return [desempaquetar(d) for (d,) in filas]
 
-    def cuantos(self, a, pos):
+    def cuantos(self, a: int, pos: str) -> dict[int, int]:
         """Partidas guardadas de ese campeón en esa posición, por rival."""
         with self._lock:
             return dict(self._db.execute("SELECT b, COUNT(*) FROM reg WHERE a=? AND pos=? GROUP BY b", (a, pos)).fetchall())
 
-    def resumen(self):
+    def resumen(self) -> dict[str, int]:
         with self._lock:
             partidas = self._db.execute("SELECT COUNT(*) FROM vista WHERE util=1").fetchone()[0]
             miradas = self._db.execute("SELECT COUNT(*) FROM vista").fetchone()[0]

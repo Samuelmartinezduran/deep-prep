@@ -7,10 +7,12 @@ Se codifica con prioridad mínima y pocos hilos para no molestar si ya estás en
 
 import logging
 import subprocess
+from collections.abc import Iterable
 from pathlib import Path
 
-from .revision import TROZO_S, en_grabacion, nombre_trozo
+from .revision import TROZO_S, Desfase, en_grabacion, nombre_trozo
 from .sistema import SIN_VENTANA
+from .tipos import Json
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +21,7 @@ DESPUES_S = 4
 PRIORIDAD_MINIMA = getattr(subprocess, "IDLE_PRIORITY_CLASS", 0)
 
 
-def tramo(ms, desfase_s):
+def tramo(ms: float, desfase_s: Desfase) -> tuple[list[str], float, float] | None:
     """(trozos de la grabación, segundo de inicio dentro del primero, duración) del recorte de una muerte.
 
     desfase_s: como en revision.en_grabacion (por serie; un número es la serie 1). Devuelve None si la muerte es
@@ -37,11 +39,11 @@ def tramo(ms, desfase_s):
     return archivos, round(inicio - primero * TROZO_S, 2), round(fin - inicio, 2)
 
 
-def nombre_clip(i, muerte):
+def nombre_clip(i: int, muerte: Json) -> str:
     return f"{i + 1:02d}_{muerte['t'].replace(':', '-')}.mp4"
 
 
-def lista_concat(rutas):
+def lista_concat(rutas: Iterable[str | Path]) -> str:
     """Texto del archivo de concat de ffmpeg con estos trozos.
 
     Cada ruta va entre comillas simples. Una comilla dentro de la ruta (C:/Users/O'Neill/...) no se puede poner
@@ -50,7 +52,7 @@ def lista_concat(rutas):
     return "".join("file '{}'\n".format(Path(r).as_posix().replace("'", "'\\''")) for r in rutas)
 
 
-def orden_ffmpeg(ffmpeg, rutas, desde, duracion, destino, lista):
+def orden_ffmpeg(ffmpeg: str, rutas: list[Path], desde: float, duracion: float, destino: Path, lista: Path) -> list[str]:
     """Orden de ffmpeg para un recorte; con dos trozos, 'lista' es el archivo de concat que hay que escribir."""
     if len(rutas) == 1:
         entrada = ["-ss", f"{desde}", "-i", str(rutas[0])]
@@ -82,7 +84,7 @@ def orden_ffmpeg(ffmpeg, rutas, desde, duracion, destino, lista):
     ]
 
 
-def recortar(ffmpeg, carpeta, i, muerte, desfase_s):
+def recortar(ffmpeg: str, carpeta: str | Path, i: int, muerte: Json, desfase_s: Desfase) -> Path | None:
     """Hace el recorte de una muerte y devuelve su ruta, o None si la grabación no la cubre."""
     carpeta = Path(carpeta)
     corte = tramo(muerte["ms"], desfase_s)

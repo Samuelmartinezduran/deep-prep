@@ -43,8 +43,9 @@ class PoolContra(unittest.TestCase):
 class Liga(unittest.TestCase):
     def test_valor_con_cambio_de_division(self):
         antes = an.valor_liga("emerald", "I", 90)
-        self.assertEqual(an.valor_liga("DIAMOND", "IV", 8) - antes, 18)
-        self.assertEqual(an.valor_liga("MASTER", "I", 0) - an.valor_liga("DIAMOND", "I", 100), 0)
+        assert antes is not None
+        self.assertEqual(an.valor_liga("DIAMOND", "IV", 8), antes + 18)
+        self.assertEqual(an.valor_liga("MASTER", "I", 0), an.valor_liga("DIAMOND", "I", 100))
         self.assertIsNone(an.valor_liga("", "", 0))
 
 
@@ -77,18 +78,25 @@ class MapaMuertes(unittest.TestCase):
         self.assertEqual([(m["id"], m["x"], m["y"]) for m in out], [("a", 100, 200), ("b", an.SUMA_X - 100, an.SUMA_Y - 200)])
 
 
+def tramo(ms, desfase_s):
+    """clips.tramo, que en estas pruebas siempre da un recorte."""
+    corte = clips.tramo(ms, desfase_s)
+    assert corte is not None
+    return corte
+
+
 class Recortes(unittest.TestCase):
     def test_tramo_dentro_de_un_trozo(self):
-        archivos, desde, dur = clips.tramo(100_000, 10)  # muerte en el segundo 110 de la grabación
+        archivos, desde, dur = tramo(100_000, 10)  # muerte en el segundo 110 de la grabación
         self.assertEqual((archivos, desde, dur), (["r01_seg_000.mkv"], 90.0, clips.ANTES_S + clips.DESPUES_S))
 
     def test_tramo_entre_dos_trozos(self):
-        archivos, desde, _ = clips.tramo(305_000, 5)  # segundo 310: empieza en el 290 del primer trozo
+        archivos, desde, _ = tramo(305_000, 5)  # segundo 310: empieza en el 290 del primer trozo
         self.assertEqual(archivos, ["r01_seg_000.mkv", "r01_seg_001.mkv"])
         self.assertEqual(desde, 290.0)
 
     def test_al_principio_no_empieza_antes_de_cero(self):
-        archivos, desde, dur = clips.tramo(5_000, 2)
+        archivos, desde, dur = tramo(5_000, 2)
         self.assertEqual((archivos, desde), (["r01_seg_000.mkv"], 0.0))
         self.assertEqual(dur, 7 + clips.DESPUES_S)
 
@@ -106,10 +114,10 @@ class Recortes(unittest.TestCase):
     def test_cada_muerte_en_su_serie(self):
         self.assertEqual(clips.tramo(300_000, self.SERIES), (["r01_seg_001.mkv"], 10.0, 24.0))  # 5:00 -> 5:30 de r01
         self.assertEqual(clips.tramo(720_000, self.SERIES), (["r02_seg_000.mkv"], 100.0, 24.0))  # 12:00 -> 2:00 de r02
-        self.assertEqual(clips.tramo(1_498_000, self.SERIES)[0], ["r02_seg_002.mkv", "r02_seg_003.mkv"])  # 24:58
+        self.assertEqual(tramo(1_498_000, self.SERIES)[0], ["r02_seg_002.mkv", "r02_seg_003.mkv"])  # 24:58
 
     def test_justo_despues_de_relanzar_empieza_con_la_serie(self):
-        archivos, desde, dur = clips.tramo(605_000, self.SERIES)  # 10:05: 5 s después de empezar r02
+        archivos, desde, dur = tramo(605_000, self.SERIES)  # 10:05: 5 s después de empezar r02
         self.assertEqual((archivos, desde, dur), (["r02_seg_000.mkv"], 0.0, 5 + clips.DESPUES_S))
 
     def test_antes_de_que_empiece_la_grabacion_no_hay_tramo(self):

@@ -4,12 +4,21 @@ import os
 import subprocess
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 # Los procesos que lanza la app (ffmpeg, PowerShell...) no abren una ventana de consola.
 SIN_VENTANA = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 
-def crear_acceso_directo(destino, objetivo, argumentos="", descripcion="Deep Prep", carpeta=None, icono=None, texto=False):
+def crear_acceso_directo(
+    destino: str | Path,
+    objetivo: str | Path,
+    argumentos: str = "",
+    descripcion: str = "Deep Prep",
+    carpeta: str | Path | None = None,
+    icono: str | Path | None = None,
+    texto: bool = False,
+) -> subprocess.CompletedProcess[Any]:
     """Crea (o rehace) un acceso directo .lnk con PowerShell y devuelve lo que ha hecho PowerShell (subprocess.run).
 
     carpeta: dónde arranca (por defecto, la del objetivo). icono: su .ico (por defecto, el del objetivo).
@@ -35,11 +44,12 @@ def crear_acceso_directo(destino, objetivo, argumentos="", descripcion="Deep Pre
     )
 
 
-def pedir_a_la_copia_en_marcha(url, ruta, espera=5):
+def pedir_a_la_copia_en_marcha(url: str, ruta: str, espera: float = 5) -> bytes:
     """POST vacío a la API de la copia de la app que ya está en marcha (en url); devuelve el cuerpo de la respuesta.
 
     Lleva el Origin de su propio panel: es lo único que acepta. Lanza OSError si no hay ninguna escuchando.
     """
     pet = urllib.request.Request(url + ruta, data=b"{}", headers={"Origin": url.rstrip("/"), "Content-Type": "application/json"})
     with urllib.request.urlopen(pet, timeout=espera) as r:
-        return r.read()
+        cuerpo: bytes = r.read()
+        return cuerpo

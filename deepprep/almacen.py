@@ -9,15 +9,17 @@ import sqlite3
 import threading
 import time
 import zlib
+from pathlib import Path
+from typing import Any
 
 ESQUEMA_KV = "CREATE TABLE IF NOT EXISTS kv (clave TEXT PRIMARY KEY, valor TEXT NOT NULL, ts REAL NOT NULL);"
 
 
-def empaquetar(obj):
+def empaquetar(obj: Any) -> bytes:
     return zlib.compress(json.dumps(obj, separators=(",", ":")).encode("utf-8"))
 
 
-def desempaquetar(blob):
+def desempaquetar(blob: bytes) -> Any:
     return json.loads(zlib.decompress(blob).decode("utf-8"))
 
 
@@ -29,7 +31,7 @@ class BaseSQLite:
 
     ESQUEMA = ""
 
-    def __init__(self, ruta, espera=5.0):
+    def __init__(self, ruta: str | Path, espera: float = 5.0) -> None:
         self._lock = threading.RLock()
         self._db = sqlite3.connect(str(ruta), check_same_thread=False, timeout=espera)
         with self._lock:
@@ -37,14 +39,14 @@ class BaseSQLite:
             self._db.commit()
 
     # --- clave/valor con caducidad -------------------------------------------------
-    def kv_get(self, clave, max_edad=None):
+    def kv_get(self, clave: str, max_edad: float | None = None) -> Any:
         with self._lock:
             fila = self._db.execute("SELECT valor, ts FROM kv WHERE clave=?", (clave,)).fetchone()
         if not fila or (max_edad is not None and time.time() - fila[1] > max_edad):
             return None
         return json.loads(fila[0])
 
-    def kv_set(self, clave, valor):
+    def kv_set(self, clave: str, valor: Any) -> None:
         with self._lock:
             self._db.execute(
                 "INSERT OR REPLACE INTO kv (clave, valor, ts) VALUES (?,?,?)",
@@ -52,6 +54,6 @@ class BaseSQLite:
             )
             self._db.commit()
 
-    def cerrar(self):
+    def cerrar(self) -> None:
         with self._lock:
             self._db.close()

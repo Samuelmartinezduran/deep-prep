@@ -8,10 +8,14 @@ salvo con "siempre en marcha" (entonces solo se cierra desde Ajustes o al apagar
 import logging
 import threading
 import time
+from typing import TYPE_CHECKING, Any
 
 import webview
 
 from . import config, overlay
+
+if TYPE_CHECKING:
+    from .app import App
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +25,15 @@ MINUTOS_PARA_SALIR = 5
 
 
 class Ventanas:
-    def __init__(self, app, url):
+    def __init__(self, app: "App", url: str) -> None:
         self.app = app
         self.url = url
-        self.principal = None
-        self.flotante = None
+        self.principal: Any = None  # webview.Window
+        self.flotante: Any = None
         self.saliendo = False
-        self.oculta_desde = None  # cuándo se cerró (escondió) la ventana principal
+        self.oculta_desde: float | None = None  # cuándo se cerró (escondió) la ventana principal
 
-    def arrancar(self, oculta=False):
+    def arrancar(self, oculta: bool = False) -> None:
         """Bloquea hasta que la app se cierra: el bucle de ventanas tiene que ir en el hilo principal.
 
         oculta: arranque con Windows; la ventana principal empieza escondida (el acceso directo la enseña).
@@ -61,7 +65,7 @@ class Ventanas:
         icono = config.RUTA_WEB / "icono.ico"
         webview.start(self._en_marcha, icon=str(icono) if icono.exists() else None)
 
-    def _en_marcha(self):
+    def _en_marcha(self) -> None:
         if self.flotante:
             hwnd = self._hwnd(self.flotante)
             if hwnd:
@@ -73,37 +77,38 @@ class Ventanas:
         self._vigilar_salida()
 
     @staticmethod
-    def _hwnd(ventana, espera=20):
+    def _hwnd(ventana: Any, espera: float = 20) -> int | None:
         limite = time.time() + espera
         while time.time() < limite:
             nativa = getattr(ventana, "native", None)
             if nativa is not None:
                 try:
-                    return nativa.Handle.ToInt64()
+                    hwnd: int = nativa.Handle.ToInt64()
+                    return hwnd
                 except Exception:  # noqa: BLE001  mientras se crea la ventana .NET (pythonnet) falla con las suyas; se reintenta
                     pass
             time.sleep(0.2)
         return None
 
-    def _al_cerrar(self):
+    def _al_cerrar(self) -> bool:
         if self.saliendo:
             return True
         self.oculta_desde = time.time()
         threading.Thread(target=self.principal.hide, daemon=True).start()
         return False  # cancela el cierre: solo se esconde
 
-    def mostrar_principal(self):
+    def mostrar_principal(self) -> None:
         self.oculta_desde = None
         self.principal.show()
         self.principal.restore()
 
-    def salir(self):
+    def salir(self) -> None:
         self.saliendo = True
         for v in (self.flotante, self.principal):
             if v:
                 v.destroy()
 
-    def _vigilar_salida(self):
+    def _vigilar_salida(self) -> None:
         while not self.saliendo:
             time.sleep(5)
             oculta = self.oculta_desde

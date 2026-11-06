@@ -26,9 +26,11 @@ import time
 import urllib.request
 import zipfile
 from pathlib import Path
+from typing import Any
 
 from . import __version__, config, inicio_windows
 from .sistema import SIN_VENTANA, crear_acceso_directo, pedir_a_la_copia_en_marcha
+from .tipos import EstadoVersion, Json, Resultado
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +62,7 @@ VISTA = config.DATOS / "version_vista.txt"
 DESLIGADO = SIN_VENTANA | getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
 
 
-def version(texto):
+def version(texto: object) -> tuple[int, ...]:
     """'v1.2.10' -> (1, 2, 10) para comparar versiones."""
     try:
         return tuple(int(x) for x in str(texto).lstrip("vV").split("."))
@@ -68,39 +70,41 @@ def version(texto):
         return (0,)
 
 
-def _get(url, binario=False):
+def _get(url: str, binario: bool = False) -> Any:
     pet = urllib.request.Request(url, headers={"User-Agent": "deep-prep", "Accept": "application/vnd.github+json"})
     with urllib.request.urlopen(pet, timeout=60) as r:
         datos = r.read()
     return datos if binario else json.loads(datos)
 
 
-def _url_de_la_instalada(puerto=None):
+def _url_de_la_instalada(puerto: int | None = None) -> str:
     """El panel de la copia instalada (si está en marcha): la del puerto de config.json."""
     return f"http://127.0.0.1:{puerto or config.cargar().get('puerto', 5151)}/"
 
 
-def _segundos_encendido():
+def _segundos_encendido() -> float:
     try:
         k32 = ctypes.windll.kernel32
         k32.GetTickCount64.restype = ctypes.c_ulonglong
-        return k32.GetTickCount64() / 1000
+        segundos: float = k32.GetTickCount64() / 1000
+        return segundos
     except (AttributeError, OSError):
         return 0
 
 
-def _marcar_version(carpeta):
+def _marcar_version(carpeta: str | Path) -> None:
     try:
         (Path(carpeta) / "version.txt").write_text(__version__, encoding="utf-8")
     except OSError:
         pass
 
 
-def _version_instalada():
+def _version_instalada() -> str:
     """La versión instalada: la de la copia en marcha si la hay; si no, la que dejó apuntada al instalarse."""
     try:
         with urllib.request.urlopen(_url_de_la_instalada() + "api/ajustes", timeout=5) as r:
-            return json.loads(r.read())["version"]["version"]
+            instalada: str = json.loads(r.read())["version"]["version"]
+            return instalada
     except (OSError, ValueError, KeyError, TypeError):
         pass
     try:
@@ -109,7 +113,7 @@ def _version_instalada():
         return ""
 
 
-def _abrir_la_instalada():
+def _abrir_la_instalada() -> None:
     """Enseña la ventana de la copia instalada (o la arranca si no está en marcha)."""
     try:
         if json.loads(pedir_a_la_copia_en_marcha(_url_de_la_instalada(), "api/mostrar")).get("ok"):
@@ -122,7 +126,7 @@ def _abrir_la_instalada():
 
 
 # --- de Porofesor a Deep Prep -------------------------------------------------------------------------------
-def _en_uso(carpeta):
+def _en_uso(carpeta: str | Path) -> bool:
     """¿Corre algún programa de esa carpeta? Windows no deja abrir para escribir un .exe que está en marcha."""
     for exe in Path(carpeta).rglob("*.exe"):
         try:
@@ -135,7 +139,7 @@ def _en_uso(carpeta):
     return False
 
 
-def _apunta_a(acceso, carpeta):
+def _apunta_a(acceso: Path, carpeta: str | Path) -> bool:
     """¿El acceso directo (.lnk) lleva a algo de esa carpeta? La ruta va escrita dentro, en ANSI y en UTF-16."""
     try:
         datos = acceso.read_bytes().lower()
@@ -145,7 +149,7 @@ def _apunta_a(acceso, carpeta):
     return any(ruta.encode(codigo, "ignore").lower() in datos for codigo in ("mbcs", "utf-16-le"))
 
 
-def quitar_restos_de_porofesor(carpeta=None):
+def quitar_restos_de_porofesor(carpeta: str | Path | None = None) -> None:
     """Quita lo que dejó instalado Porofesor (1.0.x): sus accesos directos y la carpeta del programa.
 
     Solo los accesos directos que llevan a esa carpeta (los de quien la usa desde el código apuntan a otro sitio)
@@ -153,6 +157,7 @@ def quitar_restos_de_porofesor(carpeta=None):
     registro y se queda: nunca estropea la actualización. Se reintenta en cada arranque mientras quede algo.
     """
     carpeta = Path(carpeta or CARPETA_PROGRAMA_VIEJA)
+    error: OSError | None = None
     try:
         if carpeta.resolve() == CARPETA_PROGRAMA.resolve():
             return
@@ -181,7 +186,7 @@ def quitar_restos_de_porofesor(carpeta=None):
         logger.exception("No se pudo quitar lo que dejó Porofesor (%s): %r", carpeta, e)
 
 
-def _pasar_de_porofesor(exe, vieja):
+def _pasar_de_porofesor(exe: Path, vieja: Path) -> None:
     """Deep Prep recién instalada encima de una Porofesor (1.0.x): accesos directos nuevos y fuera los viejos."""
     quitar_restos_de_porofesor(vieja)
     try:
@@ -195,7 +200,7 @@ def _pasar_de_porofesor(exe, vieja):
 
 
 # --- instalación ------------------------------------------------------------------------------------------
-def instalar_si_hace_falta():
+def instalar_si_hace_falta() -> bool:
     """En la app empaquetada abierta desde fuera de su carpeta: se instala y arranca la copia instalada.
 
     Devuelve True si esta copia tiene que cerrarse (ya arrancó la instalada).
@@ -229,7 +234,7 @@ def instalar_si_hace_falta():
     return True
 
 
-def _cerrar_la_instalada(puerto=None):
+def _cerrar_la_instalada(puerto: int | None = None) -> None:
     """Si ya hay una Deep Prep (o una Porofesor) en marcha, se le pide que se cierre antes de reinstalar."""
     url = _url_de_la_instalada(puerto)
     try:
@@ -244,7 +249,7 @@ def _cerrar_la_instalada(puerto=None):
             return
 
 
-def terminar_actualizacion(pid, destino, modo=None):
+def terminar_actualizacion(pid: str | int, destino: str | Path, modo: str | None = None) -> bool:
     """Lo hace la versión nueva ("--actualizar PID DESTINO [--oculta|--mostrar]"): espera a que la vieja se cierre,
     se copia encima y la abre. Sin modo (lo piden la 1.0.0 y la 1.0.1), se decide por el arranque del PC.
 
@@ -257,11 +262,12 @@ def terminar_actualizacion(pid, destino, modo=None):
         k32.CloseHandle(h)
     origen = Path(sys.executable).parent
     destino = Path(destino)
-    vieja = None
+    vieja: Path | None = None
     if destino.name.lower() == "porofesor" and destino.resolve() != CARPETA_PROGRAMA.resolve():
         vieja, destino = destino, CARPETA_PROGRAMA
     # Se copia encima (sin borrar antes): si algo falla a medias, sigue habiendo una app que abrir.
-    copiada, error = False, None
+    copiada = False
+    error: OSError | None = None
     for _intento in range(20):  # el antivirus o el propio Windows pueden tener algo abierto un momento
         try:
             shutil.copytree(origen, destino, dirs_exist_ok=True, ignore=shutil.ignore_patterns(EXE_VIEJO))
@@ -291,13 +297,15 @@ def terminar_actualizacion(pid, destino, modo=None):
 
 # --- actualizaciones ----------------------------------------------------------------------------------------
 class Actualizador:
-    def __init__(self, app, repo=REPO):
+    def __init__(self, app: Any, repo: str = REPO) -> None:
+        """app: la app (de ella mira fase, modo, grabador, revisando, al_salir, ventana_visible y ultima_consulta);
+        en las pruebas, una de mentira o None."""
         self.app = app
         self.repo = repo
-        self.estado = {"version": __version__, "nueva": None, "lista": False, "error": ""}
-        self._carpeta_nueva = None
+        self.estado: EstadoVersion = {"version": __version__, "nueva": None, "lista": False, "error": ""}
+        self._carpeta_nueva: Path | None = None
 
-    def arrancar(self):
+    def arrancar(self) -> None:
         if config.CONGELADA:
             # Restos de una actualización ya instalada.
             if not Path(sys.executable).resolve().is_relative_to(CARPETA_DESCARGA.resolve()):
@@ -309,14 +317,14 @@ class Actualizador:
             if self._faltan_novedades():
                 threading.Thread(target=self._bajar_novedades, name="novedades", daemon=True).start()
 
-    def _faltan_novedades(self):
+    def _faltan_novedades(self) -> bool:
         try:
             vista = VISTA.read_text(encoding="utf-8").strip()
         except OSError:
             vista = ""
         return vista != __version__ and not self.novedades()
 
-    def _bajar_novedades(self):
+    def _bajar_novedades(self) -> None:
         """Recién actualizada desde una versión que no bajó las notas (la 1.0.0): se piden a GitHub."""
         try:
             rel = _get(f"https://api.github.com/repos/{self.repo}/releases/tags/v{__version__}")
@@ -326,7 +334,7 @@ class Actualizador:
         except Exception as e:  # noqa: BLE001  sin red: se quedan sin novedades esta vez
             logger.warning("No se pudieron leer las novedades de %s: %s", __version__, e)
 
-    def _bucle(self):
+    def _bucle(self) -> None:
         ultima = 0.0
         while True:
             try:
@@ -340,7 +348,7 @@ class Actualizador:
                 self.estado["error"] = str(e)[:200]
             time.sleep(60)
 
-    def comprobar(self):
+    def comprobar(self) -> bool:
         """Mira la última versión publicada; si es más nueva, la descarga y la deja lista."""
         rel = _get(f"https://api.github.com/repos/{self.repo}/releases/latest")
         nueva = rel.get("tag_name", "")
@@ -372,11 +380,11 @@ class Actualizador:
             )
         except OSError:
             pass
-        self.estado.update(nueva=nueva.lstrip("vV"), lista=True, error="")
+        self.estado.update({"nueva": nueva.lstrip("vV"), "lista": True, "error": ""})
         logger.info("Versión %s descargada; se instala en cuanto no estorbe", nueva)
         return True
 
-    def novedades(self):
+    def novedades(self) -> Json | None:
         """Lo nuevo de esta versión si se acaba de instalar y aún no se ha visto; si no, None."""
         try:
             n = json.loads(NOVEDADES.read_text(encoding="utf-8"))
@@ -384,7 +392,7 @@ class Actualizador:
             return None
         return n if n.get("version") == __version__ else None
 
-    def novedades_vistas(self):
+    def novedades_vistas(self) -> Resultado:
         NOVEDADES.unlink(missing_ok=True)
         try:
             VISTA.write_text(__version__, encoding="utf-8")
@@ -392,7 +400,7 @@ class Actualizador:
             pass
         return {"ok": True}
 
-    def puede_instalar(self):
+    def puede_instalar(self) -> bool:
         """Sin partida a la vista, sin grabación, sin revisiones pendientes y sin nadie mirando la ventana:
         instalar cierra la app, y cerrarla delante de alguien parece que se ha roto."""
         app = self.app
@@ -407,12 +415,15 @@ class Actualizador:
             and not mirando
         )
 
-    def aplicar(self):
+    def aplicar(self) -> None:
         """Arranca la versión nueva (desde la descarga) para que espere a que esta se cierre y se instale ella."""
-        nueva = self._carpeta_nueva / EXE
+        carpeta = self._carpeta_nueva
+        if carpeta is None:  # no pasa: solo se aplica con una versión ya descargada (estado["lista"])
+            return
+        nueva = carpeta / EXE
         subprocess.Popen(
             [str(nueva), "--actualizar", str(os.getpid()), str(CARPETA_PROGRAMA), "--oculta"],
-            cwd=str(self._carpeta_nueva),
+            cwd=str(carpeta),
             creationflags=DESLIGADO,
         )
         logger.info("Instalando la versión %s; la app se reabre sola", self.estado["nueva"])

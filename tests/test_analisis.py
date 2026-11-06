@@ -8,6 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 from deepprep import analisis as an
+from deepprep.tipos import Jugador, Linea, Partida
 
 DATOS = Path(__file__).parent / "datos"
 
@@ -83,6 +84,11 @@ class Geografia(unittest.TestCase):
 
 
 class DatosReales(unittest.TestCase):
+    partida: Partida
+    linea: Linea
+    diana: Jugador
+    yi: Jugador
+
     @classmethod
     def setUpClass(cls):
         cls.partida = an.reducir_partida(cargar("partida.json.gz"))
@@ -118,7 +124,9 @@ class DatosReales(unittest.TestCase):
     def test_primer_gank_y_muertes(self):
         self.assertEqual(an.primer_gank(self.linea, 7), (367917, "bot"))
         self.assertEqual(an.muertes_antes(self.linea, 7, 15), 3)
-        self.assertGreater(an.oro_al(self.linea, 2, 10), an.oro_al(self.linea, 7, 10))
+        oro_yi, oro_diana = an.oro_al(self.linea, 2, 10), an.oro_al(self.linea, 7, 10)
+        assert oro_yi is not None and oro_diana is not None
+        self.assertGreater(oro_yi, oro_diana)
 
     def test_perfil_del_jungla_rival(self):
         perfil = an.perfil_jungla(self.yi["puuid"], [self.partida], {self.partida["id"]: self.linea}, self.yi["campeon"], 100)

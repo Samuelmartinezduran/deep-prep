@@ -13,6 +13,8 @@ Cada pieza hace una cosa y App las conecta:
 import logging
 import threading
 import time
+from collections.abc import Callable, Collection, Iterable
+from typing import Any
 
 from . import actualizador, config, inicio_windows, lcu
 from . import analisis as an
@@ -31,13 +33,14 @@ from .revisiones import Revisor
 from .riot import ClaveInvalida, Cliente, ErrorRiot
 from .seleccion import Seleccion
 from .sesion import Sesion
+from .tipos import Cancelada, Json, Linea, Panel, Partida, Resultado, Revision, Sync
 from .trabajo import Cola
 from .vigia import EN_JUEGO, FASES, PARTIDA_CERCA, Sesiones, Vigia
 
 logger = logging.getLogger(__name__)
 
 
-def sin_arranque_windows(encendido):
+def sin_arranque_windows(encendido: bool) -> str:
     """Para las pruebas y las herramientas: el arranque con Windows no se toca."""
     return ""
 
@@ -52,16 +55,16 @@ class App:
 
     def __init__(
         self,
-        configuracion,
+        configuracion: config.Configuracion,
         *,
-        cache,
-        datos,
-        cliente,
-        cliente_lol,
-        duelos,
-        grabador=None,
-        arranque_windows=sin_arranque_windows,
-    ):
+        cache: Cache,
+        datos: Datos,
+        cliente: Cliente,
+        cliente_lol: lcu.Cliente,
+        duelos: BaseDuelos,
+        grabador: Grabador | None = None,
+        arranque_windows: Callable[[bool], str] = sin_arranque_windows,
+    ) -> None:
         self.configuracion = configuracion
         self.cfg = configuracion.valores
         self.grabador = grabador
@@ -71,18 +74,18 @@ class App:
         self.lcu = cliente_lol
         self.duelos = duelos  # duelos de Master+ (lo llena el recolector)
         self.cola = Cola(al_fallar=self._fallo_tarea)
-        self.recolector = None
+        self.recolector: rec.Recolector | None = None
         self.actualizador = actualizador.Actualizador(self)
         self._crear_piezas(arranque_windows)
         self.ultima_consulta = time.time()  # última vez que el panel pidió el estado
-        self.al_mostrar = None  # lo pone la ventana principal: otra copia arrancada pide enseñarla
-        self.al_salir = None  # lo ponen las ventanas: cierra la app del todo
-        self.ventana_visible = None  # lo ponen las ventanas: ¿está la principal a la vista?
-        self._resumen_duelos = (0.0, None)
-        self._ventana_juego = (0.0, None)  # (cuándo se leyó, WindowMode del juego)
+        self.al_mostrar: Callable[[], None] | None = None  # lo pone la ventana principal: otra copia arrancada pide enseñarla
+        self.al_salir: Callable[[], None] | None = None  # lo ponen las ventanas: cierra la app del todo
+        self.ventana_visible: Callable[[], bool] | None = None  # lo ponen las ventanas: ¿está la principal a la vista?
+        self._resumen_duelos: tuple[float, Json | None] = (0.0, None)
+        self._ventana_juego: tuple[float, str | None] = (0.0, None)  # (cuándo se leyó, WindowMode del juego)
         self._arranco = False  # arrancar() ya se llamó (las pruebas usan la app sin arrancarla)
 
-    def _crear_piezas(self, arranque_windows):
+    def _crear_piezas(self, arranque_windows: Callable[[bool], str]) -> None:
         """Las piezas de la app, cada una con lo que necesita de las demás."""
         configuracion, cache, datos, cliente, duelos = self.configuracion, self.cache, self.datos, self.cliente, self.duelos
         self.mis_cuentas = Cuentas(configuracion, cache, cliente, al_recuperar_clave=lambda: self.sesiones.reabrir())
@@ -111,52 +114,52 @@ class App:
 
     # --- lo que llevan las piezas ---------------------------------------------------------------
     @property
-    def cuentas(self):
+    def cuentas(self) -> dict[str, str]:
         """Tus cuentas: puuid -> 'Nombre#TAG'."""
         return self.mis_cuentas.propias
 
     @property
-    def error_clave(self):
+    def error_clave(self) -> str:
         return self.mis_cuentas.error_clave
 
     @property
-    def fase(self):
+    def fase(self) -> str | None:
         return self.vigia.fase
 
     @property
-    def modo(self):
+    def modo(self) -> str:
         return self.vigia.modo
 
     @property
-    def reloj(self):
+    def reloj(self) -> float | None:
         return self.vigia.reloj
 
     @property
-    def cuenta_activa(self):
+    def cuenta_activa(self) -> str | None:
         return self.vigia.cuenta_activa
 
     @property
-    def sesion(self):
+    def sesion(self) -> Sesion | None:
         return self.sesiones.actual
 
     @property
-    def seleccion(self):
+    def seleccion(self) -> Json | None:
         return self._seleccion.actual
 
     @property
-    def sync(self):
+    def sync(self) -> Sync:
         return self.partidas.sync
 
     @property
-    def revisando(self):
+    def revisando(self) -> int:
         return self.revisor.revisando
 
     @property
-    def ultima_revision(self):
+    def ultima_revision(self) -> str | None:
         return self.revisor.ultima
 
     # --- arranque ---------------------------------------------------------------------
-    def arrancar(self):
+    def arrancar(self) -> None:
         self._arranco = True
         try:
             self.comprobar_clave()
@@ -174,11 +177,11 @@ class App:
         if config.CONGELADA and self.cfg.get("siempre_en_marcha") and not inicio_windows.activo():
             inicio_windows.poner(True)
 
-    def _al_ver_cliente(self):
+    def _al_ver_cliente(self) -> None:
         if self.recolector is None and self._arranco:
             self._arrancar_recolector()
 
-    def _arrancar_recolector(self):
+    def _arrancar_recolector(self) -> None:
         if self.recolector or not self.cfg.get("recolectar", True):
             return
         # Tu región va con el cliente del panel (y su cuota); las demás, cada una con la suya.
@@ -198,7 +201,7 @@ class App:
         if not self.recolector.arrancar():
             self.recolector = None
 
-    def _europa_libre(self):
+    def _europa_libre(self) -> bool:
         """EUW comparte cuota con el panel: el recolector solo la usa con el cliente quieto."""
         return (
             not self.error_clave
@@ -207,7 +210,7 @@ class App:
             and self.sync["hechas"] >= self.sync["total"]
         )
 
-    def _bucle(self, paso, pausa):
+    def _bucle(self, paso: Callable[[], None], pausa: float) -> None:
         while True:
             try:
                 paso()
@@ -219,7 +222,7 @@ class App:
                 logger.exception("Fallo suelto en el hilo %s", threading.current_thread().name)
             time.sleep(pausa)
 
-    def _fallo_tarea(self, e):
+    def _fallo_tarea(self, e: Exception) -> None:
         if isinstance(e, ClaveInvalida):
             self.mis_cuentas.error_clave = str(e)
         elif isinstance(e, ErrorRiot):
@@ -227,7 +230,7 @@ class App:
         else:
             logger.error("Tarea rota", exc_info=e)
 
-    def _fondo(self):
+    def _fondo(self) -> None:
         """El historial propio en segundo plano (sin estorbar a una partida que se está cargando)."""
         if self.error_clave or self.sesiones.cargando():
             return
@@ -236,7 +239,7 @@ class App:
         if self.cuentas and self.fase not in EN_JUEGO:
             self.revisor.rellenar()
 
-    def _partida_terminada(self, s):
+    def _partida_terminada(self, s: Sesion) -> None:
         """Tu partida ha acabado: si era en la Grieta, se prepara su revisión (con la grabación, si la hay)."""
         if s.mapa != GRIETA or not self.cfg.get("revisar", True):
             return
@@ -244,7 +247,7 @@ class App:
         carpeta = self.grabador.carpeta_reciente() if self.grabador else None
         self.revisor.en_segundo_plano(s.id, s.yo, panel, carpeta)
 
-    def _ajustes_guardados(self, nuevo):
+    def _ajustes_guardados(self, nuevo: Json) -> None:
         self.comparador.olvidar()
         if "grabar" in nuevo:
             self.grabador = (self.grabador or Grabador(self.cfg)) if nuevo["grabar"] else None
@@ -254,58 +257,58 @@ class App:
             self.sesion.invalidar_panel()  # las notas y las reglas nuevas salen ya en el panel
 
     # --- lo que piden el panel y las sesiones -------------------------------------------------------
-    def comprobar_clave(self):
+    def comprobar_clave(self) -> None:
         self.mis_cuentas.comprobar_clave()
 
-    def poner_clave(self, clave):
+    def poner_clave(self, clave: str) -> Resultado:
         return self.mis_cuentas.poner_clave(clave)
 
-    def buscar(self, rid):
+    def buscar(self, rid: str) -> Resultado:
         return self.sesiones.buscar(rid)
 
-    def volver(self):
+    def volver(self) -> Resultado:
         return self.sesiones.volver()
 
-    def actualizar_modo(self):
+    def actualizar_modo(self) -> None:
         self.vigia.actualizar_modo()
 
-    def duelo(self, a, pos, b):
+    def duelo(self, a: int, pos: str, b: int | None) -> Json | None:
         return self.comparador.duelo(a, pos, b)
 
-    def pool_contra(self, pos, rival, cola=None):
+    def pool_contra(self, pos: str, rival: int | None, cola: int | None = None) -> Json | None:
         return self.comparador.pool_contra(pos, rival, cola)
 
-    def mis_partidas(self, cola=None):
+    def mis_partidas(self, cola: int | None = None) -> list[Partida]:
         return self.partidas.mis_partidas(cola)
 
-    def traer_partida(self, id_, cancelada=None, fondo=False):
+    def traer_partida(self, id_: str, cancelada: Cancelada | None = None, fondo: bool = False) -> Partida | None:
         return self.partidas.traer_partida(id_, cancelada, fondo)
 
-    def traer_linea(self, id_, cancelada=None):
+    def traer_linea(self, id_: str, cancelada: Cancelada | None = None) -> Linea | None:
         return self.partidas.traer_linea(id_, cancelada)
 
-    def notas_de(self, campeones, rivales=()):
+    def notas_de(self, campeones: Iterable[int], rivales: Collection[int] = ()) -> list[Json]:
         return self._ajustes.notas_de(campeones, rivales)
 
-    def ajustes(self):
+    def ajustes(self) -> Json:
         return self._ajustes.leer()
 
-    def guardar_ajustes(self, cambios):
+    def guardar_ajustes(self, cambios: Any) -> Resultado:
         return self._ajustes.guardar(cambios)
 
-    def revisiones(self):
+    def revisiones(self) -> Json:
         return self.revisor.lista()
 
-    def revision(self, id_):
+    def revision(self, id_: str) -> Revision | None:
         return self.revisor.una(id_)
 
-    def abrir_carpeta(self, id_):
+    def abrir_carpeta(self, id_: str) -> Resultado:
         return self.revisor.abrir_carpeta(id_)
 
-    def abrir_clip(self, id_, i):
+    def abrir_clip(self, id_: str, i: Any) -> Resultado:
         return self.revisor.abrir_clip(id_, i)
 
-    def salir(self):
+    def salir(self) -> Resultado:
         """Cierra la app del todo (con 'siempre en marcha' no se cierra sola)."""
         if not self.al_salir:
             return {"ok": False, "error": "Sin ventanas no puedo cerrarme desde aquí."}
@@ -313,7 +316,7 @@ class App:
         return {"ok": True}
 
     # --- estado para el panel ------------------------------------------------------------------------
-    def _para_el_modo(self, panel):
+    def _para_el_modo(self, panel: Panel) -> Panel:
         """Con el juego ya empezado, solo datos: fuera el plan y los veredictos de línea.
 
         Riot no permite que una app saque conclusiones por el jugador durante la partida; antes de empezar
@@ -335,7 +338,7 @@ class App:
             duelo=None,  # lo que hacen los que ganan el duelo es una lectura: solo antes de empezar
         )
 
-    def _estado_overlay(self):
+    def _estado_overlay(self) -> Json:
         if not self.cfg.get("overlay", True):
             return {"activo": False, "atajo": "", "aviso": ""}
         leido, modo = self._ventana_juego
@@ -350,15 +353,15 @@ class App:
             )
         return {"activo": True, "atajo": self.cfg.get("atajo_overlay", ""), "aviso": aviso}
 
-    def _estado_recolector(self):
+    def _estado_recolector(self) -> Json | None:
         if time.time() - self._resumen_duelos[0] > 30:
-            r = self.duelos.resumen()
+            r: Json = self.duelos.resumen()
             r["activo"] = bool(self.recolector)
             r["pool"] = [{"campeon": self.datos.nombre(c), "pos": an.NOMBRE_POS.get(p, p)} for c, p in self.partidas.pool()]
             self._resumen_duelos = (time.time(), r)
         return self._resumen_duelos[1]
 
-    def estado(self, contar=True):
+    def estado(self, contar: bool = True) -> Json:
         # El overlay también pide el estado, pero estar escondido encima del juego no es "mirar el panel".
         if contar:
             self.ultima_consulta = time.time()
@@ -370,7 +373,7 @@ class App:
             "modo": self.modo,
             "reloj": self.reloj,
             "overlay": self._estado_overlay(),
-            "cuenta": self.cuentas.get(self.cuenta_activa, ""),
+            "cuenta": self.cuentas.get(self.cuenta_activa or "", ""),
             "clave": {"ok": not self.error_clave, "error": self.error_clave},
             "cuota": limitador.estado(self.cliente.region),
             "sync": self.sync,
@@ -384,7 +387,14 @@ class App:
         }
 
 
-def crear_app(configuracion=None, *, cliente=None, cliente_lol=None, duelos=None, grabar=True):
+def crear_app(
+    configuracion: config.Configuracion | None = None,
+    *,
+    cliente: Cliente | None = None,
+    cliente_lol: lcu.Cliente | None = None,
+    duelos: BaseDuelos | None = None,
+    grabar: bool = True,
+) -> App:
     """La app de verdad: config.json, cache.db y duelos.db de la carpeta de datos, la API de Riot y el cliente del LoL.
 
     Las herramientas pueden cambiar alguna pieza. Con una configuración propia (p. ej. Configuracion.en_memoria) no se

@@ -12,7 +12,9 @@ import ssl
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 # Región del cliente -> plataforma de la API de Riot.
 PLATAFORMA_DE = {
@@ -40,7 +42,7 @@ AJUSTES_RIOT = (
 )
 
 
-def rutas_posibles(configurada):
+def rutas_posibles(configurada: str | Path) -> Iterator[Path]:
     """Dónde puede estar instalado el LoL: la ruta configurada, la que apunta el propio Riot y las habituales."""
     yield Path(configurada)
     try:
@@ -59,7 +61,7 @@ POS_SELECCION = {"top": "TOP", "jungle": "JUNGLE", "middle": "MIDDLE", "bottom":
 
 
 class Cliente:
-    def __init__(self, ruta_lol):
+    def __init__(self, ruta_lol: str | Path) -> None:
         self._configurada = ruta_lol
         self.ruta = Path(ruta_lol)  # carpeta del LoL (se corrige sola si está en otro sitio)
         self._buscada = 0.0
@@ -68,7 +70,7 @@ class Cliente:
         self._ssl.check_hostname = False
         self._ssl.verify_mode = ssl.CERT_NONE
 
-    def _conexion(self):
+    def _conexion(self) -> tuple[str, str] | None:
         try:
             partes = (self.ruta / "lockfile").read_text(encoding="utf-8").strip().split(":")
         except OSError:
@@ -86,7 +88,7 @@ class Cliente:
             return None
         return partes[2], partes[3]
 
-    def get(self, ruta):
+    def get(self, ruta: str) -> Any:
         """Devuelve el JSON de la ruta, o None si el cliente no está abierto o no responde."""
         con = self._conexion()
         if not con:
@@ -100,7 +102,7 @@ class Cliente:
         except (urllib.error.URLError, OSError, ValueError):
             return None
 
-    def estado(self):
+    def estado(self) -> dict[str, str] | None:
         """{'fase', 'nombre', 'tag'} o None si el cliente está cerrado."""
         fase = self.get("/lol-gameflow/v1/gameflow-phase")
         if not isinstance(fase, str):
@@ -108,12 +110,12 @@ class Cliente:
         yo = self.get("/lol-summoner/v1/current-summoner") or {}
         return {"fase": fase, "nombre": yo.get("gameName", ""), "tag": yo.get("tagLine", "")}
 
-    def plataforma(self):
+    def plataforma(self) -> str | None:
         """Plataforma de la API (euw1, na1…) según la región del cliente, o None."""
         r = self.get("/riotclient/region-locale")
         return PLATAFORMA_DE.get(str((r or {}).get("region", "")).upper()) if isinstance(r, dict) else None
 
-    def reloj(self):
+    def reloj(self) -> float | None:
         """Segundos de partida según la API local del propio juego (puerto 2999), o None si aún no responde.
 
         Solo sirve para distinguir la pantalla de carga del juego ya empezado y para el reloj del panel:
@@ -127,14 +129,14 @@ class Cliente:
         t = datos.get("gameTime") if isinstance(datos, dict) else None
         return float(t) if isinstance(t, (int, float)) else None
 
-    def mapa(self):
+    def mapa(self) -> int:
         """Id del mapa de la partida en curso (11 = Grieta del Invocador), o 0 si no se sabe."""
         flujo = self.get("/lol-gameflow/v1/session")
         if not isinstance(flujo, dict):
             return 0
         return (flujo.get("map") or {}).get("id") or ((flujo.get("gameData") or {}).get("queue") or {}).get("mapId") or 0
 
-    def seleccion(self):
+    def seleccion(self) -> dict[str, Any] | None:
         """Selección en curso: {'mio', 'aliados', 'rivales'} con ids de campeón (0 = sin elegir) y 'cola'."""
         s = self.get("/lol-champ-select/v1/session")
         if not isinstance(s, dict) or "myTeam" not in s:
@@ -142,7 +144,7 @@ class Cliente:
         celda = s.get("localPlayerCellId")
         mio = 0
         pos = ""
-        aliados = []
+        aliados: list[int] = []
         for j in s.get("myTeam", []):
             campeon = j.get("championId") or j.get("championPickIntent") or 0
             if j.get("cellId") == celda:

@@ -1,9 +1,16 @@
 """Lo que se cambia desde los ajustes del panel: qué se puede tocar, cómo se comprueba y tus notas por campeón."""
 
-from typing import Any
+from collections.abc import Callable, Collection, Iterable
+from typing import TYPE_CHECKING, Any
 
-from .comparador import COMPARAR_CON
+from .comparador import COMPARAR_CON, Comparador
+from .config import Configuracion
+from .ddragon import Datos
 from .overlay import parsear_atajo
+from .tipos import Json, Resultado
+
+if TYPE_CHECKING:
+    from .actualizador import Actualizador
 
 # Lo que el panel puede leer y cambiar de config.json.
 EDITABLES = (
@@ -28,44 +35,44 @@ class _Rechazo(Exception):
 
 
 # --- cómo se comprueba y se limpia cada ajuste (lanzan _Rechazo, o TypeError/ValueError con un formato raro) -----
-def _cuentas(valor):
+def _cuentas(valor: Iterable[Any]) -> list[str]:
     cuentas = [str(c).strip() for c in valor if str(c).strip()]
     if not cuentas or any("#" not in c for c in cuentas):
         raise _Rechazo("Las cuentas van como Nombre#TAG, y al menos una.")
     return cuentas
 
 
-def _recordatorios(valor):
+def _recordatorios(valor: Iterable[Any]) -> list[str]:
     return [str(r).strip()[:160] for r in valor if str(r).strip()][:8]
 
 
-def _notas(valor):
+def _notas(valor: Any) -> dict[str, str]:
     return {str(int(k)): str(v).strip()[:300] for k, v in dict(valor).items() if str(v).strip()}
 
 
-def _comparar_con(valor):
+def _comparar_con(valor: Any) -> str:
     if valor not in COMPARAR_CON:
         raise _Rechazo("Esa referencia no existe.")
-    return valor
+    return str(valor)
 
 
-def _codificador(valor):
+def _codificador(valor: Any) -> str:
     if valor not in ("auto", "cpu"):
         raise _Rechazo("Codificador desconocido.")
-    return valor
+    return str(valor)
 
 
-def _max_gb(valor):
+def _max_gb(valor: Any) -> int:
     return max(0, int(float(valor or 0)))
 
 
-def _atajo(valor):
+def _atajo(valor: Any) -> str:
     if not parsear_atajo(str(valor)):
         raise _Rechazo("No entiendo ese atajo. Ejemplos: ctrl+tab, alt+x, f9.")
     return str(valor).strip().lower()
 
 
-def _opacidad(valor):
+def _opacidad(valor: Any) -> float:
     return min(1.0, max(0.4, float(valor)))
 
 
@@ -76,7 +83,15 @@ class Ajustes:
     al_guardar(nuevo) se llama con lo que ha cambiado, ya guardado, para que la app lo aplique.
     """
 
-    def __init__(self, configuracion, datos, comparador, actualizador, arranque_windows, al_guardar):
+    def __init__(
+        self,
+        configuracion: Configuracion,
+        datos: Datos,
+        comparador: Comparador,
+        actualizador: "Actualizador",
+        arranque_windows: Callable[[bool], str],
+        al_guardar: Callable[[Json], None],
+    ) -> None:
         self.configuracion = configuracion
         self.cfg = configuracion.valores
         self.datos = datos
@@ -85,8 +100,9 @@ class Ajustes:
         self.arranque_windows = arranque_windows
         self._al_guardar = al_guardar
 
-    def leer(self):
-        campeones = sorted(({"id": i, "nombre": c["nombre"]} for i, c in self.datos.campeones.items()), key=lambda c: c["nombre"])
+    def leer(self) -> Json:
+        por_nombre = sorted(self.datos.campeones.items(), key=lambda par: par[1]["nombre"])
+        campeones = [{"id": i, "nombre": c["nombre"]} for i, c in por_nombre]
         partidas, perfil_partidas = self.comparador.partidas_de_referencias()
         return {
             **{k: self.cfg.get(k) for k in EDITABLES},
@@ -97,7 +113,7 @@ class Ajustes:
             "version": self.actualizador.estado,
         }
 
-    def guardar(self, cambios):
+    def guardar(self, cambios: Any) -> Resultado:
         try:
             nuevo = self._validar(cambios)
         except _Rechazo as e:
@@ -113,9 +129,9 @@ class Ajustes:
         self._al_guardar(nuevo)
         return {"ok": True}
 
-    def _validar(self, cambios):
+    def _validar(self, cambios: Any) -> Json:
         """Lo que cambia, ya comprobado y limpio. Se mira en este orden y el primer ajuste que no vale es el que se dice."""
-        primero = (
+        primero: tuple[tuple[str, Callable[[Any], Any]], ...] = (
             ("cuentas", _cuentas),
             ("recordatorios", _recordatorios),
             ("notas", _notas),
@@ -125,7 +141,7 @@ class Ajustes:
             ("comparar_con", _comparar_con),
             ("perfil_base", self._perfil_base),
         )
-        despues = (
+        despues: tuple[tuple[str, Callable[[Any], Any]], ...] = (
             ("referencias", self._referencias),
             ("grabacion_codificador", _codificador),
             ("grabacion_max_gb", _max_gb),
@@ -146,14 +162,14 @@ class Ajustes:
                 nuevo[clave] = validar(cambios[clave])
         return nuevo
 
-    def _perfil_base(self, valor):
+    def _perfil_base(self, valor: Any) -> str:
         perfil = str(valor).strip()
         if perfil:
             self._buscar_referencia(perfil)
         return perfil
 
-    def _referencias(self, valor):
-        refs = {}
+    def _referencias(self, valor: Any) -> dict[str, str]:
+        refs: dict[str, str] = {}
         for campeon, rid in dict(valor).items():
             rid = str(rid).strip()
             if not rid:
@@ -162,16 +178,17 @@ class Ajustes:
             refs[str(int(campeon))] = rid
         return refs
 
-    def _buscar_referencia(self, rid):
+    def _buscar_referencia(self, rid: str) -> None:
         """Busca la cuenta de referencia (y su servidor) y la apunta; si no se puede, ese ajuste no vale."""
         error = self.comparador.resolver_referencia(rid)
         if error:
             raise _Rechazo(error)
 
-    def notas_de(self, campeones, rivales=()):
+    def notas_de(self, campeones: Iterable[int], rivales: Collection[int] = ()) -> list[Json]:
         """Tus notas de los campeones que hay en la partida (las escribiste tú antes de jugar)."""
         notas = self.cfg.get("notas") or {}
-        vistos, out = set(), []
+        vistos: set[int] = set()
+        out: list[Json] = []
         for c in campeones:
             if c and c not in vistos and notas.get(str(c)):
                 vistos.add(c)

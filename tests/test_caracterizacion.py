@@ -132,7 +132,7 @@ class FuncionesPuras(Golden):
 
     def test_revisar(self):
         panel = json.loads(MAQUETA.read_text(encoding="utf-8"))["panel"]
-        out = {}
+        out: dict[str, Any] = {}
         for j in PARTIDA["jug"]:
             out[j["puuid"]] = rv.revisar(PARTIDA, LINEA_COMPLETA, j["puuid"], nombre, panel, {1: 20, 2: -900})
         diana = next(j for j in PARTIDA["jug"] if j["campeon"] == 131)

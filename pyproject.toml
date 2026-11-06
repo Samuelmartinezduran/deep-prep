@@ -116,14 +116,15 @@ select = [
 ]
 ignore = [
     "E741",   # `l` es la convención del código para «línea» (de tiempo / de calle); renombrarla no aporta
-    "RUF012", # atributos de clase mutables: pide anotarlos con ClassVar; se activará al tipar el código
+    "RUF012", # atributos de clase mutables con ClassVar: ya solo salen en los falsos de las pruebas
     "SIM105", # contextlib.suppress en vez de try/except/pass: preferencia de estilo, no un fallo
 ]
 # Reglas que aquí no tocan: PL/C90 (complejidad, funciones largas a propósito), S (subprocess y urlopen
 # son la app), ARG (firmas impuestas por pywebview, http.server y ctypes), N (nombres en español:
 # N818 exigiría acabar las excepciones en «Error»), DTZ (la app trabaja en hora local), PTH (ya usa pathlib
 # salvo en open()), PLC0415 (los imports dentro de funciones son a propósito: arranque rápido y pywebview
-# opcional), ANN y D (aún no hay tipos ni docstrings en todas las funciones).
+# opcional), ANN (los tipos de deepprep los exige mypy; las pruebas y las herramientas no los llevan) y D (aún no
+# hay docstrings en todas las funciones).
 allowed-confusables = ["−"] # signo menos tipográfico (U+2212) en los textos para el jugador
 
 [tool.ruff.lint.isort]
@@ -135,8 +136,8 @@ known-first-party = ["deepprep", "tests"]
 python_version = "3.14"
 platform = "win32" # ctypes.windll, msvcrt, CREATE_NO_WINDOW... solo existen en Windows
 files = ["deepprep", "tests"]
-# Punto de partida realista para un código aún sin anotaciones: se revisa el cuerpo de todas las funciones
-# (check_untyped_defs) aunque no tengan tipos, pero todavía no se exige ponerlos (disallow_untyped_defs).
+# Se revisa el cuerpo de todas las funciones, también las que no llevan tipos (las pruebas); el código de la app
+# los lleva todos y eso se exige por módulo, abajo.
 check_untyped_defs = true
 strict_equality = true
 extra_checks = true
@@ -146,42 +147,59 @@ warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool", "possibly-undefined"]
 
 [[tool.mypy.overrides]]
-# Núcleo: hoy pasan check_untyped_defs sin errores y son los primeros que se van a anotar. Lo de abajo ya
-# está activo y se aplica a cada anotación que se añada (firmas completas, genéricos con parámetros...).
-# Cuando un módulo esté anotado del todo, se pasa a su propio bloque con disallow_untyped_defs = true.
-module = ["deepprep.riot", "deepprep.cache", "deepprep.config", "deepprep.servidor"]
+# Anotados del todo: cada función lleva sus tipos (disallow_untyped_defs) y se comprueba también lo que devuelven
+# (warn_return_any). Lo que viene de Riot o de la caché va como dict[str, Any] con un nombre (tipos.py): de ahí sale
+# Any, así que lo que se devuelve de un JSON se apunta antes en una variable con su tipo.
+module = [
+    "deepprep",
+    "deepprep.__main__",
+    "deepprep.actualizador",
+    "deepprep.ajustes",
+    "deepprep.almacen",
+    "deepprep.analisis",
+    "deepprep.app",
+    "deepprep.base_duelos",
+    "deepprep.cache",
+    "deepprep.clips",
+    "deepprep.comparador",
+    "deepprep.config",
+    "deepprep.constantes",
+    "deepprep.cuentas",
+    "deepprep.ddragon",
+    "deepprep.duelos",
+    "deepprep.grabacion",
+    "deepprep.inicio_windows",
+    "deepprep.lcu",
+    "deepprep.overlay",
+    "deepprep.partidas",
+    "deepprep.recolector",
+    "deepprep.revision",
+    "deepprep.revisiones",
+    "deepprep.riot",
+    "deepprep.seleccion",
+    "deepprep.sesion",
+    "deepprep.sistema",
+    "deepprep.tipos",
+    "deepprep.trabajo",
+    "deepprep.ventanas",
+    "deepprep.vigia",
+]
+disallow_untyped_defs = true
 disallow_incomplete_defs = true
 disallow_any_generics = true
 disallow_untyped_decorators = true
 warn_return_any = true
 warn_unreachable = true
-# disallow_untyped_defs = true
-# disallow_untyped_calls = true
 
 [[tool.mypy.overrides]]
-# Pendientes: con check_untyped_defs dan errores (sobre todo `x = {}` sin tipo, atributos que las pruebas
-# crean en setUpClass y Optional sin comprobar). Se revisa lo que está fuera de las funciones y las llamadas
-# que les llegan desde módulos ya revisados. Se van quitando de la lista según se arreglan.
-module = [
-    "deepprep.actualizador",
-    "deepprep.analisis",
-    "deepprep.app",
-    "deepprep.duelos",
-    "deepprep.grabacion",
-    "deepprep.inicio_windows",
-    "deepprep.overlay",
-    "deepprep.recolector",
-    "deepprep.revision",
-    "deepprep.sesion",
-    "deepprep.trabajo",
-    "deepprep.ventanas",
-    "tests.test_actualizador",
-    "tests.test_analisis",
-    "tests.test_app",
-    "tests.test_revision",
-    "tests.test_riot",
-]
-check_untyped_defs = false
+# servidor: igual, salvo imagen_ddragon, que está en la parte de los archivos estáticos (arriba del todo) y se deja
+# como estaba mientras la toca la rama del panel. Cuando se una, se anota y el módulo pasa al bloque de arriba.
+module = ["deepprep.servidor"]
+disallow_incomplete_defs = true
+disallow_any_generics = true
+disallow_untyped_decorators = true
+warn_return_any = true
+warn_unreachable = true
 
 [[tool.mypy.overrides]]
 # pywebview trae tipos (py.typed), pero en un entorno sin él instalado no debe romper el análisis. pythonnet
@@ -201,8 +219,8 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Medido el 6/11/2026 con las 99 pruebas: 60,4 % (líneas + ramas). Subirlo según se añadan pruebas.
-fail_under = 60
+# Medido el 6/11/2026 con las 168 pruebas: 71,8 % (líneas + ramas). Subirlo según se añadan pruebas.
+fail_under = 70
 precision = 1
 show_missing = true
 skip_empty = true

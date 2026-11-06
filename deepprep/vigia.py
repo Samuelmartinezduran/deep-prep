@@ -3,10 +3,17 @@
 import logging
 import threading
 import time
-from typing import Any
+from collections.abc import Callable
 
+from .config import Configuracion
 from .constantes import GRIETA
-from .riot import REGION_DE, ClaveInvalida, ErrorRiot
+from .cuentas import Cuentas
+from .grabacion import Grabador
+from .lcu import Cliente as ClienteLoL
+from .riot import REGION_DE, ClaveInvalida, Cliente, ErrorRiot
+from .seleccion import Seleccion
+from .sesion import Sesion
+from .tipos import Json, Resultado
 
 logger = logging.getLogger(__name__)
 
@@ -40,17 +47,19 @@ class Sesiones:
     crear(juego, yo, origen) hace la sesión; al_terminar(sesion) se llama cuando tu partida acaba.
     """
 
-    def __init__(self, crear, cliente, cuentas, al_terminar):
+    def __init__(
+        self, crear: Callable[[Json, str, str], Sesion], cliente: Cliente, cuentas: Cuentas, al_terminar: Callable[[Sesion], None]
+    ) -> None:
         self._crear = crear
         self.cliente = cliente
         self.cuentas = cuentas
         self._al_terminar = al_terminar
-        self.actual = None
+        self.actual: Sesion | None = None
         self.fijada = False  # el usuario ha buscado otra partida a mano y no hay que pisársela
-        self._ultimo_juego: tuple[Any, str, str] | None = None  # (juego, yo, origen) de la última que se abrió
+        self._ultimo_juego: tuple[Json, str, str] | None = None  # (juego, yo, origen) de la última que se abrió
         self._lock = threading.RLock()
 
-    def abrir(self, juego, yo, origen, forzar=False):
+    def abrir(self, juego: Json, yo: str, origen: str, forzar: bool = False) -> None:
         with self._lock:
             s = self.actual
             if s and not forzar and s.id == juego.get("gameId") and s.yo == yo:
@@ -64,13 +73,13 @@ class Sesiones:
             nueva.lanzar()
             self.actual = nueva
 
-    def reabrir(self):
+    def reabrir(self) -> None:
         """La clave vuelve a valer: la partida que se estaba viendo se pide otra vez entera."""
         if self._ultimo_juego and self.actual and not self.actual.terminada:
             juego, yo, origen = self._ultimo_juego
             self.abrir(juego, yo, origen, forzar=True)
 
-    def terminar(self):
+    def terminar(self) -> None:
         """La partida propia ha acabado: el panel se queda a la vista y se prepara la revisión."""
         s = self.actual
         if not s or s.origen != "propia" or s.terminada:
@@ -78,11 +87,11 @@ class Sesiones:
         s.terminada = True
         self._al_terminar(s)
 
-    def cargando(self):
+    def cargando(self) -> bool:
         s = self.actual
         return bool(s and not s.terminada and s.hechas < s.total)
 
-    def buscar(self, rid):
+    def buscar(self, rid: str) -> Resultado:
         """Abre a mano la partida en vivo de cualquier jugador."""
         try:
             r = self.cuentas.resolver(rid.strip())
@@ -100,7 +109,7 @@ class Sesiones:
         self.abrir(juego, r[0], "propia" if r[0] in self.cuentas.propias else "manual")
         return {"ok": True}
 
-    def volver(self):
+    def volver(self) -> Resultado:
         """Deja de mostrar la partida buscada a mano."""
         with self._lock:
             self.fijada = False
@@ -117,7 +126,17 @@ class Vigia:
     cliente abierto (ya se sabe su región).
     """
 
-    def __init__(self, lcu, cliente, configuracion, cuentas, sesiones, seleccion, grabador, al_ver_cliente):
+    def __init__(
+        self,
+        lcu: ClienteLoL,
+        cliente: Cliente,
+        configuracion: Configuracion,
+        cuentas: Cuentas,
+        sesiones: Sesiones,
+        seleccion: Seleccion,
+        grabador: Callable[[], Grabador | None],
+        al_ver_cliente: Callable[[], None],
+    ) -> None:
         self.lcu = lcu
         self.cliente = cliente
         self.configuracion = configuracion
@@ -127,16 +146,16 @@ class Vigia:
         self.seleccion = seleccion
         self._grabador = grabador
         self._al_ver_cliente = al_ver_cliente
-        self.fase = None  # None = cliente cerrado
+        self.fase: str | None = None  # None = cliente cerrado
         # 'previa' (fuera de partida o en selección), 'carga' (pantalla de carga) o 'juego' (ya se juega).
         # En 'juego' el panel solo enseña datos: Riot no permite sacar conclusiones durante la partida.
         self.modo = "previa"
-        self.reloj = None  # segundos de partida según el propio juego
-        self.cuenta_activa = None  # puuid de la cuenta abierta en el cliente
+        self.reloj: float | None = None  # segundos de partida según el propio juego
+        self.cuenta_activa: str | None = None  # puuid de la cuenta abierta en el cliente
         self.ultimo_sondeo = 0.0  # última vez que se preguntó a Riot por la partida en vivo
         self._plataforma_vista = False  # región del cliente ya mirada en esta sesión del cliente
 
-    def paso(self):
+    def paso(self) -> None:
         ahora = time.time()
         if self.cuentas.error_clave and not self.cuentas.reprobar_clave(ahora):
             return
@@ -162,7 +181,7 @@ class Vigia:
         else:
             self.sesiones.terminar()
 
-    def _sin_cliente(self, ahora):
+    def _sin_cliente(self, ahora: float) -> None:
         """Cliente cerrado: todo a cero y, de vez en cuando, se pregunta a Riot si alguna cuenta tuya está en partida
         (p. ej. con el LoL instalado en otra ruta)."""
         self._plataforma_vista = False
@@ -180,7 +199,7 @@ class Vigia:
                 return
         self.sesiones.terminar()
 
-    def _en_partida(self, anterior, ahora):
+    def _en_partida(self, anterior: str | None, ahora: float) -> None:
         """Ya en partida: al empezar se arma el grabador, y tu sesión se abre en cuanto Riot da la partida en vivo."""
         if anterior not in EN_JUEGO:
             self.sesiones.fijada = False  # partida nueva: manda la propia
@@ -197,7 +216,7 @@ class Vigia:
         if juego:
             self.sesiones.abrir(juego, self.cuenta_activa, "propia")
 
-    def ajustar_plataforma(self, plataforma):
+    def ajustar_plataforma(self, plataforma: str | None) -> None:
         """La región de la API sale del cliente del LoL (para quien no juega en EUW)."""
         if not plataforma or plataforma == self.cfg.get("plataforma"):
             return
@@ -209,7 +228,7 @@ class Vigia:
         self.configuracion.guardar()
         self.cliente.poner_plataforma(plataforma, region)
 
-    def actualizar_modo(self):
+    def actualizar_modo(self) -> None:
         """Pantalla de carga o juego empezado, según el reloj del propio juego (el overlay lo llama más a menudo)."""
         if self.fase not in EN_JUEGO:
             self.modo, self.reloj = "previa", None

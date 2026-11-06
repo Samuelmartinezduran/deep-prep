@@ -4,22 +4,24 @@ import itertools
 import logging
 import queue
 import threading
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class Cola:
-    def __init__(self, hilos=6, al_fallar=None):
-        self._q = queue.PriorityQueue()
+    def __init__(self, hilos: int = 6, al_fallar: Callable[[Exception], None] | None = None) -> None:
+        self._q: queue.PriorityQueue[tuple[int, int, Callable[..., object], tuple[Any, ...]]] = queue.PriorityQueue()
         self._orden = itertools.count()
         self._al_fallar = al_fallar
         for i in range(hilos):
             threading.Thread(target=self._bucle, name=f"trabajo-{i}", daemon=True).start()
 
-    def poner(self, prioridad, fn, *args):
+    def poner(self, prioridad: int, fn: Callable[..., object], *args: Any) -> None:
         self._q.put((prioridad, next(self._orden), fn, args))
 
-    def _bucle(self):
+    def _bucle(self) -> None:
         while True:
             _, _, fn, args = self._q.get()
             try:

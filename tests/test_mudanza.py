@@ -124,7 +124,9 @@ class MudanzaDeDatos(ConCarpetaTemporal):
             mock.patch.object(act, "VISTA", self.nuevos / "version_vista.txt"),
         ):
             a = act.Actualizador(app=None)
-            self.assertEqual(a.novedades()["notas"], NOTAS)
+            novedades = a.novedades()
+            assert novedades is not None
+            self.assertEqual(novedades["notas"], NOTAS)
             self.assertFalse(a._faltan_novedades())  # están: no hay que pedírselas a GitHub
 
 
@@ -439,6 +441,7 @@ class ZipPuente(ConInstalaciones):
             ):
                 a = act.Actualizador(app=None)
                 self.assertTrue(a.comprobar())
+            assert a._carpeta_nueva is not None
             self.assertTrue((a._carpeta_nueva / "DeepPrep.exe").is_file())
 
     def test_del_zip_puente_a_deep_prep_instalada(self):

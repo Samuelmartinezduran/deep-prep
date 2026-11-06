@@ -3,11 +3,17 @@
 import json
 import re
 import urllib.request
+from collections.abc import Callable
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qs, urlparse
 
 from . import config
 from .riot import USER_AGENT
+from .tipos import Json, Resultado
+
+if TYPE_CHECKING:
+    from .app import App
 
 ARCHIVOS = {
     "/": ("index.html", "text/html; charset=utf-8"),
@@ -53,7 +59,7 @@ def imagen_ddragon(tipo, clave, version):
     return datos
 
 
-def _mostrar(app, cuerpo):
+def _mostrar(app: "App", cuerpo: Json) -> Resultado:
     """Otra copia de la app arrancada con el acceso directo pide que esta enseñe su ventana."""
     mostrar = getattr(app, "al_mostrar", None)
     if mostrar:
@@ -62,13 +68,13 @@ def _mostrar(app, cuerpo):
 
 
 # La API del panel: ruta -> qué hace (con la URL de la petición en GET y con el cuerpo JSON ya leído en POST).
-API_GET = {
+API_GET: dict[str, Callable[["App", Any], Any]] = {
     "/api/estado": lambda app, url: app.estado(contar="vista=overlay" not in url.query),
     "/api/revisiones": lambda app, url: app.revisiones(),
     "/api/revision": lambda app, url: app.revision(parse_qs(url.query).get("id", [""])[0]),
     "/api/ajustes": lambda app, url: app.ajustes(),
 }
-API_POST = {
+API_POST: dict[str, Callable[["App", Any], Any]] = {
     "/api/buscar": lambda app, cuerpo: app.buscar(str(cuerpo.get("riot_id", ""))),
     "/api/volver": lambda app, cuerpo: app.volver(),
     "/api/clave": lambda app, cuerpo: app.poner_clave(str(cuerpo.get("clave", ""))),
@@ -86,10 +92,10 @@ class _Respuestas(BaseHTTPRequestHandler):
 
     permitidos: frozenset[str] = frozenset()  # Host (y Origin) del propio panel
 
-    def log_message(self, *args):
+    def log_message(self, *args: Any) -> None:
         pass
 
-    def _enviar(self, codigo, cuerpo, tipo, guardar=False):
+    def _enviar(self, codigo: int, cuerpo: bytes, tipo: str, guardar: bool = False) -> None:
         self.send_response(codigo)
         self.send_header("Content-Type", tipo)
         self.send_header("Content-Length", str(len(cuerpo)))
@@ -97,10 +103,10 @@ class _Respuestas(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(cuerpo)
 
-    def _json(self, obj, codigo=200):
+    def _json(self, obj: Any, codigo: int = 200) -> None:
         self._enviar(codigo, json.dumps(obj, ensure_ascii=False).encode("utf-8"), "application/json; charset=utf-8")
 
-    def _ajena(self):
+    def _ajena(self) -> bool:
         """Peticiones que no vienen del propio panel (otra web abierta en el navegador, DNS rebinding)."""
         if self.headers.get("Host") not in self.permitidos:
             return True
@@ -114,11 +120,11 @@ class Servidor(ThreadingHTTPServer):
     daemon_threads = True
 
 
-def crear(app, puerto):
+def crear(app: "App", puerto: int) -> Servidor:
     class Manejador(_Respuestas):
         permitidos = frozenset({f"127.0.0.1:{puerto}", f"localhost:{puerto}"})
 
-        def do_GET(self):
+        def do_GET(self) -> None:
             if self._ajena():
                 return self._json({"error": "origen no permitido"}, 403)
             url = urlparse(self.path)
@@ -139,7 +145,7 @@ def crear(app, puerto):
                     return self._enviar(200, datos, TIPOS[EXT_DDRAGON[partes[2]]], guardar=True)
             self._json({"error": "no existe"}, 404)
 
-        def do_POST(self):
+        def do_POST(self) -> None:
             if self._ajena():
                 return self._json({"error": "origen no permitido"}, 403)
             try:

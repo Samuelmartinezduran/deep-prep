@@ -17,7 +17,11 @@ import sys
 import tempfile
 import threading
 import time
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
+from typing import Self
+
+from .tipos import Cfg
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +37,12 @@ PROGRAMA = Path(
 AVISOS: list[str] = []
 
 
-def falta_mudar(viejos, nuevos):
+def falta_mudar(viejos: Path, nuevos: Path) -> bool:
     """¿Hay datos de Porofesor que aún no se han pasado a la carpeta de Deep Prep?"""
     return viejos.is_dir() and not (nuevos / "config.json").exists()
 
 
-def mudar_datos(viejos, nuevos, intentos=30, pausa=0.5):
+def mudar_datos(viejos: Path, nuevos: Path, intentos: int = 30, pausa: float = 0.5) -> Path:
     """Pasa los datos de Porofesor (viejos) a la carpeta de Deep Prep (nuevos). Devuelve la carpeta que hay que usar.
 
     En la misma unidad basta con cambiarle el nombre a la carpeta. Si Windows no deja (algo tiene un archivo abierto:
@@ -54,7 +58,7 @@ def mudar_datos(viejos, nuevos, intentos=30, pausa=0.5):
         nuevos.rmdir()  # si existe sin config.json y vacía, fuera, para poder cambiarle el nombre a la vieja
     except OSError:
         pass
-    error = None
+    error: OSError | None = None
     for _ in range(intentos):
         try:
             os.rename(viejos, nuevos)
@@ -68,7 +72,7 @@ def mudar_datos(viejos, nuevos, intentos=30, pausa=0.5):
     if not falta_mudar(viejos, nuevos):
         return nuevos
 
-    def sobrante(carpeta, nombres):
+    def sobrante(carpeta: str, nombres: list[str]) -> set[str]:
         # Los cerrojos se rehacen solos; config.json va aparte, al final.
         fuera = {n for n in nombres if n.lower().endswith(".lock")}
         if Path(carpeta) == viejos:
@@ -88,7 +92,7 @@ def mudar_datos(viejos, nuevos, intentos=30, pausa=0.5):
     return nuevos
 
 
-def elegir_datos(entorno=None, argv=None):
+def elegir_datos(entorno: Mapping[str, str] | None = None, argv: Sequence[str] | None = None) -> Path:
     """La carpeta de datos de este proceso; si toca, antes muda ahí los de Porofesor."""
     entorno = os.environ if entorno is None else entorno
     argv = sys.argv if argv is None else argv
@@ -118,7 +122,7 @@ RUTA_CACHE = DATOS / "cache.db"
 RUTA_WEB = Path(__file__).resolve().parent / "web"
 RUTA_REGISTRO = DATOS / "deepprep.log"
 
-POR_DEFECTO = {
+POR_DEFECTO: Cfg = {
     # Cuentas propias. La que esté abierta en el cliente del LoL se añade sola.
     "cuentas": [],
     "plataforma": "euw1",
@@ -168,22 +172,21 @@ _lock = threading.Lock()
 _no_pisar = ""
 
 
-def _con_reintentos(fn):
+def _con_reintentos[T](fn: Callable[[], T]) -> T:
     """fn(), reintentándolo un momento si Windows dice que el archivo está ocupado (PermissionError).
 
     Pasa si otro lo tiene abierto justo entonces (el antivirus, el proceso que graba leyendo la configuración...).
+    A la quinta, si sigue ocupado, el error sale.
     """
-    for intento in range(5):
+    for _intento in range(4):
         try:
             return fn()
         except PermissionError:
-            if intento == 4:
-                raise
             time.sleep(0.1)
-    return None
+    return fn()
 
 
-def escribir_atomico(ruta, texto):
+def escribir_atomico(ruta: str | Path, texto: str) -> None:
     """Escribe un archivo de texto entero o nada.
 
     Va primero a un temporal en la misma carpeta y luego se cambia por el de verdad (os.replace): si algo falla a
@@ -204,26 +207,26 @@ def escribir_atomico(ruta, texto):
             pass
 
 
-def _ruta_copia():
+def _ruta_copia() -> Path:
     return RUTA_CONFIG.with_name(RUTA_CONFIG.name + ".copia")
 
 
-def _ruta_rota():
+def _ruta_rota() -> Path:
     return RUTA_CONFIG.with_name(RUTA_CONFIG.name + ".roto")
 
 
-def _texto(cfg):
+def _texto(cfg: Cfg) -> str:
     return json.dumps(cfg, ensure_ascii=False, indent=2)
 
 
-def _objeto(texto):
+def _objeto(texto: str) -> Cfg:
     datos = json.loads(texto)
     if not isinstance(datos, dict):
         raise ValueError(f"no es un objeto JSON sino {type(datos).__name__}")
     return datos
 
 
-def _copiar(texto):
+def _copiar(texto: str) -> None:
     """Deja en config.json.copia el último config.json bueno: de ahí se tira si un día aparece roto."""
     copia = _ruta_copia()
     try:
@@ -233,7 +236,7 @@ def _copiar(texto):
         logger.warning("No se pudo guardar la copia de config.json: %r", e)
 
 
-def _recuperar(error):
+def _recuperar(error: Exception) -> Cfg:
     """config.json está roto o no se puede leer: lo aparta (config.json.roto) y tira de la copia, si la hay.
 
     Devuelve lo que se salva de la configuración ({} si nada). Nunca escribe encima del archivo roto: si no se
@@ -263,7 +266,7 @@ def _recuperar(error):
     return recuperado
 
 
-def cargar():
+def cargar() -> Cfg:
     cfg = dict(POR_DEFECTO)
     with _lock:
         if not RUTA_CONFIG.exists():
@@ -280,7 +283,7 @@ def cargar():
     return cfg
 
 
-def guardar(cfg):
+def guardar(cfg: Cfg) -> None:
     texto = _texto(cfg)
     with _lock:
         if _no_pisar:
@@ -294,7 +297,7 @@ def guardar(cfg):
 FORMATO_REGISTRO = "%(asctime)s %(levelname)s %(name)s: %(message)s"
 
 
-def configurar_registro():
+def configurar_registro() -> None:
     """Configura el registro de la app una vez, al arrancar: fecha y hora, nivel, módulo y mensaje.
 
     Lanzada con pyw no hay consola: todo va a deepprep.log, también lo que no pasa por logging (los errores de un
@@ -313,24 +316,24 @@ class Configuracion:
     memoria (en_memoria): la app la usa igual, pero no escribe nada.
     """
 
-    def __init__(self, valores, guardar=None):
+    def __init__(self, valores: Cfg, guardar: Callable[[Cfg], None] | None = None) -> None:
         self.valores = valores
         self._guardar = guardar
 
     @classmethod
-    def de_archivo(cls):
+    def de_archivo(cls) -> Self:
         return cls(cargar(), guardar)
 
     @classmethod
-    def en_memoria(cls, valores):
+    def en_memoria(cls, valores: Cfg) -> Self:
         return cls(valores)
 
-    def guardar(self):
+    def guardar(self) -> None:
         if self._guardar is not None:
             self._guardar(self.valores)
 
 
-def leer_clave():
+def leer_clave() -> str:
     try:
         with _lock:  # que no esté abierta justo cuando guardar_clave la cambia (Windows no lo dejaría)
             return RUTA_CLAVE.read_text(encoding="utf-8").strip()
@@ -338,6 +341,6 @@ def leer_clave():
         return ""
 
 
-def guardar_clave(clave):
+def guardar_clave(clave: str) -> None:
     with _lock:
         escribir_atomico(RUTA_CLAVE, clave.strip())

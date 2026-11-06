@@ -9,9 +9,14 @@ import threading
 import time
 import webbrowser
 from pathlib import Path
+from types import ModuleType
+from typing import TYPE_CHECKING
 
 from . import config
 from .sistema import pedir_a_la_copia_en_marcha
+
+if TYPE_CHECKING:
+    from .app import App
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +25,7 @@ logger = logging.getLogger(__name__)
 MINUTOS_SIN_PANEL = 5
 
 
-def abrir_ventana(url):
+def abrir_ventana(url: str) -> None:
     """Plan B sin pywebview: el panel como ventana propia de Chrome o Edge, o en el navegador por defecto."""
     candidatos = [
         Path(os.environ.get("PROGRAMFILES", "")) / "Google/Chrome/Application/chrome.exe",
@@ -36,7 +41,7 @@ def abrir_ventana(url):
     webbrowser.open(url)
 
 
-def pedir_que_se_muestre(url):
+def pedir_que_se_muestre(url: str) -> bool:
     """Ya hay otra copia en marcha: que enseñe su ventana. Devuelve False si no sabe hacerlo."""
     try:
         return bool(json.loads(pedir_a_la_copia_en_marcha(url, "api/mostrar")).get("ok"))
@@ -44,7 +49,7 @@ def pedir_que_se_muestre(url):
         return False
 
 
-def main():
+def main() -> None:
     if "--grabar" in sys.argv:
         _grabar()
         return
@@ -84,7 +89,7 @@ def main():
     _seguir_mientras_haga_falta(app)
 
 
-def _grabar():
+def _grabar() -> None:
     """Proceso aparte que graba una partida (lo lanza la app al empezar cada partida en la Grieta)."""
     from . import grabacion
 
@@ -92,14 +97,14 @@ def _grabar():
     grabacion.grabar(config.cargar(), prueba_seg=prueba)
 
 
-def _terminar_actualizacion(actualizador):
+def _terminar_actualizacion(actualizador: ModuleType) -> None:
     """Versión nueva recién descargada: espera a que se cierre la vieja y se instala encima."""
     i = sys.argv.index("--actualizar")
     modo = sys.argv[i + 3] if len(sys.argv) > i + 3 else None  # la 1.0.0 y la 1.0.1 no lo pasan
     actualizador.terminar_actualizacion(sys.argv[i + 1], sys.argv[i + 2], modo)
 
 
-def _ventanas(app, url):
+def _ventanas(app: "App", url: str) -> bool:
     """Abre las ventanas propias (bloquea hasta que la app se cierra) y devuelve True.
 
     Sin pywebview, sin WebView2 o con un fallo de .NET abre el panel en el navegador y devuelve False: no hay overlay.
@@ -119,7 +124,7 @@ def _ventanas(app, url):
         return False
 
 
-def _seguir_mientras_haga_falta(app):
+def _seguir_mientras_haga_falta(app: "App") -> None:
     """Sin ventanas propias, la app sigue mientras alguien mire el panel, el cliente del LoL esté abierto o esté
     'siempre en marcha'."""
     try:

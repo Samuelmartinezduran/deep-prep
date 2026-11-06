@@ -3,9 +3,19 @@
 import threading
 import time
 from collections import Counter
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 from . import analisis as an
 from .constantes import COLAS, COLAS_GRIETA, FLEXIBLE, GRIETA, LIGA_COLA, NOMBRE_LIGA, SOLO_DUO
+from .tipos import Aviso, Etiqueta, Json, LigaUI, Linea, Panel, Partida
+
+if TYPE_CHECKING:
+    from .app import App
+
+Filas = dict[str | int, Json]  # puuid (o id() si el perfil está oculto) -> datos de trabajo del jugador
+PorPosicion = dict[str, dict[str, Json]]  # 'aliado'|'rival' -> {posición: jugador}
+AvisoConPeso = tuple[int, str, str]  # (peso, tono, texto)
 
 NIVELES = {
     "IRON": "Hierro",
@@ -24,7 +34,7 @@ ORDEN_POS = {p: i for i, p in enumerate(an.POSICIONES)}
 
 
 class Sesion:
-    def __init__(self, app, juego, yo, origen):
+    def __init__(self, app: "App", juego: Json, yo: str, origen: str) -> None:
         self.app = app
         self.id = juego["gameId"]
         self.cola = juego.get("gameQueueConfigId", 0)
@@ -38,9 +48,9 @@ class Sesion:
         self.hechas = 0
         self._lock = threading.RLock()
         self._sucio = True
-        self._panel = None
+        self._panel: Panel | None = None
         self._ts_panel = 0.0
-        self.jugadores = []
+        self.jugadores: list[Json] = []
         for p in juego.get("participants", []):
             nombre, _, tag = (p.get("riotId") or "").partition("#")
             # Con el perfil oculto Riot no da PUUID y pone el campeón como nombre.
@@ -69,18 +79,18 @@ class Sesion:
         self._roles()
 
     # --- tareas ----------------------------------------------------------------------
-    def _cancelada(self):
+    def _cancelada(self) -> bool:
         return self.cancelada
 
-    def cancelar(self):
+    def cancelar(self) -> None:
         self.cancelada = True
 
-    def _poner(self, prioridad, fn, *args):
+    def _poner(self, prioridad: int, fn: Callable[..., None], *args: Any) -> None:
         with self._lock:
             self.total += 1
         self.app.cola.poner(prioridad, self._ejecutar, fn, args)
 
-    def _ejecutar(self, fn, args):
+    def _ejecutar(self, fn: Callable[..., None], args: tuple[Any, ...]) -> None:
         try:
             if not self.cancelada:
                 fn(*args)
@@ -89,7 +99,7 @@ class Sesion:
                 self.hechas += 1
                 self._sucio = True
 
-    def lanzar(self):
+    def lanzar(self) -> None:
         for j in self.jugadores:
             if not j["puuid"]:
                 continue
@@ -97,10 +107,11 @@ class Sesion:
             self._poner(11, self._t_liga, j)
             self._poner(12, self._t_maestria, j)
 
-    def _es_jungla_rival(self, j):
-        return j["equipo"] != self.mi_equipo and j["rol"] == "JUNGLE"
+    def _es_jungla_rival(self, j: Json) -> bool:
+        rival: bool = j["equipo"] != self.mi_equipo and j["rol"] == "JUNGLE"
+        return rival
 
-    def _t_liga(self, j):
+    def _t_liga(self, j: Json) -> None:
         cache = self.app.cache
         clave = f"liga:{j['puuid']}"
         ligas = cache.kv_get(clave, max_edad=1800)
@@ -112,7 +123,7 @@ class Sesion:
             cache.kv_set(clave, ligas)
         j["liga"] = ligas
 
-    def _t_maestria(self, j):
+    def _t_maestria(self, j: Json) -> None:
         """Una sola consulta trae la maestría de toda la cuenta: la del campeón de hoy, sus mains y el total."""
         cache = self.app.cache
         clave = f"maestrias:{j['puuid']}"
@@ -132,7 +143,7 @@ class Sesion:
             "mains": [{"nombre": self.app.datos.nombre(int(c)), "puntos": v[0]} for c, v in mains],
         }
 
-    def _t_ids(self, j):
+    def _t_ids(self, j: Json) -> None:
         cache = self.app.cache
         n = self.app.cfg["partidas_por_jugador"]
         cola = self.cola if self.cola in LIGA_COLA else None
@@ -155,7 +166,7 @@ class Sesion:
                 prioridad = 60 + k
             self._poner(prioridad, self._t_partida, j, id_)
 
-    def _t_partida(self, j, id_):
+    def _t_partida(self, j: Json, id_: str) -> None:
         red = self.app.traer_partida(id_, self._cancelada)
         if not red:
             return
@@ -164,7 +175,7 @@ class Sesion:
             self._roles()
         self._quizas_linea(j, red)
 
-    def _quizas_linea(self, j, red):
+    def _quizas_linea(self, j: Json, red: Partida) -> None:
         """Decide si merece la pena pedir la línea de tiempo de esta partida (es la consulta cara)."""
         if j["puuid"] == self.yo or red["remake"] or red["cola"] not in COLAS_GRIETA:
             return
@@ -189,23 +200,23 @@ class Sesion:
             pedidas.add(red["id"])
         self._poner(prioridad, self._t_linea, j, red["id"])
 
-    def _t_linea(self, j, id_):
+    def _t_linea(self, j: Json, id_: str) -> None:
         if self.app.traer_linea(id_, self._cancelada):
             with self._lock:
                 j["lineas"].add(id_)
 
     # --- roles -------------------------------------------------------------------------
-    def _muestra(self, j):
+    def _muestra(self, j: Json) -> list[Partida]:
         cache = self.app.cache
         return [m for m in (cache.partida(i) for i in (j["ids"] or []) if i in j["cargadas"]) if m]
 
-    def _roles(self):
+    def _roles(self) -> None:
         with self._lock:
             for equipo in (100, 200):
                 grupo = [j for j in self.jugadores if j["equipo"] == equipo]
-                historiales = {}
+                historiales: dict[str, Counter[str]] = {}
                 for j in grupo:
-                    posiciones = Counter()
+                    posiciones: Counter[str] = Counter()
                     for m in an.validas(self._muestra(j)):
                         en = an.jugador_en(m, j["puuid"])
                         if en and en["pos"]:
@@ -216,11 +227,11 @@ class Sesion:
                     j["rol"] = rol
 
     # --- panel -------------------------------------------------------------------------
-    def invalidar_panel(self):
+    def invalidar_panel(self) -> None:
         """Ha cambiado algo de fuera que sale en el panel (notas, ajustes): se vuelve a montar al pedirlo."""
         self._sucio = True
 
-    def panel(self):
+    def panel(self) -> Panel:
         with self._lock:
             ahora = time.time()
             if self._panel is None or (self._sucio and ahora - self._ts_panel >= 1.0):
@@ -231,12 +242,12 @@ class Sesion:
             self._panel["terminada"] = self.terminada
             return self._panel
 
-    def _liga_ui(self, ligas):
+    def _liga_ui(self, ligas: list[Json] | None) -> dict[str, LigaUI | None] | None:
         """Rango de solo/dúo siempre (es el que dice el nivel real); en flexible, además el de flex."""
         if ligas is None:
             return None
 
-        def una(tipo):
+        def una(tipo: str) -> LigaUI | None:
             e = next((x for x in ligas if x.get("queueType") == tipo), None)
             if not e:
                 return None
@@ -255,7 +266,7 @@ class Sesion:
 
         return {"solo": una(LIGA_COLA[SOLO_DUO]), "flex": una(LIGA_COLA[FLEXIBLE]) if self.cola == FLEXIBLE else None}
 
-    def _montar(self):
+    def _montar(self) -> Panel:
         app = self.app
         datos = app.datos
         ahora_ms = int(time.time() * 1000)
@@ -291,9 +302,9 @@ class Sesion:
             "notas": self._notas(),
         }
 
-    def _lineas_cargadas(self):
+    def _lineas_cargadas(self) -> dict[str, Linea]:
         """Las líneas de tiempo ya bajadas de las partidas de los diez: {id: línea}."""
-        lineas = {}
+        lineas: dict[str, Linea] = {}
         for j in self.jugadores:
             for id_ in j["lineas"]:
                 linea = self.app.cache.linea(id_)
@@ -301,25 +312,32 @@ class Sesion:
                     lineas[id_] = linea
         return lineas
 
-    def _grupos(self, muestras):
+    def _grupos(self, muestras: dict[str, list[Partida]]) -> tuple[dict[str, int], dict[tuple[int, int | None], str]]:
         """Grupos que vienen juntos, deducidos del historial público (como Porofessor, Blitz y compañía).
 
         Devuelve ({puuid: número de grupo}, {(equipo, grupo): letra}): la letra distingue dos grupos del mismo equipo.
         """
-        grupos = {}
+        grupos: dict[str, int] = {}
         for equipo in (100, 200):
             grupos.update(an.premades([j["puuid"] for j in self.jugadores if j["equipo"] == equipo and j["puuid"]], muestras))
-        letra = {}
+        letra: dict[tuple[int, int | None], str] = {}
         for j in self.jugadores:
             g = grupos.get(j["puuid"])
             if g and (j["equipo"], g) not in letra:
                 letra[(j["equipo"], g)] = "ABCDE"[sum(1 for e, _ in letra if e == j["equipo"])]
         return grupos, letra
 
-    def _jugadores(self, muestras, lineas, grupos, letra, ahora_ms):
+    def _jugadores(
+        self,
+        muestras: dict[str, list[Partida]],
+        lineas: dict[str, Linea],
+        grupos: dict[str, int],
+        letra: dict[tuple[int, int | None], str],
+        ahora_ms: int,
+    ) -> tuple[Filas, dict[str, list[Json]]]:
         """(datos de trabajo de cada jugador para las secciones de abajo, los dos equipos tal y como salen en el panel)."""
-        filas = {}  # puuid -> resumen, etiquetas... del jugador
-        equipos = {"aliado": [], "rival": []}
+        filas: Filas = {}  # puuid -> resumen, etiquetas... del jugador
+        equipos: dict[str, list[Json]] = {"aliado": [], "rival": []}
         for j in self.jugadores:
             res = an.resumen_jugador(j["puuid"], muestras.get(j["puuid"], []), j["campeon"], lineas)
             grupo = letra.get((j["equipo"], grupos.get(j["puuid"])), "")
@@ -332,7 +350,7 @@ class Sesion:
             lista.sort(key=lambda f: ORDEN_POS.get(f["rol"], 9))
         return filas, equipos
 
-    def _etiquetas(self, j, res, grupo, ahora_ms):
+    def _etiquetas(self, j: Json, res: Json, grupo: str, ahora_ms: int) -> list[Etiqueta]:
         etiquetas = an.etiquetas(res, j["rol"], j["maestria"], ahora_ms) if res["n"] else []
         if grupo and j["puuid"] != self.yo:
             etiquetas.insert(
@@ -345,7 +363,7 @@ class Sesion:
             )
         return etiquetas
 
-    def _fila_del_panel(self, j, res, etiquetas, grupo):
+    def _fila_del_panel(self, j: Json, res: Json, etiquetas: list[Etiqueta], grupo: str) -> Json:
         datos = self.app.datos
         maestria = j["maestria"]
         return {
@@ -369,9 +387,9 @@ class Sesion:
             "cargando": bool(j["puuid"]) and (j["ids"] is None or len(j["cargadas"]) < min(5, len(j["ids"]))),
         }
 
-    def _por_posicion(self, filas):
+    def _por_posicion(self, filas: Filas) -> PorPosicion:
         """{'aliado'|'rival': {posición: jugador}} para comparar línea a línea."""
-        por_pos = {"aliado": {}, "rival": {}}
+        por_pos: PorPosicion = {"aliado": {}, "rival": {}}
         for f in filas.values():
             j = f["j"]
             por_pos[f["lado"]][j["rol"]] = {
@@ -383,7 +401,9 @@ class Sesion:
             }
         return por_pos
 
-    def _jungla_rival(self, jr, muestras, lineas):
+    def _jungla_rival(
+        self, jr: Json | None, muestras: dict[str, list[Partida]], lineas: dict[str, Linea]
+    ) -> tuple[Json | None, Json | None]:
         """(lo que enseña el panel del jungla rival, su perfil), o (None, None) si no se sabe quién es."""
         if not (jr and jr["j"]["puuid"]):
             return None, None
@@ -402,19 +422,21 @@ class Sesion:
         }
         return jungla, perfil
 
-    def _duelo(self, yo, por_pos):
+    def _duelo(self, yo: Json | None, por_pos: PorPosicion) -> Json | None:
         """Tu duelo contra el rival de tu posición, según las partidas de Master+."""
-        rival_directo = por_pos["rival"].get(yo["rol"]) if yo and yo["rol"] else None
+        if not (yo and yo["rol"]):
+            return None
+        rival_directo = por_pos["rival"].get(yo["rol"])
         return self.app.duelo(yo["campeon"], yo["rol"], rival_directo["j"]["campeon"]) if rival_directo else None
 
-    def _notas(self):
+    def _notas(self) -> list[Json]:
         """Tus notas de los campeones de la partida (solo en la tuya)."""
         if self.origen != "propia":
             return []
         rivales = {j["campeon"] for j in self.jugadores if j["equipo"] != self.mi_equipo}
         return self.app.notas_de([j["campeon"] for j in self.jugadores], rivales)
 
-    def _historial(self, muestras, por_pos, ahora_ms):
+    def _historial(self, muestras: dict[str, list[Partida]], por_pos: PorPosicion, ahora_ms: int) -> Json | None:
         app = self.app
         yo = next((j for j in self.jugadores if j["puuid"] == self.yo), None)
         if not yo:
@@ -440,9 +462,11 @@ class Sesion:
             fila["icono"] = app.datos.icono(fila["campeon"])
         return h
 
-    def _avisos(self, filas, perfil, jr, historial, grupos):
+    def _avisos(
+        self, filas: Filas, perfil: Json | None, jr: Json | None, historial: Json | None, grupos: dict[str, int]
+    ) -> list[Aviso]:
         """Hechos destacados, con sus números. Nunca órdenes: Riot no permite apps que decidan por el jugador."""
-        avisos = [  # (peso, tono, texto)
+        avisos: list[AvisoConPeso] = [
             *_aviso_de_tu_duelo(historial),
             *_avisos_del_jungla(perfil, jr),
             *self._avisos_de_jugadores(filas),
@@ -451,10 +475,10 @@ class Sesion:
         avisos.sort(key=lambda a: a[0], reverse=True)
         return [{"tono": tono, "texto": texto} for _, tono, texto in avisos[:7]]
 
-    def _avisos_de_jugadores(self, filas):
+    def _avisos_de_jugadores(self, filas: Filas) -> list[AvisoConPeso]:
         """Rivales que destacan (kills en solitario, racha con su campeón) y quién va con poco rodaje o fuera de rol."""
-        avisos = []
-        verdes = {"aliado": [], "rival": []}
+        avisos: list[AvisoConPeso] = []
+        verdes: dict[str, list[str]] = {"aliado": [], "rival": []}
         for f in filas.values():
             j, res = f["j"], f["res"]
             campeon = self.app.datos.nombre(j["campeon"])
@@ -477,16 +501,16 @@ class Sesion:
             avisos.append((4, "neutro", "Aliados con poco rodaje o fuera de rol: " + ", ".join(verdes["aliado"]) + "."))
         return avisos
 
-    def _avisos_de_premades(self, filas, grupos):
-        por_grupo = {}
+    def _avisos_de_premades(self, filas: Filas, grupos: dict[str, int]) -> list[AvisoConPeso]:
+        por_grupo: dict[int, list[str]] = {}
         for f in filas.values():
             if f["lado"] == "rival" and f["j"]["puuid"] in grupos:
                 por_grupo.setdefault(grupos[f["j"]["puuid"]], []).append(self.app.datos.nombre(f["j"]["campeon"]))
         return [(3, "neutro", f"Premade rival: {' + '.join(nombres)}.") for nombres in por_grupo.values()]
 
-    def _plan(self, lineas_juego, perfil, gank):
+    def _plan(self, lineas_juego: list[Json], perfil: Json | None, gank: Json | None) -> list[str]:
         """Dos o tres frases para leer en la pantalla de carga."""
-        plan = []
+        plan: list[str] = []
         if lineas_juego:
             mejor = lineas_juego[0]
             if mejor["veredicto"] == "Aquí se equivocan" and mejor["rival"]:
@@ -503,7 +527,7 @@ class Sesion:
         return plan[:3]
 
 
-def _gank(perfil):
+def _gank(perfil: Json | None) -> Json | None:
     """Si su primer gank va casi siempre a la misma línea (4 o más partidas, la mitad o más): {línea, veces, n}."""
     if not (perfil and perfil["ganks"]):
         return None
@@ -514,9 +538,11 @@ def _gank(perfil):
     return None
 
 
-def _aviso_de_tu_duelo(historial):
+def _aviso_de_tu_duelo(historial: Json | None) -> list[AvisoConPeso]:
     """Cómo te va contra el campeón de tu rival de posición: con tu campeón de hoy o, si no, con cualquiera."""
-    vj = (historial or {}).get("vs_directo")
+    if not historial:
+        return []
+    vj = historial.get("vs_directo")
     if vj and vj["n_mio"] >= 2:
         d = vj["n_mio"] - vj["v_mio"]
         tono = "ojo" if vj["v_mio"] < d else ("bien" if vj["v_mio"] > d else "neutro")
@@ -529,11 +555,11 @@ def _aviso_de_tu_duelo(historial):
     return []
 
 
-def _avisos_del_jungla(perfil, jr):
+def _avisos_del_jungla(perfil: Json | None, jr: Json | None) -> list[AvisoConPeso]:
     """Si el jungla rival gana casi siempre cuando va por delante o saca muchas kills en solitario."""
     if not (perfil and perfil["snowball"] and jr):
         return []
-    avisos = []
+    avisos: list[AvisoConPeso] = []
     s = perfil["snowball"]
     gana, veces = s["delante"]
     if veces >= 3 and gana / veces >= 0.75:

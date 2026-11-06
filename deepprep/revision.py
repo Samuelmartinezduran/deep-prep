@@ -3,7 +3,14 @@
 Riot anima justo a esto: jugar primero y analizar después. Aquí sí se sacan conclusiones.
 """
 
+from collections.abc import Callable, Collection, Iterable, Mapping
+from typing import Any
+
 from . import analisis as an
+from .tipos import Json, Jugador, Linea, Panel, Partida, Revision
+
+# Segundos grabados antes del 0:00 de la partida, por serie de la grabación (un número solo es la serie 1).
+Desfase = Mapping[int, float] | float | None
 
 MONSTRUOS = {"DRAGON": "Dragón", "BARON_NASHOR": "Barón", "RIFTHERALD": "Heraldo", "HORDE": "Larvas", "ATAKHAN": "Atakhan"}
 DRAGONES = {
@@ -20,11 +27,12 @@ VENTANA_OBJETIVO_MS = 90_000
 TROZO_S = 300  # la grabación va en trozos de 5 minutos
 
 
-def reducir_linea_completa(t):
+def reducir_linea_completa(t: Json) -> Linea:
     """Línea de tiempo entera (no solo los 15 primeros minutos): estado por minuto, kills y monstruos."""
     info = t["info"]
     pos, est = an.estado_por_minuto(info["frames"])
-    kills, monstruos = [], []
+    kills: list[list[Any]] = []
+    monstruos: list[list[Any]] = []
     for f in info["frames"]:
         for e in f.get("events", []):
             if e["type"] == "CHAMPION_KILL":
@@ -35,7 +43,7 @@ def reducir_linea_completa(t):
     return {"id": t["metadata"]["matchId"], "pos": pos, "est": est, "kills": kills, "monstruos": monstruos}
 
 
-def donde(x, y, mi_equipo):
+def donde(x: float, y: float, mi_equipo: int) -> str:
     tipo, lado, mitad = an.zona(x, y)
     lado_txt = "arriba" if lado == "sup" else "abajo"
     if tipo == "base":
@@ -47,19 +55,19 @@ def donde(x, y, mi_equipo):
     return f"en tu jungla ({lado_txt})" if mitad == mi_equipo else f"en la jungla rival ({lado_txt})"
 
 
-def nombre_monstruo(tipo, subtipo):
+def nombre_monstruo(tipo: str, subtipo: str) -> str:
     base = MONSTRUOS.get(tipo, tipo.capitalize())
     if tipo == "DRAGON" and subtipo in DRAGONES:
         return f"{base} {DRAGONES[subtipo]}"
     return base
 
 
-def nombre_trozo(serie, trozo):
+def nombre_trozo(serie: int, trozo: int) -> str:
     """Archivo de un trozo de la grabación (lo que escribe grabacion.py: r01_seg_000.mkv, ...)."""
     return f"r{serie:02d}_seg_{trozo:03d}.mkv"
 
 
-def en_grabacion(ms, desfase_s):
+def en_grabacion(ms: float, desfase_s: Desfase) -> tuple[int, float] | None:
     """En qué serie de la grabación cae un momento de la partida y en qué segundo de ella: (serie, s), o None.
 
     desfase_s: {serie: segundos que lleva grabados antes del 0:00 de la partida}; negativo si la serie empezó
@@ -68,12 +76,12 @@ def en_grabacion(ms, desfase_s):
     """
     if desfase_s is None:
         return None
-    series = desfase_s if isinstance(desfase_s, dict) else {1: desfase_s}
+    series = desfase_s if isinstance(desfase_s, Mapping) else {1: desfase_s}
     empezadas = [(n, ms / 1000 + d) for n, d in series.items() if ms / 1000 + d >= 0]
     return min(empezadas, key=lambda s: s[1]) if empezadas else None
 
 
-def en_video(ms, desfase_s):
+def en_video(ms: float, desfase_s: Desfase) -> dict[str, str] | None:
     """Dónde cae un momento de la partida en la grabación: (trozo, 'm:ss' dentro del trozo), o None."""
     donde = en_grabacion(ms, desfase_s)
     if not donde:
@@ -84,12 +92,19 @@ def en_video(ms, desfase_s):
     return {"archivo": nombre_trozo(serie, trozo), "en": f"{dentro // 60}:{dentro % 60:02d}"}
 
 
-def _al(linea, pid, minuto):
+def _al(linea: Linea, pid: int, minuto: int) -> list[int] | None:
     est = linea["est"].get(str(pid)) or []
     return est[minuto] if len(est) > minuto else None
 
 
-def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None):
+def revisar(
+    partida: Partida,
+    linea: Linea,
+    yo_puuid: str,
+    nombre_campeon: Callable[[int], str],
+    panel: Panel | None = None,
+    desfase_s: Desfase = None,
+) -> Revision | None:
     """Revisión de la partida desde el punto de vista de yo_puuid.
 
     nombre_campeon: función id -> nombre. panel: el panel tal y como estaba al empezar (para comparar).
@@ -106,7 +121,7 @@ def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None
     # Con quién compararte: tu rival de posición (en jungla, el jungla rival).
     directo = next((j for j in partida["jug"] if yo["pos"] and j["pos"] == yo["pos"] and j["equipo"] != equipo), None) or jr
 
-    def campeon(p):
+    def campeon(p: int) -> str:
         return nombre_campeon(por_pid[p]["campeon"]) if p in por_pid else "Torre o súbditos"
 
     return {
@@ -135,13 +150,15 @@ def revisar(partida, linea, yo_puuid, nombre_campeon, panel=None, desfase_s=None
     }
 
 
-def _muertes(linea, pid, equipo, campeon, pids, desfase_s):
+def _muertes(
+    linea: Linea, pid: int, equipo: int, campeon: Callable[[int], str], pids: Collection[int], desfase_s: Desfase
+) -> list[Json]:
     """Tus muertes: dónde, quién, si costaron un objetivo y en qué punto de la grabación caen.
 
     campeon(pid): nombre del campeón de ese jugador. pids: los de los jugadores (lo demás es una torre o súbditos).
     """
     monstruos = linea["monstruos"]
-    muertes = []
+    muertes: list[Json] = []
     for t, x, y, asesino, victima, ayudas in linea["kills"]:
         if victima != pid:
             continue
@@ -168,7 +185,7 @@ def _muertes(linea, pid, equipo, campeon, pids, desfase_s):
     return muertes
 
 
-def _objetivos(monstruos, pid, equipo):
+def _objetivos(monstruos: list[list[Any]], pid: int, equipo: int) -> list[Json]:
     return [
         {
             "t": an.mmss(t),
@@ -180,9 +197,9 @@ def _objetivos(monstruos, pid, equipo):
     ]
 
 
-def _comparacion(linea, pid, directo, nombre_campeon):
+def _comparacion(linea: Linea, pid: int, directo: Jugador, nombre_campeon: Callable[[int], str]) -> Json | None:
     """Tu oro, experiencia, CS y nivel al 10 y al 15 al lado de los de tu rival directo, o None sin datos."""
-    filas = {}
+    filas: dict[str, Json] = {}
     for minuto in (10, 15):
         mio, suyo = _al(linea, pid, minuto), _al(linea, directo["pid"], minuto)
         if mio and suyo:
@@ -195,11 +212,11 @@ def _comparacion(linea, pid, directo, nombre_campeon):
     return {"rival": nombre_campeon(directo["campeon"]), "minutos": filas} if filas else None
 
 
-def _prevision(panel, linea, partida, equipo, jr):
+def _prevision(panel: Panel | None, linea: Linea, partida: Partida, equipo: int, jr: Jugador | None) -> list[Json]:
     """Lo que el panel decía al empezar frente a lo que pasó."""
     if not panel:
         return []
-    filas = []
+    filas: list[Json] = []
     gank = panel.get("gank")
     if gank and jr:
         real = an.primer_gank(linea, jr["pid"])
@@ -208,7 +225,7 @@ def _prevision(panel, linea, partida, equipo, jr):
                 "tema": "Primer gank del jungla rival",
                 "dijo": f"{gank['linea']} ({gank['veces']} de {gank['n']} partidas)",
                 "paso": f"{real[1]} al {an.mmss(real[0])}" if real else "ninguno antes del 10",
-                "acierto": bool(real) and real[1] == gank["linea"],
+                "acierto": real is not None and real[1] == gank["linea"],
             }
         )
     lineas = panel.get("lineas") or []
@@ -230,13 +247,15 @@ def _prevision(panel, linea, partida, equipo, jr):
 
 
 # --- tendencias de la temporada ------------------------------------------------------------------
-def _fila(nombre, juegos):
+def _fila(nombre: str, juegos: list[bool]) -> Json:
     return {"nombre": nombre, "n": len(juegos), "v": sum(1 for g in juegos if g)}
 
 
-def tendencias(partidas, mis_puuids, nombre_campeon, hora_local):
+def tendencias(
+    partidas: list[Partida], mis_puuids: Collection[str], nombre_campeon: Callable[[int], str], hora_local: Callable[[int], int]
+) -> Json | None:
     """Patrones de tus clasificatorias de la temporada. hora_local: función ms -> hora (0-23)."""
-    juegos = []  # de la más antigua a la más reciente
+    juegos: list[tuple[Partida, Jugador]] = []  # de la más antigua a la más reciente
     for m in reversed(an.validas(partidas)):
         yo = next((j for j in m["jug"] if j["puuid"] in mis_puuids), None)
         if yo:
@@ -244,9 +263,14 @@ def tendencias(partidas, mis_puuids, nombre_campeon, hora_local):
     if not juegos:
         return None
     primera, tras_victoria, tras_derrota = _por_sesion(juegos)
-    franjas = {"Mañana (6-14 h)": [], "Tarde (14-20 h)": [], "Noche (20-24 h)": [], "Madrugada (0-6 h)": []}
-    duraciones = {"Menos de 25 min": [], "25 a 35 min": [], "Más de 35 min": []}
-    directos = {}  # (campeón rival, posición) -> resultados, contra tu rival de posición
+    franjas: dict[str, list[bool]] = {
+        "Mañana (6-14 h)": [],
+        "Tarde (14-20 h)": [],
+        "Noche (20-24 h)": [],
+        "Madrugada (0-6 h)": [],
+    }
+    duraciones: dict[str, list[bool]] = {"Menos de 25 min": [], "25 a 35 min": [], "Más de 35 min": []}
+    directos: dict[tuple[int, str], list[bool]] = {}  # (campeón rival, posición) -> resultados, contra tu rival de posición
     for m, yo in juegos:
         franjas[_franja(hora_local(m["creacion"]))].append(yo["gana"])
         minutos = m["duracion"] / 60
@@ -274,27 +298,28 @@ def tendencias(partidas, mis_puuids, nombre_campeon, hora_local):
     }
 
 
-def _por_sesion(juegos):
+def _por_sesion(juegos: list[tuple[Partida, Jugador]]) -> tuple[list[bool], list[bool], list[bool]]:
     """Resultados de la primera partida de cada sesión, de las de después de ganar y de las de después de perder."""
-    primera, tras_victoria, tras_derrota = [], [], []
+    primera: list[bool] = []
+    tras_victoria: list[bool] = []
+    tras_derrota: list[bool] = []
     for i, (m, yo) in enumerate(juegos):
         anterior = juegos[i - 1] if i else None
         # Misma sesión: empezó menos de 2 horas después de acabar la anterior.
-        seguida = anterior and m["creacion"] - (anterior[0]["creacion"] + anterior[0]["duracion"] * 1000) < 2 * 3600 * 1000
-        if seguida:
+        if anterior and m["creacion"] - (anterior[0]["creacion"] + anterior[0]["duracion"] * 1000) < 2 * 3600 * 1000:
             (tras_victoria if anterior[1]["gana"] else tras_derrota).append(yo["gana"])
         else:
             primera.append(yo["gana"])
     return primera, tras_victoria, tras_derrota
 
 
-def _franja(h):
+def _franja(h: int) -> str:
     return "Madrugada (0-6 h)" if h < 6 else "Mañana (6-14 h)" if h < 14 else "Tarde (14-20 h)" if h < 20 else "Noche (20-24 h)"
 
 
-def mapa_muertes(revisiones):
+def mapa_muertes(revisiones: Iterable[Revision | None]) -> list[Json]:
     """Tus muertes de varias revisiones, todas vistas desde la base azul (abajo a la izquierda)."""
-    out = []
+    out: list[Json] = []
     for r in revisiones:
         if not r or "equipo" not in r:
             continue
