@@ -4,7 +4,7 @@ Corea, Norteamérica y Asia-Pacífico tienen cuota propia (Riot cuenta cada host
 quitan nada al panel de tu partida. EUW comparte cuota con el panel: solo se usa con el cliente quieto
 y empieza por tus propias partidas (para comparar tus números con los de Master+).
 
-Uso suelto (sin la app): py -m porofesor.recolector [--minutos 60] [--sin-europa]
+Uso suelto (sin la app): py -m deepprep.recolector [--minutos 60] [--sin-europa]
 """
 import json
 import msvcrt

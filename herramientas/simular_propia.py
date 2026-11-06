@@ -12,9 +12,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from anonimizar import anonimizar  # noqa: E402
-from porofesor import config  # noqa: E402
-from porofesor.app import App  # noqa: E402
-from porofesor.riot import Cliente  # noqa: E402
+from deepprep import config  # noqa: E402
+from deepprep.app import App  # noqa: E402
+from deepprep.riot import Cliente  # noqa: E402
 
 SALIDA = Path(__file__).parent / "panel_simulado.json"  # volcado del panel para mirarlo con calma
 MAQUETA = Path(__file__).parent / "maquetas" / "partida.json"
@@ -79,7 +79,7 @@ def main():
         # Deja el panel a la vista en el puerto de siempre durante 'espera' segundos.
         import threading
 
-        from porofesor import servidor
+        from deepprep import servidor
 
         srv = servidor.crear(app, cfg["puerto"])
         threading.Thread(target=srv.serve_forever, daemon=True).start()

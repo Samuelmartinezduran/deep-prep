@@ -10,7 +10,11 @@ from pathlib import Path
 
 from . import config
 
-ACCESO = Path(os.environ.get("APPDATA", "")) / "Microsoft/Windows/Start Menu/Programs/Startup/Porofesor.lnk"
+# DEEPPREP_INICIO lo manda a otro sitio (para probar sin tocar la carpeta Inicio de verdad).
+ACCESO = Path(os.environ.get("DEEPPREP_INICIO")
+              or Path(os.environ.get("APPDATA", "")) / "Microsoft/Windows/Start Menu/Programs/Startup/Deep Prep.lnk")
+# El de Porofesor (hasta la 1.0.2): lo quita actualizador.quitar_restos_de_porofesor si era el de la app instalada.
+ACCESO_VIEJO = ACCESO.with_name("Porofesor.lnk")
 
 
 def activo():
@@ -28,14 +32,14 @@ def poner(encendido):
     if config.CONGELADA:
         pyw, argumentos = sys.executable, "--oculta"
     else:
-        pyw, argumentos = shutil.which("pyw"), "-X utf8 -m porofesor --oculta"
+        pyw, argumentos = shutil.which("pyw"), "-X utf8 -m deepprep --oculta"
     if not pyw:
         return "No encuentro pyw para arrancar con Windows."
     icono = config.RUTA_WEB / "icono.ico"
     ps = (
         "$s=(New-Object -ComObject WScript.Shell).CreateShortcut($env:ACCESO);"
         "$s.TargetPath=$env:PYW; $s.Arguments=$env:ARGS;"
-        "$s.WorkingDirectory=$env:RAIZ; $s.IconLocation=$env:ICONO; $s.Description='Porofesor (en segundo plano)'; $s.Save()"
+        "$s.WorkingDirectory=$env:RAIZ; $s.IconLocation=$env:ICONO; $s.Description='Deep Prep (en segundo plano)'; $s.Save()"
     )
     entorno = dict(os.environ, ACCESO=str(ACCESO), PYW=pyw, ARGS=argumentos, RAIZ=str(config.RAIZ), ICONO=str(icono))
     r = subprocess.run(["powershell", "-NoProfile", "-Command", ps], env=entorno, capture_output=True, text=True,

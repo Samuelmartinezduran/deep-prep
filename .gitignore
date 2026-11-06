@@ -13,6 +13,7 @@ __pycache__/
 empaquetado/build/
 empaquetado/dist/
 empaquetado/descargas/
+empaquetado/puente/
 empaquetado/*.zip
 empaquetado/*.sha256
 empaquetado/*.spec

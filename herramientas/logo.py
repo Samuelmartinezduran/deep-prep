@@ -1,4 +1,4 @@
-"""Genera el icono de Porofesor (porofesor/web/icono.ico) y una vista previa.
+"""Genera el icono de Deep Prep (deepprep/web/icono.ico) y una vista previa.
 
 El dibujo es la Grieta reducida a lo esencial: el borde son las líneas de top y bot, la diagonal es mid,
 las esquinas son las dos bases y el punto del centro eres tú. Violeta de la app sobre fondo oscuro.
@@ -46,7 +46,7 @@ def dibujar(tam):
 
 def main():
     imagenes = [dibujar(t) for t in TAMANOS]
-    destino = RAIZ / "porofesor" / "web" / "icono.ico"
+    destino = RAIZ / "deepprep" / "web" / "icono.ico"
     imagenes[-1].save(destino, format="ICO", sizes=[(t, t) for t in TAMANOS], append_images=imagenes[:-1])
     print(destino)
     if len(sys.argv) > 1:

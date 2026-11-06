@@ -5,7 +5,7 @@ import time
 import unittest
 from pathlib import Path
 
-from porofesor import grabacion as g
+from deepprep import grabacion as g
 
 
 class Limpieza(unittest.TestCase):

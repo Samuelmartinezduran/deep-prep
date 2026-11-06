@@ -1,4 +1,4 @@
-"""Arranque: py -m porofesor  (--sin-ventana: solo el servidor, sin ventanas)"""
+"""Arranque: py -m deepprep  (--sin-ventana: solo el servidor, sin ventanas)"""
 import json
 import os
 import subprocess
@@ -51,7 +51,9 @@ def main():
         grabacion.grabar(config.cargar(), prueba_seg=prueba)
         return
     if sys.stderr is None:  # lanzado con pyw: no hay consola, los errores van a un archivo
-        sys.stdout = sys.stderr = open(config.DATOS / "porofesor.log", "a", encoding="utf-8", buffering=1)
+        sys.stdout = sys.stderr = open(config.DATOS / "deepprep.log", "a", encoding="utf-8", buffering=1)
+    for aviso in config.AVISOS:  # la mudanza de los datos de Porofesor, si la ha habido
+        print(aviso)
 
     from . import actualizador
 
@@ -84,14 +86,14 @@ def main():
         return
     app.arrancar()
     threading.Thread(target=srv.serve_forever, name="servidor", daemon=True).start()
-    print(f"Porofesor en {url}")
+    print(f"Deep Prep en {url}")
 
     if con_ventana:
         try:
             import ctypes
 
-            # Así la barra de tareas usa el icono de Porofesor y no el de Python.
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Samuel.Porofesor")
+            # Así la barra de tareas usa el icono de Deep Prep y no el de Python.
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Samuel.DeepPrep")
             from .ventanas import Ventanas
 
             Ventanas(app, url).arrancar(oculta="--oculta" in sys.argv)

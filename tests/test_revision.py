@@ -4,8 +4,8 @@ import json
 import unittest
 from pathlib import Path
 
-from porofesor import analisis as an
-from porofesor import revision as rv
+from deepprep import analisis as an
+from deepprep import revision as rv
 
 DATOS = Path(__file__).parent / "datos"
 

@@ -53,7 +53,7 @@ if (!OVERLAY) {
   raiz.innerHTML = `
     <div class="app">
       <aside class="barra">
-        <div class="marca">${LOGO}<span>Porofesor</span></div>
+        <div class="marca">${LOGO}<span>Deep Prep</span></div>
         <nav class="pestanas" id="pestanas">
           <button data-vista="partida" class="activa">${ICONO.partida}<span>Partida</span></button>
           <button data-vista="revisiones">${ICONO.revisiones}<span>Revisiones</span></button>
@@ -530,7 +530,7 @@ function pintarEspera(e) {
   const aviso = ov.aviso ? `<div class="aviso-ventana">${esc(ov.aviso)}</div>` : "";
   return `<div class="espera">
       <div class="espera-icono">${LOGO}</div>
-      <div class="etiqueta-cab">Porofesor</div><h1>${esc(e.fase_txt)}</h1><p>${texto}</p>${sync}${pasos}${aviso}</div>`;
+      <div class="etiqueta-cab">Deep Prep</div><h1>${esc(e.fase_txt)}</h1><p>${texto}</p>${sync}${pasos}${aviso}</div>`;
 }
 
 // --- overlay: lo justo para leerlo en dos segundos ------------------------------------------------
@@ -553,7 +553,7 @@ function ovFila(f) {
 
 function pintarOverlay(e) {
   const p = e.panel;
-  if (!p) return `<div class="ov"><div class="ov-cab">${LOGO.replace("<svg", '<svg width="18" height="18"')}<span class="titulo">Porofesor</span><span class="linea2">Esperando la partida…</span></div></div>`;
+  if (!p) return `<div class="ov"><div class="ov-cab">${LOGO.replace("<svg", '<svg width="18" height="18"')}<span class="titulo">Deep Prep</span><span class="linea2">Esperando la partida…</span></div></div>`;
   const j = p.jungla;
   const jungla = j
     ? `<section class="caja">${titulo(`Jungla rival · ${esc(j.campeon)}`, `${j.n} partidas · ${j.n_lineas} líneas de tiempo`)}${tarjetas(j, true)}</section>`
@@ -805,7 +805,7 @@ async function pintarAjustes() {
       <label>Opacidad <span class="rango-fila"><input type="range" id="a-opacidad" min="40" max="100" value="${opacidad}"><span class="num" id="opacidad-valor">${opacidad}%</span></span></label>`)}
     ${grupo("Siempre en marcha", "Así el recolector sigue llenando tus duelos de Master+ y el overlay está listo al jugar. Gasta muy poco: en torno al 2% de un núcleo y 130 MB de memoria.", `
       ${interruptor("a-siempre", a.siempre_en_marcha, "Arrancar con Windows y seguir con el LoL cerrado")}
-      <div><button id="salir-app">Cerrar Porofesor del todo</button></div>`)}
+      <div><button id="salir-app">Cerrar Deep Prep del todo</button></div>`)}
     ${grupo("Grabación", "Cada partida en la Grieta se graba en Vídeos\\LoL-coach y la revisión apunta el minuto de cada muerte en el vídeo.", `
       ${interruptor("a-grabar", a.grabar, "Grabar cada partida en la Grieta")}
       <label>Grabar con <select id="a-codificador">
@@ -826,7 +826,7 @@ async function pintarAjustes() {
       <div id="notas">${notas}</div><div><button id="nueva-nota">Añadir nota</button></div>`)}
     <datalist id="lista-campeones">${campeones.map((c) => `<option value="${esc(c.nombre)}">`).join("")}</datalist>
     <div class="guardar"><button class="primario" id="guardar-ajustes">Guardar cambios</button><span id="ajustes-estado" class="linea2"></span>
-      <span class="linea2 version">Porofesor ${esc(a.version.version)}${a.version.lista ? ` · la ${esc(a.version.nueva)} se instala sola cuando cierres esta ventana, fuera de partida` : ""}</span></div>
+      <span class="linea2 version">Deep Prep ${esc(a.version.version)}${a.version.lista ? ` · la ${esc(a.version.nueva)} se instala sola cuando cierres esta ventana, fuera de partida` : ""}</span></div>
   </div>`;
 }
 
@@ -911,7 +911,7 @@ function pintarVersion(v, n) {
   const puntos = lineas.filter((l) => /^[-*•]/.test(l)).map((l) => `<li>${esc(l.replace(/^[-*•]\s*/, ""))}</li>`);
   const texto = lineas.filter((l) => !/^[-*•]/.test(l)).map((l) => `<p>${esc(l.replace(/^#+\s*/, ""))}</p>`);
   $("novedades").innerHTML = `<section class="novedades">
-      <div class="nov-cab"><span class="etiqueta-cab">Novedades</span><h2>Porofesor ${esc(n.version)}</h2></div>
+      <div class="nov-cab"><span class="etiqueta-cab">Novedades</span><h2>Deep Prep ${esc(n.version)}</h2></div>
       <div class="nov-cuerpo">${texto.join("")}${puntos.length ? `<ul>${puntos.join("")}</ul>` : ""}</div>
       <button id="cerrar-novedades">Entendido</button>
     </section>`;

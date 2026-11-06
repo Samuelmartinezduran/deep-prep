@@ -9,14 +9,14 @@ import zipfile
 from pathlib import Path
 from unittest import mock
 
-from porofesor import actualizador as act
+from deepprep import actualizador as act
 
 
 def zip_con_exe():
     b = io.BytesIO()
     with zipfile.ZipFile(b, "w") as z:
-        z.writestr("Porofesor/Porofesor.exe", b"exe")
-        z.writestr("Porofesor/_internal/algo.dll", b"dll")
+        z.writestr("DeepPrep/DeepPrep.exe", b"exe")
+        z.writestr("DeepPrep/_internal/algo.dll", b"dll")
     return b.getvalue()
 
 
@@ -43,9 +43,9 @@ class Actualizador(unittest.TestCase):
 
     def github(self, tag, datos, huella=None):
         huella = huella or hashlib.sha256(datos).hexdigest()
-        rel = {"tag_name": tag, "assets": [{"name": "Porofesor-9.9.9.zip", "browser_download_url": "zip"},
-                                            {"name": "Porofesor-9.9.9.zip.sha256", "browser_download_url": "sha"}]}
-        respuestas = {"zip": datos, "sha": f"{huella}  Porofesor-9.9.9.zip\n".encode()}
+        rel = {"tag_name": tag, "assets": [{"name": "DeepPrep-9.9.9.zip", "browser_download_url": "zip"},
+                                            {"name": "DeepPrep-9.9.9.zip.sha256", "browser_download_url": "sha"}]}
+        respuestas = {"zip": datos, "sha": f"{huella}  DeepPrep-9.9.9.zip\n".encode()}
         return lambda url, binario=False: respuestas[url] if binario else rel
 
     def test_versiones(self):
@@ -57,7 +57,7 @@ class Actualizador(unittest.TestCase):
         with mock.patch.object(act, "_get", self.github("v9.9.9", zip_con_exe())):
             self.assertTrue(a.comprobar())
         self.assertEqual((a.estado["nueva"], a.estado["lista"]), ("9.9.9", True))
-        self.assertTrue((a._carpeta_nueva / "Porofesor.exe").is_file())
+        self.assertTrue((a._carpeta_nueva / "DeepPrep.exe").is_file())
 
     def test_no_instala_si_la_huella_no_cuadra(self):
         a = act.Actualizador(AppFalsa())
@@ -105,8 +105,8 @@ if __name__ == "__main__":
 class Novedades(unittest.TestCase):
     def test_solo_las_de_esta_version_y_una_vez(self):
         import tempfile
-        from porofesor import __version__
-        from porofesor import actualizador as act
+        from deepprep import __version__
+        from deepprep import actualizador as act
 
         with tempfile.TemporaryDirectory() as d:
             original, vista = act.NOVEDADES, act.VISTA

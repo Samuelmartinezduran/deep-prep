@@ -11,12 +11,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import gzip  # noqa: E402
 
-from porofesor import analisis as an  # noqa: E402
-from porofesor import config, servidor  # noqa: E402
-from porofesor import revision as rv  # noqa: E402
-from porofesor.app import App  # noqa: E402
-from porofesor import duelos as du  # noqa: E402
-from porofesor.recolector import BaseDuelos  # noqa: E402
+from deepprep import analisis as an  # noqa: E402
+from deepprep import config, servidor  # noqa: E402
+from deepprep import revision as rv  # noqa: E402
+from deepprep.app import App  # noqa: E402
+from deepprep import duelos as du  # noqa: E402
+from deepprep.recolector import BaseDuelos  # noqa: E402
 
 
 AQUI = Path(__file__).parent

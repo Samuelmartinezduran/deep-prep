@@ -8,9 +8,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from porofesor import analisis as an  # noqa: E402
-from porofesor import config  # noqa: E402
-from porofesor.app import App  # noqa: E402
+from deepprep import analisis as an  # noqa: E402
+from deepprep import config  # noqa: E402
+from deepprep.app import App  # noqa: E402
 
 
 class SinRed:

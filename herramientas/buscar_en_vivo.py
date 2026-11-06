@@ -9,8 +9,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from porofesor import config  # noqa: E402
-from porofesor.riot import Cliente  # noqa: E402
+from deepprep import config  # noqa: E402
+from deepprep.riot import Cliente  # noqa: E402
 
 
 def main():

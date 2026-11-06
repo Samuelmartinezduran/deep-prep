@@ -2,9 +2,9 @@
 import unittest
 from pathlib import Path
 
-from porofesor import analisis as an
-from porofesor import clips
-from porofesor import revision as rv
+from deepprep import analisis as an
+from deepprep import clips
+from deepprep import revision as rv
 from tests.test_analisis import jug, partida
 
 

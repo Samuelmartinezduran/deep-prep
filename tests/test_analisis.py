@@ -5,7 +5,7 @@ import unittest
 from collections import Counter
 from pathlib import Path
 
-from porofesor import analisis as an
+from deepprep import analisis as an
 
 DATOS = Path(__file__).parent / "datos"
 

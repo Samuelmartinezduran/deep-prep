@@ -1,6 +1,6 @@
 """Graba la pantalla de cada partida en la Grieta (ffmpeg, trozos de 5 minutos) en Vídeos\\LoL-coach.
 
-La grabación va en un proceso aparte ("porofesor --grabar"): espera a que se abra el juego, graba la
+La grabación va en un proceso aparte ("deepprep --grabar"): espera a que se abra el juego, graba la
 pantalla donde está y para sola al acabar la partida, aunque la app se reinicie o se cierre por medio.
 La app solo lo lanza, mira el registro para saber en qué carpeta graba y avisa si el vídeo deja de crecer.
 
@@ -66,7 +66,7 @@ class Grabador:
             if getattr(sys, "frozen", False):
                 orden = [sys.executable, "--grabar"]
             else:
-                orden = [sys.executable, "-X", "utf8", "-m", "porofesor", "--grabar"]
+                orden = [sys.executable, "-X", "utf8", "-m", "deepprep", "--grabar"]
             try:
                 self._proceso = subprocess.Popen(
                     orden, cwd=str(config.RAIZ), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -254,7 +254,7 @@ def limpiar(base, max_gb, actual=None):
     return borradas
 
 
-# --- el proceso de grabación ("porofesor --grabar") ------------------------------------------------------
+# --- el proceso de grabación ("deepprep --grabar") -------------------------------------------------------
 def grabar(cfg, espera_min=5, max_min=100, prueba_seg=0):
     """Espera a la partida, la graba y para al acabar. Escribe lo que hace en grabacion.log.
 

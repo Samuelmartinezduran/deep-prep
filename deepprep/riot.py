@@ -14,7 +14,7 @@ import urllib.request
 from collections import defaultdict, deque
 
 # Sin User-Agent propio, Cloudflare rechaza el de urllib con "error code: 1010".
-USER_AGENT = "porofesor-personal/1.0"
+USER_AGENT = "deep-prep/2.0"
 
 
 class ClaveInvalida(Exception):

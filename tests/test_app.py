@@ -6,10 +6,10 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from porofesor import config, servidor
-from porofesor.app import App
-from porofesor.cache import Cache
-from porofesor.riot import ClaveInvalida, Limitador
+from deepprep import config, servidor
+from deepprep.app import App
+from deepprep.cache import Cache
+from deepprep.riot import ClaveInvalida, Limitador
 
 DATOS = Path(__file__).parent / "datos"
 
@@ -251,7 +251,7 @@ class NormasDeRiot(unittest.TestCase):
         lol.fase = "InProgress"
         # Dos jugadores de cada equipo vienen juntos (los dos primeros de cada lista, sin contarme a mí).
         con_grupo = lambda equipo, muestras: {p: 1 for p in [x for x in equipo if x != "puuid-yo"][:2]}
-        with mock.patch("porofesor.analisis.premades", side_effect=con_grupo):
+        with mock.patch("deepprep.analisis.premades", side_effect=con_grupo):
             app._paso()
             self.assertTrue(esperar(app.sesion))
             p = app.estado()["panel"]
@@ -361,7 +361,7 @@ class NormasDeRiot(unittest.TestCase):
         app._comprobar_clave()
 
     def test_ningun_texto_da_ordenes(self):
-        from porofesor import sesion
+        from deepprep import sesion
 
         codigo = Path(sesion.__file__).read_text(encoding="utf-8").lower()
         for orden in ("evita", "no cuentes", "a explotar", "solo con compañeros"):

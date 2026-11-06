@@ -4,9 +4,9 @@ import json
 import unittest
 from pathlib import Path
 
-from porofesor import analisis as an
-from porofesor import duelos as du
-from porofesor.recolector import BaseDuelos, pool_de
+from deepprep import analisis as an
+from deepprep import duelos as du
+from deepprep.recolector import BaseDuelos, pool_de
 
 DATOS = Path(__file__).parent / "datos"
 

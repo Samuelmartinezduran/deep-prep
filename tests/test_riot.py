@@ -1,7 +1,7 @@
 """Pruebas del control de cuota, con un reloj falso que avanza al 'dormir'."""
 import unittest
 
-from porofesor.riot import Limitador
+from deepprep.riot import Limitador
 
 
 class Reloj:
