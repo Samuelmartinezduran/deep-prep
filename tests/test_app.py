@@ -7,8 +7,10 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
+from unittest import mock
 
 from deepprep import config, servidor
+from deepprep import recolector as rec
 from deepprep.app import App
 from deepprep.base_duelos import BaseDuelos
 from deepprep.cache import Cache
@@ -523,6 +525,28 @@ class SeleccionDeCampeon(unittest.TestCase):
         lol.fase = "Lobby"
         app.vigia.paso()
         self.assertIsNone(app.estado()["seleccion"])
+
+
+class RecolectorPorRegion(unittest.TestCase):
+    def test_tu_region_va_con_el_cliente_del_panel_y_las_demas_aparte(self):
+        for region in ("europe", "asia"):
+            with self.subTest(region=region):
+                cfg = dict(config.POR_DEFECTO, cuentas=["Yo#EUW"], region=region, revisar=False, grabar=False)
+                riot = RiotFalso(None)
+                app = crear(cfg, riot, LolFalso())
+                with (
+                    mock.patch.object(rec.config, "cargar", dict),
+                    mock.patch.object(rec.Recolector, "arrancar", return_value=True),
+                ):
+                    app._arrancar_recolector()
+                r = app.recolector
+                assert r is not None
+                self.assertIs(r.cliente_propio, riot)  # comparte cuota con el panel: solo con el cliente quieto
+                self.assertEqual(r.cuota_libre, app._cuota_libre)
+                fuera = sorted(c.region for c in r.clientes)
+                self.assertEqual(len(fuera), len(rec.TODAS) - 1)
+                self.assertNotIn(f"{region}.api.riotgames.com", fuera)  # la tuya no va dos veces
+                self.assertEqual(rec.de_fuera(region), [(p, x) for p, x in rec.TODAS if x != region])
 
 
 class BusquedaManual(unittest.TestCase):

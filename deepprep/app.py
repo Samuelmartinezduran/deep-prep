@@ -208,7 +208,6 @@ class App:
         if self.recolector or not self.cfg.get("recolectar", True):
             return
         # Tu región va con el cliente del panel (y su cuota); las demás, cada una con la suya.
-        fuera = [(p, r) for p, r in rec.TODAS if r != self.cfg["region"]]
         self.recolector = rec.Recolector(
             self.duelos,
             config.leer_clave,
@@ -216,16 +215,16 @@ class App:
             pool=self.partidas.pool,
             mis_partidas=self.mis_partidas,
             mis_puuids=lambda: set(self.cuentas),
-            cliente_europa=self.cliente,
-            puede_europa=self._europa_libre,
+            cliente_propio=self.cliente,
+            cuota_libre=self._cuota_libre,
             referencias=self.comparador.para_el_recolector,
-            regiones=fuera,
+            regiones=rec.de_fuera(self.cfg["region"]),
         )
         if not self.recolector.arrancar():
             self.recolector = None
 
-    def _europa_libre(self) -> bool:
-        """EUW comparte cuota con el panel: el recolector solo la usa con el cliente quieto."""
+    def _cuota_libre(self) -> bool:
+        """Tu región comparte cuota con el panel: el recolector solo la usa con el cliente quieto."""
         return (
             not self.error_clave
             and self.fase not in PARTIDA_CERCA + EN_JUEGO
