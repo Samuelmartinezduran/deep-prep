@@ -11,7 +11,6 @@ from .riot import USER_AGENT
 
 ARCHIVOS = {
     "/": ("index.html", "text/html; charset=utf-8"),
-    "/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/estilo.css": ("estilo.css", "text/css; charset=utf-8"),
 }
 TIPOS = {
@@ -94,6 +93,11 @@ def crear(app, puerto):
             if ruta in ARCHIVOS:
                 nombre, tipo = ARCHIVOS[ruta]
                 return self._enviar(200, (config.RUTA_WEB / nombre).read_bytes(), tipo)
+            # Módulos del panel (web/js/): solo nombres de letras y números, sin carpetas ni otras extensiones.
+            if ruta.startswith("/js/") and ruta.endswith(".js") and NOMBRE_SEGURO.fullmatch(ruta[4:-3]):
+                archivo = config.RUTA_WEB / "js" / ruta[4:]
+                if archivo.is_file():
+                    return self._enviar(200, archivo.read_bytes(), "text/javascript; charset=utf-8")
             if ruta.startswith(("/fuentes/", "/img/")):
                 archivo = (config.RUTA_WEB / ruta.lstrip("/")).resolve()
                 if archivo.is_relative_to(config.RUTA_WEB) and archivo.is_file() and archivo.suffix in TIPOS:

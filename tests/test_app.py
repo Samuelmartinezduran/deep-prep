@@ -585,8 +585,10 @@ class Web(unittest.TestCase):
             return e.code, e.read()
 
     def test_paginas_y_estado(self):
-        for ruta in ("/", "/app.js", "/estilo.css"):
+        for ruta in ("/", "/js/main.js", "/estilo.css"):
             self.assertEqual(self.pedir(ruta)[0], 200)
+        for ruta in ("/app.js", "/js/no-existe.js", "/js/..%2Fservidor.py", "/js/../app.py"):
+            self.assertEqual(self.pedir(ruta)[0], 404)
         codigo, cuerpo = self.pedir("/api/estado")
         self.assertEqual(codigo, 200)
         self.assertIn("fase_txt", json.loads(cuerpo))
