@@ -26,3 +26,19 @@ export const ligaTxt = (l) => `${NIVEL_TXT[l.nivel] || l.nivel}${["master", "gra
 
 // Elemento de la página por id (solo en el navegador).
 export const $ = (id) => document.getElementById(id);
+
+// GIF transparente de 1×1: ocupa el sitio de una imagen que no llega (sin red no hay retratos de Data Dragon).
+export const IMAGEN_VACIA = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+// Sin la imagen, en vez del icono de imagen rota se queda el hueco del retrato (su fondo). Los errores de carga
+// no suben por el documento: se cogen en la fase de captura.
+export function sinImagenesRotas(doc = document) {
+  doc.addEventListener(
+    "error",
+    (e) => {
+      const img = e.target;
+      if (img && img.tagName === "IMG" && img.src !== IMAGEN_VACIA) img.src = IMAGEN_VACIA;
+    },
+    true
+  );
+}

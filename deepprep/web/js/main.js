@@ -3,12 +3,13 @@ import { ARMAZON } from "./cabecera.js";
 import { estado } from "./estado.js";
 import { activarEventos } from "./eventos.js";
 import { activarTooltip } from "./tooltip.js";
-import { $ } from "./util.js";
+import { $, sinImagenesRotas } from "./util.js";
 import { cambiarVista, refrescar, reloj } from "./vistas.js";
 
 estado.overlay = new URLSearchParams(location.search).get("vista") === "overlay";
 document.body.classList.toggle("overlay", estado.overlay);
 $("app").innerHTML = estado.overlay ? `<div id="principal"></div>` : ARMAZON;
+sinImagenesRotas();
 if (!estado.overlay) {
   activarEventos();
   activarTooltip();

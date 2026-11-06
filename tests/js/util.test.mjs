@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { claseWr, coma, enMapa, esc, ligaTxt, miles, minutos, numero, pct } from "../../deepprep/web/js/util.js";
+import { claseWr, coma, enMapa, esc, IMAGEN_VACIA, ligaTxt, miles, minutos, numero, pct, sinImagenesRotas } from "../../deepprep/web/js/util.js";
 
 describe("esc", () => {
   test("escapa los cinco caracteres de HTML", () => {
@@ -66,5 +66,21 @@ describe("cifras", () => {
   test("ligaTxt: sin división en Maestro y por encima", () => {
     assert.equal(ligaTxt({ nivel: "emerald", rank: "I", lp: 53 }), "Esmeralda I · 53 LP");
     assert.equal(ligaTxt({ nivel: "master", rank: "I", lp: 120 }), "Maestro · 120 LP");
+  });
+});
+
+describe("imágenes que no llegan", () => {
+  test("en vez del icono de imagen rota, una imagen vacía; lo demás no se toca", () => {
+    const oyentes = [];
+    sinImagenesRotas({ addEventListener: (tipo, fn, captura) => oyentes.push({ tipo, fn, captura }) });
+    assert.deepEqual(oyentes.map((o) => [o.tipo, o.captura]), [["error", true]]);
+    const img = { tagName: "IMG", src: "/ddragon/campeon/Diana.png" };
+    oyentes[0].fn({ target: img });
+    assert.equal(img.src, IMAGEN_VACIA);
+    oyentes[0].fn({ target: img }); // si tampoco carga la vacía, no se repite para siempre
+    assert.equal(img.src, IMAGEN_VACIA);
+    const script = { tagName: "SCRIPT", src: "/js/x.js" };
+    oyentes[0].fn({ target: script });
+    assert.equal(script.src, "/js/x.js");
   });
 });
