@@ -148,6 +148,7 @@ main { width: 100%; max-width: 1680px; padding: 32px 32px 48px; margin: 0 auto; 
 .demo {
   position: sticky; top: 56px; z-index: 4;
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px;
+  min-height: 59px; /* lo que ocupa una explicación de dos líneas: la barra no salta al cambiar de escena */
   padding: 10px 32px; background: var(--panel); border-bottom: 1px solid var(--linea);
 }
 .demo-marca { display: inline-flex; align-items: center; gap: 8px; font: 500 11px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--acento2); white-space: nowrap; }
