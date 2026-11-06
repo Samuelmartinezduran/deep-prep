@@ -56,7 +56,7 @@ export function htmlAjustes(a) {
       <label>Referencia de base <select id="a-comparar">${opciones}</select></label>
       <label id="caja-perfil" ${a.comparar_con === "perfil" ? "" : "hidden"}>Tu perfil de referencia (Nombre#TAG, de cualquier servidor)
         <input type="text" id="a-perfil" value="${esc(a.perfil_base || "")}" placeholder="p. ej. un jugador de Challenger al que quieras parecerte">
-        ${a.perfil_partidas == null ? "" : `<span class="ayuda">${a.perfil_partidas ? `${a.perfil_partidas} partidas suyas guardadas` : "buscando sus partidas…"}</span>`}</label>
+        ${a.perfil_partidas == null ? "" : `<span class="ayuda">${a.perfil_partidas ? `${esc(a.perfil_partidas)} partidas suyas guardadas` : "buscando sus partidas…"}</span>`}</label>
       <div class="sub-campos"><span class="etiqueta-cab">Por campeón</span><div id="referencias">${refs}</div><div><button id="nueva-ref">Añadir jugador de referencia</button></div></div>`)}
     ${grupo("Notas por campeón", "Salen cuando ese campeón está en tu partida, en el panel y encima del juego.", `
       <div id="notas">${notas}</div><div><button id="nueva-nota">Añadir nota</button></div>`)}

@@ -4,13 +4,14 @@ import { tablaComparacion } from "./duelo.js";
 import { estado } from "./estado.js";
 import { ICONO } from "./iconos.js";
 import { barraWr, diferencia, lp, retrato, titulo } from "./piezas.js";
+import { tip, tipLineas } from "./tooltip.js";
 import { $, claseWr, coma, enMapa, esc, fecha, ligaTxt, minutos, pct } from "./util.js";
 
 export function tablaTendencia(nombre, filas) {
   if (!filas || !filas.length) return "";
   return `<div class="tendencia"><div class="etiqueta-cab">${nombre}</div>${filas
     .map(
-      (f) => `<div class="fila-t" data-tip="<b>${esc(f.nombre)}</b> · ${f.v}V ${f.n - f.v}D">
+      (f) => `<div class="fila-t" ${tip(["b", f.nombre], ` · ${f.v}V ${f.n - f.v}D`)}>
         <span class="t-nombre">${esc(f.nombre)}</span>${barraWr(f.v, f.n)}<span class="num ${claseWr(f.v, f.n)}">${pct(f.v, f.n)}%</span><span class="num suave">${f.n}</span></div>`
     )
     .join("")}</div>`;
@@ -25,10 +26,14 @@ export function lineaTiempo(r) {
   const marcas = [];
   for (let m = 0; m <= fin; m += 5) marcas.push(`<span class="lt-marca" style="left:${(100 * m) / fin}%"><span class="num">${m}</span></span>`);
   const objetivos = r.objetivos
-    .map((o) => `<span class="lt-obj ${o.tuyo ? "aliado" : "rival"}" style="left:${x(o.t)}" data-tip="<span class=num>${esc(o.t)}</span> · <b>${esc(o.nombre)}</b><br>${quien(o)}"></span>`)
+    .map((o) => `<span class="lt-obj ${o.tuyo ? "aliado" : "rival"}" style="left:${x(o.t)}" ${tipLineas([["num", o.t], " · ", ["b", o.nombre]], [quien(o)])}></span>`)
     .join("");
   const muertes = r.muertes
-    .map((m) => `<span class="lt-muerte ${m.perdido ? "cara" : ""}" style="left:${x(m.t)}" data-tip="<span class=num>${esc(m.t)}</span> · muerte ante <b>${esc(m.asesino)}</b><br>${esc(m.donde)}${m.perdido ? `<br>${esc(m.perdido)}` : ""}">${ICONO.muerte}</span>`)
+    .map((m) => {
+      const lineas = [[["num", m.t], " · muerte ante ", ["b", m.asesino]], [m.donde]];
+      if (m.perdido) lineas.push([m.perdido]);
+      return `<span class="lt-muerte ${m.perdido ? "cara" : ""}" style="left:${x(m.t)}" ${tipLineas(...lineas)}>${ICONO.muerte}</span>`;
+    })
     .join("");
   return `<div class="linea-tiempo" role="img" aria-label="Línea de tiempo: ${r.objetivos.length} objetivos y ${r.muertes.length} muertes; el detalle está en las listas de abajo">
       <div class="lt-carril"><span class="lt-rotulo">Objetivos</span><div class="lt-pista">${objetivos}</div></div>
@@ -53,7 +58,7 @@ export function detalleRevision(r) {
     : `<p class="vacio">No moriste ni una vez.</p>`;
   const comp = r.comparacion
     ? `<div class="comparacion"><div></div><div class="etiqueta-cab">Oro</div><div class="etiqueta-cab">CS</div><div class="etiqueta-cab">Exp.</div><div class="etiqueta-cab">Nivel</div>${Object.entries(r.comparacion.minutos)
-        .map(([m, d]) => `<div class="etiqueta-cab">Min ${m}</div><div class="num">${diferencia(d.oro[0], d.oro[1])}</div><div class="num">${diferencia(d.cs[0], d.cs[1])}</div><div class="num">${diferencia(d.xp[0], d.xp[1])}</div><div class="num">${diferencia(d.nivel[0], d.nivel[1])}</div>`)
+        .map(([m, d]) => `<div class="etiqueta-cab">Min ${esc(m)}</div><div class="num">${diferencia(d.oro[0], d.oro[1])}</div><div class="num">${diferencia(d.cs[0], d.cs[1])}</div><div class="num">${diferencia(d.xp[0], d.xp[1])}</div><div class="num">${diferencia(d.nivel[0], d.nivel[1])}</div>`)
         .join("")}</div>`
     : `<p class="vacio">Sin jungla rival con el que comparar.</p>`;
   const objetivos = r.objetivos.length
@@ -116,11 +121,11 @@ export function mapaMuertes(lista) {
   const ver = filtrar(lista, estado.filtroMuertes);
   return `<div class="mapa-muertes">
       <div class="selector" role="group" aria-label="Qué muertes">${Object.entries(FILTROS)
-        .map(([k, txt]) => `<button class="${k === estado.filtroMuertes ? "activa" : ""}" data-filtro="${k}">${txt}</button>`)
+        .map(([k, txt]) => `<button class="${k === estado.filtroMuertes ? "activa" : ""}" data-filtro="${k}">${esc(txt)}</button>`)
         .join("")}</div>
       <div class="mapa" role="img" aria-label="${ver.length} muertes en el mapa">
         ${ver
-          .map((m) => `<span class="punto-mapa muerte-mapa" data-revision="${esc(m.id)}" style="${enMapa(m.x, m.y)}" data-tip="<b>${esc(m.campeon)}</b> · <span class=num>${esc(m.t)}</span><br>ante ${esc(m.asesino)} · ${m.gana ? "victoria" : "derrota"}"></span>`)
+          .map((m) => `<span class="punto-mapa muerte-mapa" data-revision="${esc(m.id)}" style="${enMapa(m.x, m.y)}" ${tipLineas([["b", m.campeon], " · ", ["num", m.t]], [`ante ${m.asesino} · ${m.gana ? "victoria" : "derrota"}`])}></span>`)
           .join("")}
       </div>
       <div class="linea2 envuelve"><span class="num">${ver.length}</span> muertes. Pulsa una para abrir su partida.</div>

@@ -38,4 +38,8 @@ describe("módulos", () => {
   test("se importan sin navegador", async () => {
     for (const n of modulos.filter((m) => m !== "main.js")) await import(new URL(n, JS));
   });
+
+  test("ningún módulo pasa el texto de un atributo a innerHTML", () => {
+    for (const n of modulos) assert.doesNotMatch(fuente(n), /innerHTML\s*=\s*[^;]*dataset/, n);
+  });
 });

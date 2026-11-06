@@ -56,6 +56,7 @@ describe("mapa de muertes", () => {
     estado.filtroMuertes = "despues";
     const html = mapaMuertes(muertes);
     assert.match(html, /<button class="activa" data-filtro="despues">15\+ min<\/button>/);
+    assert.match(html, /data-filtro="antes">&lt;15 min<\/button>/);
     assert.deepEqual(atributos(html, "data-revision"), ["b", "c"]);
     assert.match(html, /<span class="num">2<\/span> muertes\./);
     estado.filtroMuertes = "todas";
@@ -125,5 +126,6 @@ describe("revisión de una partida", () => {
     assert.equal(tablaTendencia("Hora", []), "");
     const html = tablaTendencia("Hora", [{ nombre: "Tarde", v: 14, n: 24 }]);
     assert.match(html, /<span class="num bien">58%<\/span><span class="num suave">24<\/span>/);
+    assert.deepEqual(JSON.parse(atributos(html, "data-tip")[0]), [[["b", "Tarde"], " · 14V 10D"]]);
   });
 });

@@ -1,4 +1,5 @@
 // Piezas de HTML que comparten varias vistas. Todas devuelven texto HTML y escapan lo que viene de la app.
+import { tip } from "./tooltip.js";
 import { claseWr, esc, pct, ROL_TXT, ROLES } from "./util.js";
 
 export const retrato = (url, clase = "retrato") => (url ? `<img class="${clase}" src="${esc(url)}" alt="">` : `<span class="${clase}"></span>`);
@@ -58,8 +59,8 @@ export function graficoGank(valor) {
   if (lineas.length < 2) return "";
   const max = Math.max(...lineas.map((x) => x.n));
   const total = lineas.reduce((a, x) => a + x.n, 0);
-  return `<div class="mini-barras" role="img" aria-label="Primer gank por línea: ${lineas.map((x) => `${x.l} ${x.n}`).join(", ")}">${lineas
-    .map((x) => `<div class="mb-fila" data-tip="<b>${x.l}</b> · ${x.n} de ${total}"><span>${x.l}</span><span class="mb-pista"><i style="width:${(100 * x.n) / max}%"></i></span><span class="num">${x.n}</span></div>`)
+  return `<div class="mini-barras" role="img" aria-label="Primer gank por línea: ${esc(lineas.map((x) => `${x.l} ${x.n}`).join(", "))}">${lineas
+    .map((x) => `<div class="mb-fila" ${tip(["b", x.l], ` · ${x.n} de ${total}`)}><span>${esc(x.l)}</span><span class="mb-pista"><i style="width:${(100 * x.n) / max}%"></i></span><span class="num">${x.n}</span></div>`)
     .join("")}</div>`;
 }
 

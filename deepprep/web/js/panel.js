@@ -56,12 +56,12 @@ export function mapaJungla(j) {
   const puntos = j.mapa[minuto] || [];
   return `<div class="mapa-jungla">
       <div class="selector" role="group" aria-label="Minuto">${minutos
-        .map((m) => `<button class="${m === minuto ? "activa" : ""}" data-minuto="${m}">${m}:00</button>`)
+        .map((m) => `<button class="${m === minuto ? "activa" : ""}" data-minuto="${esc(m)}">${esc(m)}:00</button>`)
         .join("")}</div>
-      <div class="mapa" role="img" aria-label="Posición de ${esc(j.campeon)} al minuto ${minuto} en ${puntos.length} partidas">
+      <div class="mapa" role="img" aria-label="Posición de ${esc(j.campeon)} al minuto ${esc(minuto)} en ${puntos.length} partidas">
         ${puntos.map(([x, y]) => `<span class="punto-mapa rival" style="${enMapa(x, y)}"></span>`).join("")}
       </div>
-      <div class="linea2 envuelve">Cada punto es una de sus ${puntos.length} partidas: dónde estaba al ${minuto}:00, ya girado al lado en que juega hoy.</div>
+      <div class="linea2 envuelve">Cada punto es una de sus ${puntos.length} partidas: dónde estaba al ${esc(minuto)}:00, ya girado al lado en que juega hoy.</div>
     </div>`;
 }
 
