@@ -1,0 +1,24 @@
+# Texto con LF en el repositorio y también al descargarlo, aunque git tenga core.autocrlf=true
+# (así ruff format y las pruebas ven lo mismo en cualquier PC y en CI).
+* text=auto eol=lf
+
+# cmd.exe necesita CRLF (con LF se lía con etiquetas y saltos).
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binarios: ni conversión de finales de línea ni diff de texto.
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.gz binary
+*.zip binary
+*.exe binary
+*.dll binary
+*.pyd binary
+*.db binary
