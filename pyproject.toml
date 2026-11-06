@@ -213,7 +213,7 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Medido el 6/11/2026 con las 187 pruebas: 73,1 % (líneas + ramas). Subirlo según se añadan pruebas.
+# Medido el 6/11/2026 con las 200 pruebas: 73,2 % (líneas + ramas). Subirlo según se añadan pruebas.
 fail_under = 70
 precision = 1
 show_missing = true
