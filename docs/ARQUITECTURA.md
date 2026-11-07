@@ -252,10 +252,10 @@ Lo cubren `test_otra_web_no_puede_tocar_la_app` y `test_paginas_y_estado` (por e
 
 | Qué | Cifra | Cómo se mide |
 |---|---|---|
-| Pruebas de Python | 200 en 15 archivos, 6,5 s | `py -X utf8 -m unittest discover -s tests -t .` |
+| Pruebas de Python | 203 en 15 archivos, 7 s | `py -X utf8 -m unittest discover -s tests -t .` |
 | De ellas, de caracterización | 12, contra 12 JSON en `tests/datos/esperado/` | `tests/test_caracterizacion.py` |
 | Pruebas del panel | 95 en 23 grupos (9 archivos), 0,13 s | `node --test` (Node 24, sin dependencias) |
-| Cobertura de Python | 73,2 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
+| Cobertura de Python | 73,7 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
 | Tipos | mypy estricto, 0 errores en 50 archivos | `mypy` |
 | Lint y formato | ruff sin avisos; 64 archivos formateados | `ruff check .`, `ruff format --check .` |
 

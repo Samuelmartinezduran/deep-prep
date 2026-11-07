@@ -6,6 +6,7 @@ Riot devuelva 429.
 """
 
 import gzip
+import http.client
 import json
 import threading
 import time
@@ -166,7 +167,8 @@ class Cliente:
                     time.sleep(1.5 * (intento + 1))
                     continue
                 raise ErrorRiot(f"{e.code} en {ruta}") from e
-            except (urllib.error.URLError, TimeoutError, OSError) as e:
+            # Una respuesta cortada a medias (IncompleteRead, o un gzip sin acabar) es un fallo de red más: se reintenta.
+            except (urllib.error.URLError, http.client.HTTPException, TimeoutError, OSError, EOFError) as e:
                 if intento < 3:
                     time.sleep(1.5 * (intento + 1))
                     continue

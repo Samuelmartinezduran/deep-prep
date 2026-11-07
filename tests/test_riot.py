@@ -1,8 +1,12 @@
-"""Pruebas del control de cuota, con un reloj falso que avanza al 'dormir'."""
+"""Pruebas del control de cuota, con un reloj falso que avanza al 'dormir', y de los reintentos ante fallos de red."""
 
+import gzip
+import http.client
+import json
 import unittest
+from unittest import mock
 
-from deepprep.riot import Limitador
+from deepprep.riot import Cliente, ErrorRiot, Limitador
 
 
 class Reloj:
@@ -90,6 +94,63 @@ class Cuota(unittest.TestCase):
         lim.penalizar("h", 30)
         lim.adquirir("h")
         self.assertGreaterEqual(reloj.t, 1030.0)
+
+
+class Respuesta:
+    """Lo que devuelve urlopen: el cuerpo (o la excepción que lanza al leerlo) y sus cabeceras."""
+
+    def __init__(self, cuerpo, gzip_=False):
+        self.cuerpo = cuerpo
+        self.headers = {"Content-Encoding": "gzip"} if gzip_ else {}
+
+    def read(self):
+        if isinstance(self.cuerpo, Exception):
+            raise self.cuerpo
+        return self.cuerpo
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        return False
+
+
+class Reintentos(unittest.TestCase):
+    """Riot a veces corta la respuesta a medias (pasó en una partida de prueba): se reintenta como un fallo de red."""
+
+    def setUp(self):
+        cfg = {"plataforma": "euw1", "region": "europe"}
+        self.cliente = Cliente(cfg, lambda: "RGAPI-prueba", Limitador(reloj=lambda: 0.0, dormir=lambda s: None))
+        parche = mock.patch("deepprep.riot.time.sleep")
+        parche.start()
+        self.addCleanup(parche.stop)
+
+    def pedir(self, respuestas):
+        with mock.patch("deepprep.riot.urllib.request.urlopen", side_effect=respuestas) as urlopen:
+            try:
+                return self.cliente._get(self.cliente.region, "/lol/match/v5/matches/EUW1_1"), urlopen.call_count
+            except ErrorRiot as e:
+                return e, urlopen.call_count
+
+    def test_respuesta_cortada_se_reintenta(self):
+        datos = {"metadata": {"matchId": "EUW1_1"}}
+        cortada = Respuesta(http.client.IncompleteRead(b'{"meta', 100))
+        resultado, llamadas = self.pedir([cortada, Respuesta(json.dumps(datos).encode())])
+        self.assertEqual(resultado, datos)
+        self.assertEqual(llamadas, 2)
+
+    def test_gzip_sin_acabar_se_reintenta(self):
+        entero = gzip.compress(b'{"ok": 1}')
+        resultado, llamadas = self.pedir([Respuesta(entero[:-6], gzip_=True), Respuesta(entero, gzip_=True)])
+        self.assertEqual(resultado, {"ok": 1})
+        self.assertEqual(llamadas, 2)
+
+    def test_si_siempre_se_corta_es_un_error_de_riot(self):
+        cortadas = [Respuesta(http.client.IncompleteRead(b"", 10)) for _ in range(4)]
+        resultado, llamadas = self.pedir(cortadas)
+        self.assertIsInstance(resultado, ErrorRiot)
+        self.assertIn("Sin conexión", str(resultado))
+        self.assertEqual(llamadas, 4)
 
 
 if __name__ == "__main__":

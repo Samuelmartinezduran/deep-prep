@@ -34,6 +34,7 @@ Porofesor pasa a llamarse Deep Prep y se rehace por dentro para publicar el cód
 - Los cerrojos de la grabación y del recolector se cierran siempre, también cuando ya había otro proceso con el cerrojo.
 - Los errores de red y HTTP se ven en el panel. Antes el botón se quedaba igual sin conexión y un 4xx o 5xx se leía como una respuesta buena.
 - Sin red, los retratos de campeón que no llegan dejan su hueco en lugar del icono de imagen rota.
+- Una respuesta de Riot cortada a medias (`IncompleteRead`, o un gzip sin acabar) se reintenta como cualquier fallo de red. Antes no se reintentaba: el recolector paraba un minuto y, si pasaba al bajar la partida recién acabada, esa revisión se perdía. Salió en la partida de prueba de la 2.0.0.
 
 ### Seguridad
 
