@@ -6,7 +6,7 @@ App de escritorio para Windows que prepara cada partida de League of Legends con
 [![Python 3.14](https://img.shields.io/badge/python-3.14-3776ab)](https://www.python.org/downloads/)
 [![Licencia MIT](https://img.shields.io/badge/licencia-MIT-informational)](LICENSE)
 
-**203 pruebas de Python · 95 del panel en JavaScript · 73,7 % de cobertura · mypy estricto · ruff sin avisos · CI en Windows**
+**205 pruebas de Python · 95 del panel en JavaScript · 73,7 % de cobertura · mypy estricto · ruff sin avisos · CI en Windows**
 
 > **In English.** Deep Prep is a Windows desktop companion for League of Legends, built for high-elo players and especially junglers. Before the game it shows matchup data measured on Master+ games and a panel of all ten players, including where the enemy jungler usually is at minutes 2–6; in game, a separate always-on-top window shows only pre-game data, as Riot's third-party policy requires; after the game it reviews each death and what it cost, and cuts a clip of each one from the recording.
 > Python 3.14, pywebview, a local HTTP server with vanilla JS modules, SQLite and FFmpeg; code and UI are in Spanish, MIT licensed. Try it without the game or a Riot key: `py -m deepprep --demo`.
@@ -94,7 +94,7 @@ Medido el 6 de noviembre de 2026 sobre la rama `main`:
 
 | Qué | Cifra | Cómo se mide |
 |---|---|---|
-| Pruebas de Python | 203 en 15 archivos, 7 s | `py -X utf8 -m unittest discover -s tests -t .` |
+| Pruebas de Python | 205 en 15 archivos, 7 s | `py -X utf8 -m unittest discover -s tests -t .` |
 | De ellas, de caracterización | 12, contra 12 JSON esperados | `tests/test_caracterizacion.py` |
 | Pruebas del panel | 95 en 9 archivos | `node --test` (Node 24, sin dependencias) |
 | Cobertura de Python | 73,7 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
@@ -158,7 +158,7 @@ La clave de Riot se pega en el panel la primera vez (se pide gratis en [develope
 
 ## Historia
 
-Empezó como **Porofesor**, una app que el autor hizo para uso propio y de unos amigos. La 1.0.0 (14 de octubre de 2026) traía el panel de partida, los duelos de Master+, las revisiones, la grabación y el actualizador; la 1.0.1 (29 de octubre) rehízo la interfaz y añadió tu pool en la selección de campeón, el mapa del jungla rival y los clips de cada muerte, y la 1.0.2 (el mismo día) arregló el actualizador. Para publicar el código pasó a llamarse **Deep Prep** (2.0.0, 6 de noviembre de 2026) y se rehízo por dentro sin cambiar lo que ve el jugador: de 99 pruebas a 203, tipos, registro con `logging`, el panel en módulos, CI y el modo demo. Las copias de Porofesor se actualizan solas a Deep Prep y se llevan sus datos. El detalle, en el [CHANGELOG](CHANGELOG.md).
+Empezó como **Porofesor**, una app que el autor hizo para uso propio y de unos amigos. La 1.0.0 (14 de octubre de 2026) traía el panel de partida, los duelos de Master+, las revisiones, la grabación y el actualizador; la 1.0.1 (29 de octubre) rehízo la interfaz y añadió tu pool en la selección de campeón, el mapa del jungla rival y los clips de cada muerte, y la 1.0.2 (el mismo día) arregló el actualizador. Para publicar el código pasó a llamarse **Deep Prep** (2.0.0, 6 de noviembre de 2026) y se rehízo por dentro sin cambiar lo que ve el jugador: de 99 pruebas a 205, tipos, registro con `logging`, el panel en módulos, CI y el modo demo. Las copias de Porofesor se actualizan solas a Deep Prep y se llevan sus datos. El detalle, en el [CHANGELOG](CHANGELOG.md).
 
 Hecho por Samuel Martínez Durán ([Samuelmartinezduran](https://github.com/Samuelmartinezduran) en GitHub).
 

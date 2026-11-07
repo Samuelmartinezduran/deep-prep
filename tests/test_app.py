@@ -218,6 +218,39 @@ class Modo(unittest.TestCase):
         app.vigia.paso()
         self.assertEqual(app.modo, "previa")
 
+    def test_en_la_pantalla_de_carga_el_reloj_contesta_parado(self):
+        # Lo que hace el juego de verdad (partida de prueba de la 2.0.0): la API del reloj ya contesta en la
+        # pantalla de carga, con 0-1 s y sin avanzar, unos 30 s antes de que se pueda jugar.
+        app, _, lol = montar()
+        lol.fase, lol.segundos = "InProgress", None
+        app.vigia.paso()
+        for segundos in (0.02, 0.02, 0.3):
+            lol.segundos = segundos
+            app.actualizar_modo()
+            self.assertEqual((app.modo, app.reloj), ("carga", None), segundos)
+        lol.segundos = 1.1  # empieza la partida: el reloj avanza
+        app.actualizar_modo()
+        self.assertEqual((app.modo, app.reloj), ("juego", 1.1))
+
+    def test_empezada_no_vuelve_a_la_carga(self):
+        app, _, lol = montar()
+        lol.fase, lol.segundos = "InProgress", 0.0
+        app.vigia.paso()
+        lol.segundos = 95.0
+        app.actualizar_modo()
+        self.assertEqual(app.modo, "juego")
+        lol.segundos = None  # la API del juego no contesta a tiempo
+        app.actualizar_modo()
+        self.assertEqual((app.modo, app.reloj), ("juego", 95.0))
+        lol.segundos = 95.0  # pausa: el reloj no avanza
+        app.actualizar_modo()
+        self.assertEqual(app.modo, "juego")
+        lol.fase = "EndOfGame"
+        app.vigia.paso()
+        lol.fase, lol.segundos = "InProgress", 0.02  # la siguiente partida vuelve a empezar en la carga
+        app.vigia.paso()
+        self.assertEqual(app.modo, "carga")
+
     def test_el_overlay_no_cuenta_como_mirar_el_panel(self):
         app, _, _ = montar()
         app.ultima_consulta = 0

@@ -34,6 +34,7 @@ Porofesor pasa a llamarse Deep Prep y se rehace por dentro para publicar el cód
 - Los cerrojos de la grabación y del recolector se cierran siempre, también cuando ya había otro proceso con el cerrojo.
 - Los errores de red y HTTP se ven en el panel. Antes el botón se quedaba igual sin conexión y un 4xx o 5xx se leía como una respuesta buena.
 - Sin red, los retratos de campeón que no llegan dejan su hueco en lugar del icono de imagen rota.
+- La vista de la pantalla de carga se quitaba a los pocos segundos, con la carga aún en pantalla, y Ctrl+Tab ya enseñaba la de partida con el reloj en 0:00. La API del juego contesta en la carga con el reloj parado, y bastaba con que contestara para dar la partida por empezada. Ahora tiene que avanzar el reloj. Además, una vez empezada, la partida ya no vuelve a la vista de carga si el reloj no contesta un momento: antes, ese fallo podía sacar en partida el plan y el duelo. Pasaba desde la 1.0.0.
 - Una respuesta de Riot cortada a medias (`IncompleteRead`, o un gzip sin acabar) se reintenta como cualquier fallo de red. Antes no se reintentaba: el recolector paraba un minuto y, si pasaba al bajar la partida recién acabada, esa revisión se perdía. Salió en la partida de prueba de la 2.0.0.
 
 ### Seguridad

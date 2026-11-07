@@ -36,6 +36,10 @@ PARTIDA_CERCA = ("Matchmaking", "ReadyCheck", "ChampSelect", "GameStart")
 # Cada cuánto se pregunta a Riot por tu partida en vivo: sin cliente a la vista y ya en partida.
 SONDEO_SIN_CLIENTE_S = 45
 SONDEO_EN_PARTIDA_S = 5
+# En la pantalla de carga la API del juego ya contesta, con el reloj parado en 0-1 s. La partida ha empezado cuando
+# el reloj avanza (AVANCE_S desde la primera lectura) o si ya va por EMPEZADA_S (la app se abre a media partida).
+RELOJ_AVANCE_S = 0.5
+RELOJ_EMPEZADA_S = 3.0
 # Cuánto de la ventana de 2 minutos de cuota pueden gastar las tareas de fondo según cómo esté el cliente.
 FONDO_SIN_CLIENTE, FONDO_PARTIDA_CERCA, FONDO_NORMAL = 40, 0, 85
 
@@ -150,7 +154,8 @@ class Vigia:
         # 'previa' (fuera de partida o en selección), 'carga' (pantalla de carga) o 'juego' (ya se juega).
         # En 'juego' el panel solo enseña datos: Riot no permite sacar conclusiones durante la partida.
         self.modo = "previa"
-        self.reloj: float | None = None  # segundos de partida según el propio juego
+        self.reloj: float | None = None  # segundos de partida según el propio juego (None hasta que empieza)
+        self._reloj_en_carga: float | None = None  # la primera lectura del reloj en la pantalla de carga
         self.cuenta_activa: str | None = None  # puuid de la cuenta abierta en el cliente
         self.ultimo_sondeo = 0.0  # última vez que se preguntó a Riot por la partida en vivo
         self._plataforma_vista = False  # región del cliente ya mirada en esta sesión del cliente
@@ -229,9 +234,22 @@ class Vigia:
         self.cliente.poner_plataforma(plataforma, region)
 
     def actualizar_modo(self) -> None:
-        """Pantalla de carga o juego empezado, según el reloj del propio juego (el overlay lo llama más a menudo)."""
+        """Pantalla de carga o juego empezado, según el reloj del propio juego (el overlay lo llama más a menudo).
+
+        Que el reloj conteste no basta: en la pantalla de carga ya contesta, parado (RELOJ_AVANCE_S). Una vez
+        empezada, la partida no vuelve a 'carga' aunque el reloj falle un momento o se pare en una pausa: la vista
+        de carga lleva conclusiones (plan, duelo) que Riot no deja enseñar durante la partida.
+        """
         if self.fase not in EN_JUEGO:
-            self.modo, self.reloj = "previa", None
+            self.modo, self.reloj, self._reloj_en_carga = "previa", None, None
             return
-        self.reloj = self.lcu.reloj()
-        self.modo = "juego" if self.reloj else "carga"
+        lectura = self.lcu.reloj()
+        if self.modo != "juego" and lectura is not None:
+            if self._reloj_en_carga is None:
+                self._reloj_en_carga = lectura
+            if lectura >= RELOJ_EMPEZADA_S or lectura - self._reloj_en_carga >= RELOJ_AVANCE_S:
+                self.modo = "juego"
+        if self.modo != "juego":
+            self.modo, self.reloj = "carga", None
+        elif lectura is not None:
+            self.reloj = lectura
