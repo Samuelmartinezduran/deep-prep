@@ -36,9 +36,10 @@ PARTIDA_CERCA = ("Matchmaking", "ReadyCheck", "ChampSelect", "GameStart")
 # Cada cuánto se pregunta a Riot por tu partida en vivo: sin cliente a la vista y ya en partida.
 SONDEO_SIN_CLIENTE_S = 45
 SONDEO_EN_PARTIDA_S = 5
-# En la pantalla de carga la API del juego ya contesta, con el reloj parado en 0-1 s. La partida ha empezado cuando
-# el reloj avanza (AVANCE_S desde la primera lectura) o si ya va por EMPEZADA_S (la app se abre a media partida).
-RELOJ_AVANCE_S = 0.5
+# En la pantalla de carga la API del juego ya contesta, con el reloj parado. La partida ha empezado cuando el reloj
+# se mueve (CAMBIO_S desde la primera lectura, hacia delante o hacia atrás si se pone a cero) o si ya va por
+# EMPEZADA_S (la app se abre a media partida). Cuanto menos cambio haga falta, antes se quita la vista de carga.
+RELOJ_CAMBIO_S = 0.2
 RELOJ_EMPEZADA_S = 3.0
 # Cuánto de la ventana de 2 minutos de cuota pueden gastar las tareas de fondo según cómo esté el cliente.
 FONDO_SIN_CLIENTE, FONDO_PARTIDA_CERCA, FONDO_NORMAL = 40, 0, 85
@@ -236,7 +237,7 @@ class Vigia:
     def actualizar_modo(self) -> None:
         """Pantalla de carga o juego empezado, según el reloj del propio juego (el overlay lo llama más a menudo).
 
-        Que el reloj conteste no basta: en la pantalla de carga ya contesta, parado (RELOJ_AVANCE_S). Una vez
+        Que el reloj conteste no basta: en la pantalla de carga ya contesta, parado (RELOJ_CAMBIO_S). Una vez
         empezada, la partida no vuelve a 'carga' aunque el reloj falle un momento o se pare en una pausa: la vista
         de carga lleva conclusiones (plan, duelo) que Riot no deja enseñar durante la partida.
         """
@@ -247,7 +248,8 @@ class Vigia:
         if self.modo != "juego" and lectura is not None:
             if self._reloj_en_carga is None:
                 self._reloj_en_carga = lectura
-            if lectura >= RELOJ_EMPEZADA_S or lectura - self._reloj_en_carga >= RELOJ_AVANCE_S:
+            if lectura >= RELOJ_EMPEZADA_S or abs(lectura - self._reloj_en_carga) >= RELOJ_CAMBIO_S:
+                logger.info("Empieza la partida: reloj en %.2f s (en la carga, %.2f s)", lectura, self._reloj_en_carga)
                 self.modo = "juego"
         if self.modo != "juego":
             self.modo, self.reloj = "carga", None

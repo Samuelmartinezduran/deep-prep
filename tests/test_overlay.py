@@ -13,8 +13,10 @@ class AppFalsa:
         self.fase = "InProgress"
         self.modo = "carga"
 
+        self.miradas = 0
+
     def actualizar_modo(self):
-        pass
+        self.miradas += 1
 
 
 class VentanaFalsa:
@@ -97,6 +99,22 @@ class Visibilidad(unittest.TestCase):
         delante[0] = True  # vuelves al juego con el atajo pulsado
         ctl.paso()
         self.assertTrue(ventana.visible)
+
+    def test_en_la_carga_mira_el_reloj_mas_a_menudo(self):
+        # Para que la vista de carga se quite en cuanto se puede jugar: antes tardaba 1-1,25 s (grabaciones del 07/11).
+        app, ventana, ahora = AppFalsa(), VentanaFalsa(), [10.0]
+        ctl = overlay.Controlador(
+            app, ventana, tecla_pulsada=lambda vk: False, juego_delante=lambda: True, reloj=lambda: ahora[0]
+        )
+        for _ in range(5):
+            ctl.paso()
+            ahora[0] += overlay.MODO_EN_CARGA_S + 0.001
+        self.assertEqual(app.miradas, 5)
+        app.modo, app.miradas = "juego", 0
+        for _ in range(5):
+            ctl.paso()
+            ahora[0] += overlay.MODO_EN_CARGA_S + 0.001
+        self.assertEqual(app.miradas, 1)
 
     def test_apagado_en_la_configuracion(self):
         app, ventana, ctl, _ = montar()

@@ -144,7 +144,7 @@ Detalles que no caben en el diagrama:
 
 - **Selección.** No se pide nada a Riot. `lcu.seleccion()` solo lee ids de campeón, la cola y tu posición; el duelo y tu pool salen de `duelos.db` y de tus partidas guardadas.
 - **Carga.** Con la caché vacía, una partida cuesta unas 270 peticiones (por jugador: lista de partidas, liga, maestría y 20 partidas; además, hasta 4 líneas de tiempo por jugador y 8 del jungla rival). La clave personal da 100 cada 2 minutos, así que `Sesion` pone prioridades: lista, liga y maestría (10 a 12), las 5 primeras partidas del jungla rival (14 en adelante) antes que las del resto (20 en adelante), líneas de tiempo del jungla (30 en adelante) y las dos primeras de cada jugador (35 en adelante). Lo más útil llega en la primera ventana de cuota. El panel se vuelve a montar como mucho una vez por segundo.
-- **Carga o juego.** El vigía y el overlay preguntan al juego (`/liveclientdata/gamestats`, puerto 2999) solo por `gameTime`. En la pantalla de carga esa API ya contesta, con el reloj parado en 0-1 s, así que no basta con que conteste: la partida empieza cuando el reloj avanza, o si al mirar ya pasa de 3 s (la app se abre o se reconecta a media partida). Una vez empezada no se vuelve a la carga aunque el reloj falle un momento o se pare en una pausa, porque la vista de carga lleva el plan y el duelo. Aparte del reloj de la partida, de esa API no se enseña nada.
+- **Carga o juego.** El vigía y el overlay preguntan al juego (`/liveclientdata/gamestats`, puerto 2999) solo por `gameTime`. En la pantalla de carga esa API ya contesta, con el reloj parado, así que no basta con que conteste: la partida empieza en cuanto el reloj se mueve 0,2 s, o si al mirar ya pasa de 3 s (la app se abre o se reconecta a media partida). Durante la carga el overlay mira el reloj cinco veces por segundo, para que la vista de carga se quite en cuanto se puede jugar. Una vez empezada no se vuelve a la carga aunque el reloj falle un momento o se pare en una pausa, porque la vista de carga lleva el plan y el duelo. Aparte del reloj de la partida, de esa API no se enseña nada.
 - **Después.** Riot tarda unos minutos en publicar la partida; el revisor la pide con `fondo=True` y, mientras espera, el actualizador no instala. Los clips esperan si empieza otra partida.
 
 ## 4. Decisiones de diseño
@@ -252,10 +252,10 @@ Lo cubren `test_otra_web_no_puede_tocar_la_app` y `test_paginas_y_estado` (por e
 
 | Qué | Cifra | Cómo se mide |
 |---|---|---|
-| Pruebas de Python | 206 en 15 archivos, 7 s | `py -X utf8 -m unittest discover -s tests -t .` |
+| Pruebas de Python | 208 en 15 archivos, 7 s | `py -X utf8 -m unittest discover -s tests -t .` |
 | De ellas, de caracterización | 12, contra 12 JSON en `tests/datos/esperado/` | `tests/test_caracterizacion.py` |
 | Pruebas del panel | 95 en 23 grupos (9 archivos), 0,13 s | `node --test` (Node 24, sin dependencias) |
-| Cobertura de Python | 73,6 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
+| Cobertura de Python | 73,8 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
 | Tipos | mypy estricto, 0 errores en 50 archivos | `mypy` |
 | Lint y formato | ruff sin avisos; 64 archivos formateados | `ruff check .`, `ruff format --check .` |
 

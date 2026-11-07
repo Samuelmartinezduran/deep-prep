@@ -41,6 +41,8 @@ TECLAS = {
 }
 CLASE_JUEGO = "RiotWindowClass"
 MODO_SIN_BORDES = "2"
+# Cada cuánto se mira si la partida ha empezado (el reloj del juego): en la pantalla de carga y el resto del tiempo.
+MODO_EN_CARGA_S, MODO_CADA_S = 0.2, 1.0
 
 
 def parsear_atajo(texto: str | None) -> list[int] | None:
@@ -113,8 +115,10 @@ class Controlador:
         if app.cfg.get("overlay_opacidad") != self._opacidad and hasattr(self.ventana, "opacidad"):
             self._opacidad = app.cfg.get("overlay_opacidad")
             self.ventana.opacidad(self._opacidad or 0.94)
-        # El vigía de la app mira el cliente cada 2,5 s; aquí el paso de carga a juego se nota antes.
-        if app.fase is not None and ahora - self._ultimo_modo >= 1.0:
+        # El vigía de la app mira el cliente cada 2,5 s; aquí el paso de carga a juego se nota antes. En la carga se
+        # mira más a menudo: la vista de carga tiene que irse en cuanto se puede jugar (normas de Riot).
+        cada = MODO_EN_CARGA_S if app.modo == "carga" else MODO_CADA_S
+        if app.fase is not None and ahora - self._ultimo_modo >= cada:
             self._ultimo_modo = ahora
             antes = app.modo
             app.actualizar_modo()

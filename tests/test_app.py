@@ -219,18 +219,27 @@ class Modo(unittest.TestCase):
         self.assertEqual(app.modo, "previa")
 
     def test_en_la_pantalla_de_carga_el_reloj_contesta_parado(self):
-        # Lo que hace el juego de verdad (partida de prueba de la 2.0.0): la API del reloj ya contesta en la
-        # pantalla de carga, con 0-1 s y sin avanzar, unos 30 s antes de que se pueda jugar.
+        # Lo que hace el juego de verdad (pruebas de la 2.0.0): la API del reloj ya contesta en la pantalla de carga,
+        # parada; en una carga de más de 3 minutos no se movió ni medio segundo.
         app, _, lol = montar()
         lol.fase, lol.segundos = "InProgress", None
         app.vigia.paso()
-        for segundos in (0.02, 0.02, 0.3):
+        for segundos in (0.02, 0.02, 0.1):
             lol.segundos = segundos
             app.actualizar_modo()
             self.assertEqual((app.modo, app.reloj), ("carga", None), segundos)
-        lol.segundos = 1.1  # empieza la partida: el reloj avanza
+        lol.segundos = 0.25  # empieza la partida: en cuanto el reloj se mueve, fuera la vista de carga
         app.actualizar_modo()
-        self.assertEqual((app.modo, app.reloj), ("juego", 1.1))
+        self.assertEqual((app.modo, app.reloj), ("juego", 0.25))
+
+    def test_si_el_reloj_se_pone_a_cero_tambien_ha_empezado(self):
+        app, _, lol = montar()
+        lol.fase, lol.segundos = "InProgress", 0.9
+        app.vigia.paso()
+        self.assertEqual(app.modo, "carga")
+        lol.segundos = 0.4
+        app.actualizar_modo()
+        self.assertEqual((app.modo, app.reloj), ("juego", 0.4))
 
     def test_empezada_no_vuelve_a_la_carga(self):
         app, _, lol = montar()
