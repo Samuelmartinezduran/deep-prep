@@ -29,7 +29,7 @@ La app pide los datos a Riot con **tu propia clave**. Es gratis:
 
 ## Para que salga encima del juego
 
-Pon el LoL en **ventana sin bordes**: Opciones → Vídeo → Modo de ventana → Sin bordes. Sale solo en la pantalla de carga y, ya jugando, mientras mantienes **Ctrl+Tab** (se cambia en Ajustes).
+Pon el LoL en **ventana sin bordes**: Opciones → Vídeo → Modo de ventana → Sin bordes. Sale solo en la pantalla de carga y, ya jugando, mientras mantienes **Ctrl+Tab** (se cambia en Ajustes). Si cambias a otra ventana con Alt+Tab, se esconde.
 
 ## Grabaciones
 

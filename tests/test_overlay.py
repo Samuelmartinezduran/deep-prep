@@ -32,7 +32,7 @@ class VentanaFalsa:
 def montar(pulsadas=(), juego=True):
     app, ventana = AppFalsa(), VentanaFalsa()
     teclas = set(pulsadas)
-    ctl = overlay.Controlador(app, ventana, tecla_pulsada=lambda vk: vk in teclas, juego_abierto=lambda: juego, reloj=lambda: 0.0)
+    ctl = overlay.Controlador(app, ventana, tecla_pulsada=lambda vk: vk in teclas, juego_delante=lambda: juego, reloj=lambda: 0.0)
     ctl._modo_juego = overlay.MODO_SIN_BORDES
     return app, ventana, ctl, teclas
 
@@ -77,6 +77,26 @@ class Visibilidad(unittest.TestCase):
         ctl._modo_juego = "0"
         ctl.paso()
         self.assertFalse(ventana.visible)
+
+    def test_con_alt_tab_a_otra_ventana_no_tapa_nada(self):
+        # Visto en la prueba de la 2.0.0: la vista de carga se quedaba encima de lo que abrías con Alt+Tab.
+        app, ventana, delante, teclas = AppFalsa(), VentanaFalsa(), [True], set()
+        ctl = overlay.Controlador(
+            app, ventana, tecla_pulsada=lambda vk: vk in teclas, juego_delante=lambda: delante[0], reloj=lambda: 0.0
+        )
+        ctl._modo_juego = overlay.MODO_SIN_BORDES
+        ctl.paso()
+        self.assertTrue(ventana.visible)
+        delante[0] = False
+        ctl.paso()
+        self.assertFalse(ventana.visible)
+        app.modo = "juego"
+        teclas.update({0x11, 0x09})  # Ctrl+Tab en el navegador, con el juego detrás
+        ctl.paso()
+        self.assertFalse(ventana.visible)
+        delante[0] = True  # vuelves al juego con el atajo pulsado
+        ctl.paso()
+        self.assertTrue(ventana.visible)
 
     def test_apagado_en_la_configuracion(self):
         app, ventana, ctl, _ = montar()

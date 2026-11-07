@@ -159,7 +159,7 @@ Lo que se enseña durante la partida se recorta en un solo sitio, `App._para_el_
 
 ### 4.2 Una ventana aparte encima del juego, no un overlay dentro del juego
 
-El overlay es una ventana de pywebview sin bordes a la que `overlay.VentanaWin32` añade `WS_EX_LAYERED`, `WS_EX_TRANSPARENT`, `WS_EX_TOOLWINDOW` y `WS_EX_NOACTIVATE`: siempre encima, sin coger el foco y dejando pasar los clics. Sale sola en la pantalla de carga y, ya jugando, solo mientras se mantiene el atajo (`overlay.debe_verse`).
+El overlay es una ventana de pywebview sin bordes a la que `overlay.VentanaWin32` añade `WS_EX_LAYERED`, `WS_EX_TRANSPARENT`, `WS_EX_TOOLWINDOW` y `WS_EX_NOACTIVATE`: siempre encima, sin coger el foco y dejando pasar los clics. Sale sola en la pantalla de carga y, ya jugando, solo mientras se mantiene el atajo (`overlay.debe_verse`). En los dos casos, solo con el juego delante (`GetForegroundWindow`): con Alt+Tab a otra ventana se esconde, y Ctrl+Tab en el navegador con el juego detrás no lo saca.
 
 **Alternativa:** dibujar dentro del juego enganchándose a DirectX, como hacen algunas plataformas de overlays. Exige inyectarse en el proceso, que es justo lo que no se puede hacer. **Coste:** solo funciona con el juego en ventana sin bordes (`WindowMode=2` en `game.cfg`); en pantalla completa exclusiva el juego se minimizaría. La app lee `game.cfg` y avisa en el panel.
 
@@ -252,10 +252,10 @@ Lo cubren `test_otra_web_no_puede_tocar_la_app` y `test_paginas_y_estado` (por e
 
 | Qué | Cifra | Cómo se mide |
 |---|---|---|
-| Pruebas de Python | 205 en 15 archivos, 7 s | `py -X utf8 -m unittest discover -s tests -t .` |
+| Pruebas de Python | 206 en 15 archivos, 7 s | `py -X utf8 -m unittest discover -s tests -t .` |
 | De ellas, de caracterización | 12, contra 12 JSON en `tests/datos/esperado/` | `tests/test_caracterizacion.py` |
 | Pruebas del panel | 95 en 23 grupos (9 archivos), 0,13 s | `node --test` (Node 24, sin dependencias) |
-| Cobertura de Python | 73,7 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
+| Cobertura de Python | 73,6 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
 | Tipos | mypy estricto, 0 errores en 50 archivos | `mypy` |
 | Lint y formato | ruff sin avisos; 64 archivos formateados | `ruff check .`, `ruff format --check .` |
 

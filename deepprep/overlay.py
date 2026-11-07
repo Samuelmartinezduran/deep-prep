@@ -81,7 +81,7 @@ class Controlador:
         app: Any,
         ventana: Any,
         tecla_pulsada: Callable[[int], bool] | None = None,
-        juego_abierto: Callable[[], bool] | None = None,
+        juego_delante: Callable[[], bool] | None = None,
         reloj: Callable[[], float] = time.monotonic,
     ) -> None:
         """app: la app (su configuración, fase y modo); ventana: algo con mostrar() y ocultar() (y opacidad())."""
@@ -91,7 +91,7 @@ class Controlador:
         self._opacidad = app.cfg.get("overlay_opacidad")
         self.vks: list[int] | None = None
         self._pulsada = tecla_pulsada or _tecla_pulsada
-        self._juego_abierto = juego_abierto or (lambda: rect_del_juego() is not None)
+        self._juego_delante = juego_delante or juego_delante_win32
         self._reloj = reloj
         self.visible = False
         self._ultimo_modo = 0.0
@@ -121,8 +121,9 @@ class Controlador:
             if app.modo != "previa" and antes == "previa":
                 self._modo_juego = modo_ventana(app.lcu.ruta)
         pulsado = bool(self.vks and all(self._pulsada(vk) for vk in self.vks))
-        # Sin la ventana del juego (se ha cerrado o aún no existe) no hay nada que tapar.
-        quiere = self.puede() and debe_verse(app.modo, pulsado) and self._juego_abierto()
+        # Sin el juego delante (cerrado, aún sin ventana o con Alt+Tab a otra cosa) no hay nada que tapar. Por lo
+        # mismo, Ctrl+Tab en el navegador con el juego detrás no lo saca.
+        quiere = self.puede() and debe_verse(app.modo, pulsado) and self._juego_delante()
         if quiere != self.visible:
             self.visible = quiere
             self.ventana.mostrar() if quiere else self.ventana.ocultar()
@@ -156,6 +157,9 @@ if _u32:
     _u32.SetWindowLongPtrW.argtypes = [wt.HWND, ctypes.c_int, ctypes.c_ssize_t]
     _u32.FindWindowW.restype = wt.HWND
     _u32.FindWindowW.argtypes = [wt.LPCWSTR, wt.LPCWSTR]
+    _u32.GetForegroundWindow.restype = wt.HWND
+    _u32.GetWindowThreadProcessId.restype = wt.DWORD
+    _u32.GetWindowThreadProcessId.argtypes = [wt.HWND, ctypes.POINTER(wt.DWORD)]
 
 
 def _tecla_pulsada(vk: int) -> bool:
@@ -171,6 +175,20 @@ def rect_del_juego() -> tuple[int, int, int, int] | None:
     if not _u32.GetWindowRect(hwnd, ctypes.byref(r)) or r.right - r.left < 200:
         return None
     return r.left, r.top, r.right - r.left, r.bottom - r.top
+
+
+def _proceso(hwnd: int) -> int:
+    pid = wt.DWORD()
+    _u32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+    return pid.value
+
+
+def juego_delante_win32() -> bool:
+    """¿La ventana del juego está abierta y es la que tienes delante? (De su mismo proceso también vale.)"""
+    if rect_del_juego() is None:
+        return False
+    juego, delante = _u32.FindWindowW(CLASE_JUEGO, None), _u32.GetForegroundWindow()
+    return bool(juego and delante) and (delante == juego or _proceso(delante) == _proceso(juego))
 
 
 class VentanaWin32:
