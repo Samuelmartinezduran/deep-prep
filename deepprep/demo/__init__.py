@@ -16,6 +16,8 @@ Los datos de ejemplo van en esta carpeta, en JSON, y no son de nadie: todos los 
 - ajustes.json: la configuración con la que empieza (cuentas, reglas, notas y referencias) y las partidas guardadas
   de cada jugador de referencia.
 - campeones.json: nombre y clave de cada campeón en Data Dragon, para no pedirlos a la red.
+- rival_linea.json: lo que enseña el panel de tu rival de línea si eliges otra posición que la de jungla, y los datos
+  destacados de esa partida sin tu duelo de jungla (inventado).
 """
 
 import copy
@@ -28,6 +30,7 @@ from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 
+from .. import analisis as an
 from .. import config
 from .. import revision as rv
 from ..actualizador import Actualizador
@@ -36,7 +39,7 @@ from ..app import para_el_modo, sin_arranque_windows
 from ..ddragon import Datos
 from ..revisiones import CLAVES_INDICE
 from ..riot import Limitador
-from ..servidor import Accion
+from ..sesion import ORDEN_POS, plan_de_linea
 from ..tipos import Cfg, EstadoVersion, Json, Panel, Resultado, Revision
 from ..vigia import FASES
 
@@ -117,7 +120,7 @@ class AppDemo:
 
     carpeta: donde va lo que se guarda desde Ajustes (la temporal de la demo). Las herramientas pueden cambiar el panel
     de ejemplo por otro (panel), enseñar unas novedades o una versión nueva lista (novedades, version) y fijar la hora
-    de las revisiones (ahora, en segundos).
+    de las revisiones (ahora, en segundos) y quitar la barra de escenas (barra).
     """
 
     def __init__(
@@ -129,6 +132,7 @@ class AppDemo:
         novedades: Json | None = None,
         version: EstadoVersion | None = None,
         ahora: float | None = None,
+        barra: bool = True,
     ) -> None:
         self.carpeta = carpeta
         campeones = leer("campeones.json")
@@ -153,11 +157,15 @@ class AppDemo:
         self.escena = escena if escena in ESCENAS else ESCENA_INICIAL
         self._panel: Panel = panel or leer("panel.json")
         self._seleccion: Json = leer("seleccion.json")
+        self._rival_linea: dict[str, Json] = leer("rival_linea.json")
+        # Tu posición en la partida de ejemplo: jungla (Diana) hasta que elijas otra en la pestaña Partida.
+        self.rol, self._rol_elegido = "JUNGLE", False
         self._novedades = novedades
         revisiones = leer("revisiones.json")
         self._tendencias: Json = revisiones["tendencias"]
         self._revisiones = self._preparar_revisiones(revisiones["revisiones"], time.time() if ahora is None else ahora)
         self.ultima_consulta = time.time()  # última vez que el panel pidió el estado
+        self.barra = barra  # la barra de escenas de la demo (sin ella, para las capturas del README)
         self.al_mostrar: Callable[[], None] | None = None
         self.al_salir: Callable[[], None] | None = None
         self.ventana_visible: Callable[[], bool] | None = None
@@ -191,10 +199,6 @@ class AppDemo:
     def modo(self) -> str:
         return MODO[self.escena]
 
-    def rutas(self) -> dict[str, Accion]:
-        """Lo que la demo añade a la API del panel: cambiar de escena desde la barra."""
-        return {"/api/demo": lambda app, cuerpo: self.elegir_escena(str(cuerpo.get("escena", "")))}
-
     def elegir_escena(self, escena: str) -> Resultado:
         if escena not in ESCENAS:
             return {"ok": False, "error": "Esa escena no existe."}
@@ -202,21 +206,64 @@ class AppDemo:
         return {"ok": True}
 
     def panel(self) -> Panel:
-        """El panel de la partida de ejemplo con tus notas y tus reglas de ahora (las de Ajustes)."""
+        """El panel de la partida de ejemplo con tus notas y tus reglas de ahora (las de Ajustes) y tu posición."""
         equipos = self._panel["equipos"]
         rivales = [self._por_nombre.get(f["campeon"], 0) for f in equipos["rival"]]
         todos = [self._por_nombre.get(f["campeon"], 0) for f in equipos["aliado"]] + rivales
+        panel: Panel = {
+            "modo": "clasificatoria",  # salvo que el panel de ejemplo diga otra cosa
+            "completo": True,
+            "rival_linea": None,
+            **self._panel,
+            "notas": self._ajustes.notas_de(todos, set(rivales)),
+            "recordatorios": list(self.cfg.get("recordatorios") or []),
+        }
+        if not panel["completo"]:  # fuera de la Grieta no hay posiciones que elegir
+            return dict(panel, rol={"actual": "", "motivo": "", "elegible": False})
+        panel["rol"] = self._rol_ui()
+        return panel if self.rol == "JUNGLE" else self._de_linea(panel)
+
+    def _rol_ui(self) -> Json:
+        return {"actual": self.rol, "motivo": an.MOTIVOS_ROL["elegido" if self._rol_elegido else "asignado"], "elegible": True}
+
+    def _de_linea(self, panel: Panel) -> Panel:
+        """La partida de ejemplo jugando en otra línea: pasas a esa posición (el aliado que la tenía, a la tuya) y el panel
+        enseña a tu rival de línea en vez de tu duelo de jungla, que no vale para otra posición."""
+        aliados = [dict(f) for f in panel["equipos"]["aliado"]]
+        yo = next(f for f in aliados if f.get("soy_yo"))
+        otro = next((f for f in aliados if f["rol"] == self.rol), None)
+        if otro:
+            otro["rol"], otro["rol_txt"] = yo["rol"], yo.get("rol_txt", "")
+        yo["rol"], yo["rol_txt"] = self.rol, an.NOMBRE_POS[self.rol]
+        aliados.sort(key=lambda f: ORDEN_POS.get(f["rol"], 9))
+        rival = next(f for f in panel["equipos"]["rival"] if f["rol"] == self.rol)
+        datos = self._rival_linea[self.rol]
+        caja = {k: v for k, v in datos.items() if k != "avisos"}
+        caja.update(nombre=rival["nombre"], campeon=rival["campeon"], icono=rival["icono"], rol=self.rol, cargando=False)
         return dict(
-            self._panel,
-            notas=self._ajustes.notas_de(todos, set(rivales)),
-            recordatorios=list(self.cfg.get("recordatorios") or []),
+            panel,
+            equipos=dict(panel["equipos"], aliado=aliados),
+            rival_linea=caja,
+            avisos=datos["avisos"],
+            plan=plan_de_linea(self.rol, rival["campeon"], datos["al10"], panel.get("gank"), None),
+            duelo=None,
         )
 
+    def elegir_rol(self, rol: str) -> Resultado:
+        if rol not in an.POSICIONES:
+            return {"ok": False, "error": "Ese rol no existe."}
+        self.rol, self._rol_elegido = rol, True
+        return {"ok": True}
+
     def seleccion(self) -> Json:
-        """La selección de campeón de ejemplo (el rival aún no lo ha elegido todo) con tus notas de ahora."""
+        """La selección de campeón de ejemplo (el rival aún no lo ha elegido todo) con tus notas de ahora. El duelo y tu
+        pool de ejemplo son de jungla: en otra posición no salen."""
         rivales = [f["campeon"] for f in self._seleccion["historial"]["vs"]]
         mio = self._por_nombre.get(self._seleccion["mio"]["nombre"], 0)
-        return dict(self._seleccion, notas=self._ajustes.notas_de([mio, *rivales], set(rivales)))
+        s = dict(self._seleccion, notas=self._ajustes.notas_de([mio, *rivales], set(rivales)), rol=self._rol_ui(), basico=False)
+        if self.rol != "JUNGLE":
+            s.update(duelo=None, pool=None, pos=an.NOMBRE_POS[self.rol])
+        return s
 
     def estado(self, contar: bool = True) -> Json:
         if contar:  # el overlay no cuenta como mirar el panel
@@ -236,12 +283,13 @@ class AppDemo:
             "grabacion": None,
             "ultima_revision": None,
             "seleccion": self.seleccion() if en_seleccion else None,
+            "apagada": None,
             "recolector": None,
             "version": self.actualizador.estado,
             "novedades": self._novedades,
             # Ya jugando, lo mismo que quita la app de verdad (normas de Riot).
             "panel": None if en_seleccion else para_el_modo(self.panel(), self.modo),
-            "demo": {"escena": self.escena},
+            "demo": {"escena": self.escena} if self.barra else None,
         }
 
     def revisiones(self) -> Json:

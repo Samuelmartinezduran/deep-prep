@@ -240,6 +240,30 @@ class Revisor:
             self.cache.kv_set(f"revision:{rev['id']}", rev)
         self.cache.kv_set("relleno_muertes_v1", True)
 
+    def rellenar_oro(self) -> None:
+        """Las revisiones de antes de la 2.1 no guardaban la diferencia de oro minuto a minuto (el gráfico de la
+        partida): se completa una vez, con la línea de tiempo de cada una (en segundo plano: no frena el panel)."""
+        if self.cache.kv_get("relleno_oro_v1"):
+            return
+        for fila in self.cache.kv_get("revisiones") or []:
+            rev = self.una(fila["id"])
+            if not rev or rev.get("dif_oro") or "equipo" not in rev:
+                continue
+            partida = self.cache.partida(rev["id"])
+            if not partida:
+                continue
+            try:
+                linea = self.cliente.linea(rev["id"], fondo=True)
+            except ErrorRiot as e:
+                logger.warning("Relleno del oro de %s: %s", rev["id"], e)
+                return  # sin red o sin cuota: otra vez será (no se marca como hecho)
+            if not linea:
+                continue
+            est = rv.reducir_linea_completa(linea)["est"]
+            rev["dif_oro"] = an.diferencia_oro(est, {j["pid"]: j["equipo"] for j in partida["jug"]}, rev["equipo"])
+            self.cache.kv_set(f"revision:{rev['id']}", rev)
+        self.cache.kv_set("relleno_oro_v1", True)
+
     def _referencia(self, crudo: Json, linea: Linea | Json, puuid: str) -> Json | None:
         try:
             registros = du.extraer(crudo, linea, self.datos.legendarios)

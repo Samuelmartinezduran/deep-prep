@@ -96,7 +96,7 @@ def main():
     estado = app.estado()
     p = estado["panel"]
     SALIDA.write_text(json.dumps(p, ensure_ascii=False, indent=1), encoding="utf-8")
-    # El estado entero sirve de maqueta para diseñar el panel sin partida (herramientas/maqueta.py).
+    # El estado entero sirve de maqueta para las pruebas y la demo (tests/test_caracterizacion.py, deepprep/demo).
     MAQUETA.parent.mkdir(exist_ok=True)
     MAQUETA.write_text(json.dumps(estado, ensure_ascii=False, indent=1), encoding="utf-8")
     # Las maquetas acaban en el repositorio: nada de Riot ID, PUUID ni id de partida reales.

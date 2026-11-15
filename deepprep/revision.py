@@ -137,6 +137,8 @@ def revisar(
         "kda": [yo["k"], yo["d"], yo["a"]],
         "cs_min": round(yo["cs"] / minutos, 1),
         "oro": yo["oro"],
+        # Oro de tu equipo menos el del rival, minuto a minuto: el gráfico de «La partida».
+        "dif_oro": an.diferencia_oro(linea["est"], {j["pid"]: j["equipo"] for j in partida["jug"]}, equipo),
         "dano": yo["dano"],
         "kp": round(yo["ch"].get("killParticipation", 0) * 100),
         "dano_pct": round(yo["ch"].get("teamDamagePercentage", 0) * 100),
@@ -146,7 +148,7 @@ def revisar(
         "muertes": _muertes(linea, pid, equipo, campeon, set(por_pid), desfase_s),
         "comparacion": _comparacion(linea, pid, directo, nombre_campeon) if directo else None,
         "objetivos": _objetivos(linea["monstruos"], pid, equipo),
-        "prevision": _prevision(panel, linea, partida, equipo, jr),
+        "prevision": _prevision(panel, linea, partida, yo, jr),
     }
 
 
@@ -212,11 +214,32 @@ def _comparacion(linea: Linea, pid: int, directo: Jugador, nombre_campeon: Calla
     return {"rival": nombre_campeon(directo["campeon"]), "minutos": filas} if filas else None
 
 
-def _prevision(panel: Panel | None, linea: Linea, partida: Partida, equipo: int, jr: Jugador | None) -> list[Json]:
+def _tramo(oro: float) -> str:
+    """Por delante, por detrás o igualado, con 300 de oro de margen (como en el panel)."""
+    return "delante" if oro >= 300 else ("detras" if oro <= -300 else "igual")
+
+
+def _prevision(panel: Panel | None, linea: Linea, partida: Partida, yo: Jugador, jr: Jugador | None) -> list[Json]:
     """Lo que el panel decía al empezar frente a lo que pasó."""
     if not panel:
         return []
+    equipo = yo["equipo"]
     filas: list[Json] = []
+    # Cómo llegaba al 10 tu rival de línea en sus partidas frente a cómo llegó hoy contra ti.
+    rl = panel.get("rival_linea") or {}
+    al10 = rl.get("al10")
+    directo = next((j for j in partida["jug"] if j["equipo"] != equipo and j["pos"] == rl.get("rol")), None)
+    suyo, mio = (an.oro_al(linea, directo["pid"], 10), an.oro_al(linea, yo["pid"], 10)) if directo else (None, None)
+    # Solo si el panel lo destacó (en el plan): 300 de oro o más, por delante o por detrás.
+    if al10 and al10["n"] >= 3 and abs(al10["oro"]) >= 300 and suyo is not None and mio is not None:
+        filas.append(
+            {
+                "tema": f"{rl['campeon']} al minuto 10",
+                "dijo": f"{an.con_signo(al10['oro'])} de oro de media frente a su rival",
+                "paso": f"{an.con_signo(suyo - mio)} de oro frente a ti",
+                "acierto": _tramo(al10["oro"]) == _tramo(suyo - mio),
+            }
+        )
     gank = panel.get("gank")
     if gank and jr:
         real = an.primer_gank(linea, jr["pid"])

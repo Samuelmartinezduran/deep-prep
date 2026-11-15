@@ -8,6 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 from deepprep import analisis as an
+from deepprep.constantes import MODOS, MODOS_POR_DEFECTO, modo_activo, modo_de
 from deepprep.tipos import Jugador, Linea, Partida
 
 DATOS = Path(__file__).parent / "datos"
@@ -143,6 +144,32 @@ class DatosReales(unittest.TestCase):
         perfil = an.perfil_jungla("nadie", [self.partida], {}, 1, 100)
         self.assertEqual((perfil["n"], perfil["tarjetas"]), (0, []))
 
+    def test_perfil_de_tu_rival_de_linea(self):
+        for pos in ("TOP", "MIDDLE", "BOTTOM", "UTILITY"):
+            j = next(x for x in self.partida["jug"] if x["pos"] == pos and x["equipo"] == 100)
+            rival = next(x for x in self.partida["jug"] if x["pos"] == pos and x["equipo"] == 200)
+            perfil = an.perfil_linea(j["puuid"], [self.partida], {self.partida["id"]: self.linea}, j["campeon"], pos)
+            self.assertEqual((perfil["n"], perfil["n_campeon"], perfil["n_lineas"]), (1, 1, 1))
+            # Su oro al 10 frente al de su rival de línea, y su CS, tal cual salen de la línea de tiempo.
+            suyo, otro = self.linea["est"][str(j["pid"])][10], self.linea["est"][str(rival["pid"])][10]
+            self.assertEqual(perfil["al10"], {"oro": suyo[0] - otro[0], "cs": suyo[2], "n": 1})
+            titulos = [t["titulo"] for t in perfil["tarjetas"]]
+            self.assertEqual(titulos[:2], ["Con su campeón", "Al minuto 10"])
+            self.assertIn("Se mueve", titulos)
+            al10 = next(t for t in perfil["tarjetas"] if t["titulo"] == "Al minuto 10")
+            # Un support no farmea: su CS no sale.
+            self.assertEqual("CS" in al10["valor"], pos != "UTILITY")
+            for t in perfil["tarjetas"]:
+                self.assertIn(t["tono"], ("ojo", "bien", "neutro"))
+
+    def test_perfil_de_linea_solo_con_partidas_en_esa_posicion(self):
+        j = next(x for x in self.partida["jug"] if x["pos"] == "TOP")
+        perfil = an.perfil_linea(j["puuid"], [self.partida], {}, j["campeon"], "MIDDLE")
+        self.assertEqual((perfil["n"], perfil["tarjetas"], perfil["al10"]), (0, [], None))
+        # Sin líneas de tiempo, lo que sale de la partida: con su campeón y su rendimiento.
+        perfil = an.perfil_linea(j["puuid"], [self.partida], {}, j["campeon"], "TOP")
+        self.assertEqual([t["titulo"] for t in perfil["tarjetas"]], ["Con su campeón", "Rendimiento"])
+
 
 class Roles(unittest.TestCase):
     def test_smite_manda_y_el_resto_sale_del_campeon(self):
@@ -171,6 +198,56 @@ class Roles(unittest.TestCase):
 
     def test_equipo_incompleto(self):
         self.assertEqual(an.asignar_roles([{"campeon": 1}], {}), [""])
+
+    def test_tu_posicion_fija_y_las_demas_alrededor(self):
+        tasas = {1: {"MIDDLE": 5}, 2: {"TOP": 5}, 3: {"JUNGLE": 5}, 4: {"BOTTOM": 5}, 5: {"UTILITY": 5}}
+        equipo = [{"campeon": c, "s1": 4, "s2": 11 if c == 3 else 14, "puuid": str(c)} for c in (1, 2, 3, 4, 5)]
+        self.assertEqual(an.asignar_roles(equipo, tasas), ["MIDDLE", "TOP", "JUNGLE", "BOTTOM", "UTILITY"])
+        # Juegas el campeón de mid en top: el de top pasa a la posición que queda libre.
+        self.assertEqual(an.asignar_roles(equipo, tasas, fijos={0: "TOP"}), ["TOP", "MIDDLE", "JUNGLE", "BOTTOM", "UTILITY"])
+
+    def test_tu_rol_de_hoy(self):
+        r = an.rol_de_hoy
+        self.assertEqual(r("MIDDLE", "TOP", "JUNGLE", True, "TOP"), ("MIDDLE", "elegido"))  # lo elegido manda siempre
+        self.assertEqual(r("", "TOP", "JUNGLE", False, "TOP"), ("TOP", "asignado"))
+        self.assertEqual(r("", "", "MIDDLE", False, "TOP"), ("MIDDLE", "principal"))
+        # Ya en partida, los hechizos corrigen: con Aplastar, jungla; sin él, lo que dice tu campeón.
+        self.assertEqual(r("", "TOP", "JUNGLE", True, "JUNGLE"), ("JUNGLE", "hechizos"))
+        self.assertEqual(r("", "", "JUNGLE", False, "MIDDLE"), ("MIDDLE", "hechizos"))
+        # En la selección los hechizos aún pueden cambiar: no cuentan.
+        self.assertEqual(r("", "", "JUNGLE", None, "MIDDLE"), ("JUNGLE", "principal"))
+        self.assertEqual(set(an.MOTIVOS_ROL), {"elegido", "asignado", "principal", "hechizos"})
+
+
+class Modos(unittest.TestCase):
+    def test_cada_cola_en_su_modo(self):
+        casos = {
+            (420, 11): "clasificatoria",
+            (440, 11): "flexible",
+            (400, 11): "normales",
+            (430, 11): "normales",
+            (480, 11): "normales",
+            (490, 11): "normales",
+            (700, 11): "clash",
+            (450, 12): "aram",
+            (720, 12): "aram",
+            (2400, 12): "aram",  # ARAM: Caos
+            (0, 12): "aram",  # una personalizada en el Abismo
+            (1700, 30): "arena",
+            (0, 30): "arena",
+            (900, 11): "otros",  # URF
+            (0, 11): "otros",  # una personalizada en la Grieta
+        }
+        for (cola, mapa), modo in casos.items():
+            self.assertEqual(modo_de(cola, mapa), modo, (cola, mapa))
+
+    def test_activos_de_fabrica_y_guardados(self):
+        self.assertEqual(set(MODOS_POR_DEFECTO), set(MODOS))
+        self.assertEqual([m for m in MODOS if not modo_activo(None, m)], ["arena", "otros"])
+        self.assertFalse(modo_activo({"aram": False}, "aram"))
+        self.assertTrue(modo_activo({"aram": False}, "clasificatoria"))  # lo que no está guardado, de fábrica
+        self.assertTrue(modo_activo({"otros": True}, "otros"))
+        self.assertFalse(modo_activo({}, "inventado"))
 
 
 class Resumen(unittest.TestCase):

@@ -57,6 +57,26 @@ class Revision(unittest.TestCase):
         self.assertEqual(temas, ["Primer gank del jungla rival", "Rival de bot con más errores"])
         self.assertTrue(all(isinstance(f["acierto"], bool) for f in r["prevision"]))
 
+    def test_prevision_de_tu_rival_de_linea_al_10(self):
+        top = next(j for j in self.partida["jug"] if j["pos"] == "TOP" and j["equipo"] == self.yo["equipo"])
+        rival = next(j for j in self.partida["jug"] if j["pos"] == "TOP" and j["equipo"] != top["equipo"])
+        real = an.oro_al(self.linea, rival["pid"], 10) - an.oro_al(self.linea, top["pid"], 10)  # type: ignore[operator]
+
+        def panel(n, oro=450):
+            return {"rival_linea": {"campeon": "Rival", "rol": "TOP", "al10": {"oro": oro, "cs": 80, "n": n}}}
+
+        r = revisar(self.partida, self.linea, top["puuid"], str, panel=panel(4))
+        fila = r["prevision"][0]
+        self.assertEqual(
+            (fila["tema"], fila["dijo"], fila["paso"]),
+            ("Rival al minuto 10", "+450 de oro de media frente a su rival", f"{an.con_signo(real)} de oro frente a ti"),
+        )
+        self.assertEqual(fila["acierto"], real >= 300)
+        # Con menos de 3 partidas suyas no se dijo nada que comprobar.
+        self.assertEqual(revisar(self.partida, self.linea, top["puuid"], str, panel=panel(2))["prevision"], [])
+        # Ni si iba igualado (menos de 300 de oro): el panel no lo destacó, no hay nada que comprobar.
+        self.assertEqual(revisar(self.partida, self.linea, top["puuid"], str, panel=panel(6, -223))["prevision"], [])
+
     def test_en_otra_posicion_se_compara_con_tu_rival_de_linea(self):
         adc = next(j for j in self.partida["jug"] if j["pos"] == "BOTTOM" and j["equipo"] == self.yo["equipo"])
         rival = next(j for j in self.partida["jug"] if j["pos"] == "BOTTOM" and j["equipo"] != adc["equipo"])

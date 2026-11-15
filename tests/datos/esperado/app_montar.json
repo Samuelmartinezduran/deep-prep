@@ -28,6 +28,7 @@
  },
  "ultima_revision": null,
  "seleccion": null,
+ "apagada": null,
  "recolector": {
   "partidas": 0,
   "miradas": 0,
@@ -35,21 +36,15 @@
   "pool": []
  },
  "panel": {
-  "duelo": {
-   "n": 0,
-   "datos": [],
-   "build": null,
-   "tu": null,
-   "poco": true,
-   "a": "Campeón 40",
-   "b": "Campeón 421",
-   "icono_a": "",
-   "icono_b": "",
-   "pos": "top",
-   "en_pool": false
-  },
   "id": 7000000002,
   "cola": "Clasificatoria solo/dúo",
+  "modo": "clasificatoria",
+  "completo": true,
+  "rol": {
+   "actual": "TOP",
+   "motivo": "por tus hechizos",
+   "elegible": true
+  },
   "yo": {
    "campeon": "Campeón 40",
    "splash": ""
@@ -483,31 +478,6 @@
     }
    ]
   },
-  "jungla": {
-   "nombre": "Larkspur",
-   "campeon": "Campeón 887",
-   "icono": "",
-   "n": 0,
-   "n_campeon": 0,
-   "n_lineas": 0,
-   "tarjetas": [],
-   "mapa": {},
-   "cargando": false
-  },
-  "lineas": [],
-  "gank": null,
-  "historial": {
-   "n": 0,
-   "campeon": null,
-   "vs": [],
-   "vs_directo": null,
-   "conocidos": [],
-   "alcance": "temporada",
-   "cola_txt": " de solo/dúo",
-   "mi_campeon": "Campeón 40"
-  },
-  "avisos": [],
-  "plan": [],
   "bans": [
    {
     "nombre": "Campeón 53",
@@ -552,6 +522,56 @@
   ],
   "recordatorios": [],
   "notas": [],
+  "duelo": {
+   "n": 0,
+   "datos": [],
+   "build": null,
+   "tu": null,
+   "poco": true,
+   "a": "Campeón 40",
+   "b": "Campeón 421",
+   "icono_a": "",
+   "icono_b": "",
+   "pos": "top",
+   "en_pool": false
+  },
+  "jungla": {
+   "nombre": "Larkspur",
+   "campeon": "Campeón 887",
+   "icono": "",
+   "n": 0,
+   "n_campeon": 0,
+   "n_lineas": 0,
+   "tarjetas": [],
+   "mapa": {},
+   "cargando": false
+  },
+  "rival_linea": {
+   "nombre": "Gloam",
+   "campeon": "Campeón 421",
+   "icono": "",
+   "rol": "TOP",
+   "n": 0,
+   "n_campeon": 0,
+   "n_lineas": 0,
+   "tarjetas": [],
+   "al10": null,
+   "cargando": false
+  },
+  "lineas": [],
+  "gank": null,
+  "historial": {
+   "n": 0,
+   "campeon": null,
+   "vs": [],
+   "vs_directo": null,
+   "conocidos": [],
+   "alcance": "temporada",
+   "cola_txt": " de solo/dúo",
+   "mi_campeon": "Campeón 40"
+  },
+  "avisos": [],
+  "plan": [],
   "progreso": {
    "hechas": 30,
    "total": 30

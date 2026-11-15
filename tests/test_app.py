@@ -106,14 +106,14 @@ class LolFalso:
         return self.region
 
     eleccion: dict[str, Any] | None = None
-    mapa_id = 11
+    cola_id, mapa_id = 420, 11  # la cola y el mapa de la sala (0 = no se sabe)
     segundos: float | None = None  # reloj del juego: None en la pantalla de carga
 
     def reloj(self):
         return self.segundos
 
-    def mapa(self):
-        return self.mapa_id
+    def cola_y_mapa(self):
+        return self.cola_id, self.mapa_id
 
     nombre = "Yo"
 
@@ -450,13 +450,13 @@ class Grabacion(unittest.TestCase):
 
         lol.fase = "EndOfGame"
         app.vigia.paso()
-        lol.fase, lol.mapa_id = "InProgress", 12  # ARAM
+        lol.fase, lol.cola_id, lol.mapa_id = "InProgress", 450, 12  # ARAM: no se revisa, así que no se graba
         app.vigia.paso()
         self.assertEqual(app.grabador.armados, 1)
 
         lol.fase = "Lobby"
         app.vigia.paso()
-        lol.fase, lol.mapa_id = "InProgress", 0  # mapa desconocido: se graba por si acaso
+        lol.fase, lol.cola_id, lol.mapa_id = "InProgress", 0, 0  # modo desconocido: se graba por si acaso
         app.vigia.paso()
         self.assertEqual(app.grabador.armados, 2)
 
@@ -569,6 +569,148 @@ class SeleccionDeCampeon(unittest.TestCase):
         self.assertIsNone(app.estado()["seleccion"])
 
 
+class ModosDeJuego(unittest.TestCase):
+    def aram(self, **cfg):
+        """La partida de las pruebas, en ARAM (cola 450 en el Abismo)."""
+        app, riot, lol = montar()
+        app.cfg.update(cfg)
+        riot.juego.update(gameQueueConfigId=450, mapId=12)
+        lol.cola_id, lol.mapa_id = 450, 12
+        return app, riot, lol
+
+    def test_en_aram_solo_lo_basico(self):
+        app, riot, lol = self.aram()
+        historiales: list[str] = []
+
+        def ids_partidas(puuid, **kw):
+            historiales.append(puuid)
+            return []
+
+        riot.ids_partidas = ids_partidas
+        lol.fase = "InProgress"
+        app.vigia.paso()
+        s = app.sesion
+        self.assertEqual((s.modo, s.completo), ("aram", False))
+        self.assertTrue(esperar(s))
+        self.assertEqual(historiales, [])  # de nadie se pide el historial: solo su rango y su maestría
+        p = app.estado()["panel"]
+        json.dumps(p)
+        self.assertEqual((p["cola"], p["modo"], p["completo"], p["rol"]["elegible"]), ("ARAM", "aram", False, False))
+        vacio = (p["jungla"], p["rival_linea"], p["duelo"], p["historial"], p["gank"], p["lineas"], p["plan"])
+        self.assertEqual(vacio, (None, None, None, None, None, [], []))
+        filas = p["equipos"]["aliado"] + p["equipos"]["rival"]
+        self.assertEqual({f["rol"] for f in filas}, {""})  # en ARAM no hay posiciones
+        self.assertFalse(any(f["cargando"] for f in filas))
+        self.assertEqual(filas[0]["liga"]["solo"]["txt"], "Diamante IV")
+        # Nadie juega su campeón con maestría (la de mentira es de otro campeón): primera vez, sin esperar historial.
+        self.assertTrue(all(any(e["t"] == "Primera vez" for e in f["etiquetas"]) for f in filas))
+        self.assertEqual(
+            [a["texto"].split(":")[0] for a in p["avisos"]],
+            ["Rivales que casi no han jugado su campeón", "Aliados que casi no han jugado su campeón"],
+        )
+
+    def test_modo_apagado_sin_panel_ni_overlay_ni_grabacion(self):
+        app, riot, lol = self.aram(modos={"aram": False})
+        lol.fase = "ChampSelect"
+        lol.eleccion = {"mio": 131, "aliados": [], "rivales": [], "cola": 450, "mapa": 12, "pos": ""}
+        app.vigia.paso()
+        self.assertEqual((app.estado()["apagada"], app.estado()["seleccion"]), ("ARAM", None))
+        lol.fase = "InProgress"
+        app.vigia.paso()
+        self.assertEqual((app.partida_apagada, app.sesion, app.grabador.armados), ("ARAM", None, 0))
+        self.assertIsNone(app.estado()["panel"])
+        # Buscar a mano una partida funciona en cualquier modo.
+        self.assertTrue(app.buscar("Otro#EUW")["ok"])
+        self.assertEqual(app.sesion.origen, "manual")
+        # La siguiente, una clasificatoria: todo vuelve.
+        lol.fase = "EndOfGame"
+        app.vigia.paso()
+        self.assertIsNone(app.partida_apagada)
+        riot.juego.update(gameQueueConfigId=420, mapId=11)
+        lol.cola_id, lol.mapa_id, lol.fase = 420, 11, "InProgress"
+        app.vigia.ultimo_sondeo = 0
+        app.vigia.paso()
+        self.assertEqual((app.sesion.origen, app.sesion.completo, app.grabador.armados), ("propia", True, 1))
+
+    def test_el_panel_de_la_anterior_no_se_queda_en_un_modo_apagado(self):
+        app, riot, lol = montar()
+        lol.fase = "InProgress"
+        app.vigia.paso()
+        self.assertEqual(app.sesion.origen, "propia")
+        lol.fase = "EndOfGame"
+        app.vigia.paso()
+        app.cfg["modos"] = {"aram": False}
+        riot.juego.update(gameQueueConfigId=450, mapId=12)
+        lol.cola_id, lol.mapa_id, lol.fase = 450, 12, "InProgress"
+        app.vigia.paso()
+        self.assertIsNone(app.sesion)
+
+    def test_seleccion_fuera_de_la_grieta(self):
+        app, _, lol = self.aram()
+        lol.fase = "ChampSelect"
+        lol.eleccion = {"mio": 131, "aliados": [], "rivales": [], "cola": 450, "mapa": 12, "pos": ""}
+        app.vigia.paso()
+        sel = app.estado()["seleccion"]
+        self.assertEqual((sel["basico"], sel["modo"], sel["duelo"], sel["pool"], sel["pos"]), (True, "ARAM", None, None, ""))
+        self.assertEqual(sel["mio"]["nombre"], "Campeón 131")
+
+    def test_ajustes_de_modos_y_rol(self):
+        app, _, _ = montar()
+        self.assertEqual(app.ajustes()["rol"], "JUNGLE")  # sin elegir ni partidas tuyas, jungla
+        self.assertEqual(app.guardar_ajustes({"rol": "SUPPORT"}), {"ok": False, "error": "Ese rol no existe."})
+        self.assertTrue(app.guardar_ajustes({"rol": "MIDDLE", "modos": {"aram": False, "inventado": True}})["ok"])
+        self.assertEqual((app.cfg["rol"], app.cfg["modos"]), ("MIDDLE", {"aram": False}))
+        self.assertEqual(app.ajustes()["rol"], "MIDDLE")
+
+
+class TuRol(unittest.TestCase):
+    def test_principal_elegido_y_otra_seleccion(self):
+        app, _, lol = montar()
+        app.cfg["rol"] = "MIDDLE"
+        lol.fase = "InProgress"
+        app.vigia.paso()
+        s = app.sesion
+        self.assertTrue(esperar(s))
+        p = app.estado()["panel"]
+        mia = next(f for f in p["equipos"]["aliado"] if f["soy_yo"])
+        # Sin Aplastar, el principal vale tal cual.
+        self.assertEqual(
+            (s.mi_rol, mia["rol"], p["rol"]),
+            ("MIDDLE", "MIDDLE", {"actual": "MIDDLE", "motivo": "tu rol principal", "elegible": True}),
+        )
+        self.assertEqual(
+            sorted(f["rol"] for f in p["equipos"]["aliado"]), sorted(["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"])
+        )
+        # Lo cambias en el panel: se reparten otra vez y tu rival de línea es el de tu nueva posición.
+        self.assertEqual(app.elegir_rol("SUPPORT"), {"ok": False, "error": "Ese rol no existe."})
+        self.assertEqual(app.elegir_rol("TOP"), {"ok": True})
+        self.assertTrue(esperar(s))
+        p = app.estado()["panel"]
+        self.assertEqual((s.mi_rol, p["rol"]["actual"], p["rol"]["motivo"]), ("TOP", "TOP", "elegido por ti"))
+        rival_top = next(f for f in p["equipos"]["rival"] if f["rol"] == "TOP")
+        self.assertEqual(p["rival_linea"]["nombre"], rival_top["nombre"])
+        # En la selección siguiente se olvida: manda la posición que te toque.
+        lol.fase = "ChampSelect"
+        lol.eleccion = {"mio": 131, "aliados": [], "rivales": [], "cola": 420, "pos": "BOTTOM"}
+        app.vigia.paso()
+        self.assertEqual(
+            app.estado()["seleccion"]["rol"], {"actual": "BOTTOM", "motivo": "el que te ha tocado", "elegible": True}
+        )
+        self.assertEqual(app.elegir_rol("UTILITY"), {"ok": True})
+        self.assertEqual(app.estado()["seleccion"]["rol"]["actual"], "UTILITY")
+        self.assertEqual(app.estado()["seleccion"]["pos"], "support")
+
+    def test_de_jungla_no_hay_rival_de_linea(self):
+        app, _, lol = montar()
+        app.cfg["rol"] = "JUNGLE"
+        app.rol_elegido = "JUNGLE"
+        lol.fase = "InProgress"
+        app.vigia.paso()
+        self.assertTrue(esperar(app.sesion))
+        p = app.estado()["panel"]
+        self.assertEqual((p["rol"]["actual"], p["rival_linea"]), ("JUNGLE", None))
+
+
 class RecolectorPorRegion(unittest.TestCase):
     def test_tu_region_va_con_el_cliente_del_panel_y_las_demas_aparte(self):
         for region in ("europe", "asia"):
@@ -637,7 +779,9 @@ class Clave(unittest.TestCase):
             config.guardar_clave = guardar
 
 
-class Web(unittest.TestCase):
+class CanalDeControl(unittest.TestCase):
+    """El servidor local: solo el estado (para leerlo), enseñar la ventana y cerrar; el panel web ya no está."""
+
     PUERTO = 5959
     app: App
     srv: servidor.Servidor
@@ -664,23 +808,23 @@ class Web(unittest.TestCase):
         except urllib.error.HTTPError as e:
             return e.code, e.read()
 
-    def test_paginas_y_estado(self):
-        for ruta in ("/", "/js/main.js", "/estilo.css"):
-            self.assertEqual(self.pedir(ruta)[0], 200)
-        for ruta in ("/app.js", "/js/no-existe.js", "/js/..%2Fservidor.py", "/js/../app.py"):
-            self.assertEqual(self.pedir(ruta)[0], 404)
+    def test_estado_y_nada_del_panel_web(self):
         codigo, cuerpo = self.pedir("/api/estado")
         self.assertEqual(codigo, 200)
         self.assertIn("fase_txt", json.loads(cuerpo))
-        self.assertEqual(self.pedir("/no-existe")[0], 404)
+        for ruta in ("/", "/js/main.js", "/estilo.css", "/api/revisiones", "/ddragon/campeon/Diana.png", "/no-existe"):
+            self.assertEqual(self.pedir(ruta)[0], 404, ruta)
+        propio = {"Origin": f"http://127.0.0.1:{self.PUERTO}"}
+        for ruta in ("/api/clave", "/api/ajustes", "/api/buscar"):
+            self.assertEqual(self.pedir(ruta, {}, propio)[0], 404, ruta)
 
     def test_otra_web_no_puede_tocar_la_app(self):
         ajena = {"Origin": "https://ejemplo.com"}
-        self.assertEqual(self.pedir("/api/clave", {"clave": "RGAPI-x"}, ajena)[0], 403)
+        self.assertEqual(self.pedir("/api/salir", {}, ajena)[0], 403)
         self.assertEqual(self.pedir("/api/estado", None, {"Host": "ejemplo.com"})[0], 403)
         propio = {"Origin": f"http://127.0.0.1:{self.PUERTO}"}
-        codigo, cuerpo = self.pedir("/api/buscar", {"riot_id": "mal"}, propio)
-        self.assertEqual((codigo, json.loads(cuerpo)["ok"]), (200, False))
+        # Sin ventanas no hay nada que enseñar.
+        self.assertEqual(self.pedir("/api/mostrar", {}, propio), (200, b'{"ok": false}'))
 
 
 if __name__ == "__main__":

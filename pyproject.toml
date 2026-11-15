@@ -19,9 +19,9 @@ description = "Live League of Legends companion for Windows: pre-game scouting, 
 readme = "README.md"
 requires-python = ">=3.14"
 license = "MIT"
-license-files = ["LICENSE", "deepprep/web/fuentes/OFL.txt"]
+license-files = ["LICENSE", "deepprep/nativa/fuentes/OFL.txt"]
 authors = [{ name = "Samuel Martínez Durán" }]
-keywords = ["league-of-legends", "riot-api", "overlay", "pywebview", "windows"]
+keywords = ["league-of-legends", "riot-api", "overlay", "qt-quick", "pyside6", "windows"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Win32 (MS Windows)",
@@ -36,8 +36,8 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    # Ventanas nativas con WebView2. En Windows trae pythonnet 3.2.1 (y clr_loader).
-    "pywebview==6.2.1",
+    # La interfaz (Qt Quick): solo los módulos esenciales de Qt, sin los complementos.
+    "PySide6-Essentials==6.12.0",
 ]
 
 [project.optional-dependencies]
@@ -61,18 +61,20 @@ Issues = "https://github.com/Samuelmartinezduran/deep-prep/issues"
 deep-prep = "deepprep.__main__:main"
 
 [tool.setuptools]
-# Solo lo que dice package-data (sin esto setuptools toma las carpetas de web/ por paquetes y avisa).
+# Solo lo que dice package-data (sin esto setuptools toma las carpetas de datos por paquetes y avisa).
 include-package-data = false
 
 [tool.setuptools.packages.find]
 # Solo el paquete (y subpaquetes con __init__.py, si algún día los hay); tests/ y herramientas/ no se instalan.
-# Sin namespaces, web/ no se toma por un paquete: va como datos, abajo.
+# Sin namespaces, recursos/ y nativa/qml no se toman por paquetes: van como datos, abajo.
 include = ["deepprep", "deepprep.*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-# El panel (HTML, JS, CSS, fuentes, iconos e imágenes) va dentro del paquete: config.RUTA_WEB lo busca ahí.
-deepprep = ["web/**/*"]
+# El icono y las imágenes propias van dentro del paquete: config.RUTA_RECURSOS los busca ahí.
+deepprep = ["recursos/**/*"]
+# La interfaz: su QML y sus fuentes, junto a nativa/ (ventanas.py los busca ahí).
+"deepprep.nativa" = ["qml/**/*", "fuentes/*"]
 # Los datos de ejemplo del modo demo (--demo): deepprep/demo los busca junto a su __init__.py.
 "deepprep.demo" = ["*.json"]
 
@@ -123,10 +125,10 @@ ignore = [
     "SIM105", # contextlib.suppress en vez de try/except/pass: preferencia de estilo, no un fallo
 ]
 # Reglas que aquí no tocan: PL/C90 (complejidad, funciones largas a propósito), S (subprocess y urlopen
-# son la app), ARG (firmas impuestas por pywebview, http.server y ctypes), N (nombres en español:
+# son la app), ARG (firmas impuestas por Qt, http.server y ctypes), N (nombres en español:
 # N818 exigiría acabar las excepciones en «Error»), DTZ (la app trabaja en hora local), PTH (ya usa pathlib
-# salvo en open()), PLC0415 (los imports dentro de funciones son a propósito: arranque rápido y pywebview
-# opcional), ANN (los tipos de deepprep los exige mypy; las pruebas y las herramientas no los llevan) y D (aún no
+# salvo en open()), PLC0415 (los imports dentro de funciones son a propósito: arranque rápido y Qt solo si
+# hay ventanas), ANN (los tipos de deepprep los exige mypy; las pruebas y las herramientas no los llevan) y D (aún no
 # hay docstrings en todas las funciones).
 allowed-confusables = ["−"] # signo menos tipográfico (U+2212) en los textos para el jugador
 
@@ -186,7 +188,6 @@ module = [
     "deepprep.sistema",
     "deepprep.tipos",
     "deepprep.trabajo",
-    "deepprep.ventanas",
     "deepprep.vigia",
 ]
 disallow_untyped_defs = true
@@ -196,21 +197,14 @@ disallow_untyped_decorators = true
 warn_return_any = true
 warn_unreachable = true
 
-[[tool.mypy.overrides]]
-# pywebview trae tipos (py.typed), pero en un entorno sin él instalado no debe romper el análisis. pythonnet
-# (clr) no hace falta: solo lo importa pywebview por dentro; si algún módulo propio llega a hacer `import clr`,
-# se añade aquí (warn_unused_configs avisa de las entradas que no se usan).
-module = ["webview"]
-ignore_missing_imports = true
-
 # --- coverage --------------------------------------------------------------------------------------
 
 [tool.coverage.run]
 source = ["deepprep"]
 branch = true
 omit = [
-    "deepprep/__main__.py", # arranque: argumentos, consola, ventanas de pywebview/Chrome; no se prueba con unittest
-    "deepprep/web/*",       # el panel (HTML/JS/CSS): sus pruebas van aparte, con node --test
+    "deepprep/__main__.py", # arranque: argumentos, consola y ventanas; no se prueba con unittest
+    "deepprep/nativa/__main__.py", # el lanzador de la interfaz con la demo (capturas, medir): para desarrollar
 ]
 
 [tool.coverage.report]

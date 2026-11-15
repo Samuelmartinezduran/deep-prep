@@ -32,7 +32,6 @@ class Comprobaciones(unittest.TestCase):
             "mypy",
             "coverage run -m unittest discover -s tests -t .",
             "coverage report",
-            "node --test",
         ):
             with self.subTest(paso_de_la_ci):
                 self.assertIn(paso_de_la_ci, ci)
@@ -40,7 +39,7 @@ class Comprobaciones(unittest.TestCase):
 
     def test_las_herramientas_con_el_python_que_se_le_da(self):
         for _, orden in self.publicar.comprobaciones("C:/entorno/python.exe"):
-            self.assertIn(orden[0], ("C:/entorno/python.exe", "node"))
+            self.assertEqual(orden[0], "C:/entorno/python.exe")
 
     def test_el_python_del_entorno_de_desarrollo_si_lo_hay(self):
         with tempfile.TemporaryDirectory() as d:
@@ -155,3 +154,45 @@ class Main(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RecorteDeQt(unittest.TestCase):
+    """Lo que la interfaz nativa no usa de PySide6 sale del paquete; lo que carga al arrancar, no."""
+
+    def test_quita_lo_que_no_se_usa_y_deja_lo_que_carga(self):
+        publicar = cargar_publicar()
+        with tempfile.TemporaryDirectory() as d:
+            dist = Path(d) / "DeepPrep"
+            pyside = dist / "_internal" / "PySide6"
+            fuera = [
+                "opengl32sw.dll",
+                "Qt6QuickControls2Basic.dll",
+                "Qt6Widgets.dll",
+                "translations/qt_es.qm",
+                "qml/QtQuick/Controls/qmldir",
+                "plugins/imageformats/qtiff.dll",
+                "plugins/platforms/qoffscreen.dll",
+            ]
+            dentro = [
+                "Qt6Core.dll",
+                "Qt6Quick.dll",
+                "Qt6QuickShapes.dll",
+                "Qt6Svg.dll",
+                "qml/QtQuick/Shapes/qmldir",
+                "plugins/platforms/qwindows.dll",
+                "plugins/imageformats/qsvg.dll",
+                "plugins/imageformats/qjpeg.dll",
+                "plugins/imageformats/qico.dll",
+            ]
+            for rel in fuera + dentro:
+                (pyside / rel).parent.mkdir(parents=True, exist_ok=True)
+                (pyside / rel).write_bytes(b"x" * 1024)
+            (dist / "_internal" / "libcrypto-3-x64.dll").write_bytes(b"x")
+            (dist / "_internal" / "libcrypto-3.dll").write_bytes(b"x")  # el de Python se queda
+            publicar.recortar_qt(dist)
+            for rel in fuera:
+                self.assertFalse((pyside / rel).exists(), rel)
+            for rel in dentro:
+                self.assertTrue((pyside / rel).exists(), rel)
+            self.assertFalse((dist / "_internal" / "libcrypto-3-x64.dll").exists())
+            self.assertTrue((dist / "_internal" / "libcrypto-3.dll").exists())

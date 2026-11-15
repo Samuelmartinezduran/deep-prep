@@ -10,6 +10,7 @@ config.json.roto
 *.log
 *.lock
 imagenes/
+qt/
 __pycache__/
 
 # Empaquetado

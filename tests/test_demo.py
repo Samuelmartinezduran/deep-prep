@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
-from deepprep import config, demo, inicio_windows, servidor
+from deepprep import config, ddragon, demo, inicio_windows, servidor
 from deepprep.app import App
 from tests import registro_de
 from tests.test_app import esperar, montar
@@ -226,55 +226,28 @@ def pedir(puerto, ruta, cuerpo=None, cabeceras=None):
         con.close()
 
 
-class ServidorDeLaDemo(SinRed):
-    def setUp(self):
-        super().setUp()
-        self.srv = servidor.crear(self.app, 0, post=self.app.rutas())  # 0: un puerto libre
-        self.puerto = self.srv.server_address[1]
-        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
-        self.addCleanup(self.srv.server_close)
-        self.addCleanup(self.srv.shutdown)
-
-    def json(self, ruta, cuerpo=None):
-        codigo, datos = pedir(self.puerto, ruta, cuerpo)
-        self.assertEqual(codigo, 200, ruta)
-        return json.loads(datos)
-
-    def test_el_panel_entero(self):
-        for ruta in ("/", "/js/main.js", "/js/demo.js", "/estilo.css"):
-            self.assertEqual(pedir(self.puerto, ruta)[0], 200, ruta)
-        self.assertEqual(self.json("/api/estado")["demo"], {"escena": demo.ESCENA_INICIAL})
-        self.assertEqual(self.json("/api/demo", {"escena": "juego"}), {"ok": True})
-        self.assertEqual(self.json("/api/estado?vista=overlay")["modo"], "juego")
-        self.assertFalse(self.json("/api/demo", {"escena": "no"})["ok"])
-        revisiones = self.json("/api/revisiones")
-        self.assertEqual(self.json(f"/api/revision?id={revisiones['lista'][0]['id']}")["campeon"], "Diana")
-        self.assertIn("Larkspur#DEMO", self.json("/api/ajustes")["referencias"].values())
-        self.assertEqual(self.json("/api/ajustes", {"atajo_overlay": "alt+x"}), {"ok": True})
-        self.assertEqual(self.json("/api/novedades", {}), {"ok": True})
-        self.assertFalse(self.json("/api/clave", {"clave": "RGAPI-x"})["ok"])
+class CanalDeLaDemo(SinRed):
+    def test_su_estado_y_nada_mas(self):
+        srv = servidor.crear(self.app, 0)  # 0: un puerto libre
+        puerto = srv.server_address[1]
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        self.addCleanup(srv.server_close)
+        self.addCleanup(srv.shutdown)
+        codigo, datos = pedir(puerto, "/api/estado")
+        self.assertEqual((codigo, json.loads(datos)["demo"]), (200, {"escena": demo.ESCENA_INICIAL}))
+        propio = {"Origin": f"http://127.0.0.1:{puerto}", "Content-Type": "application/json"}
+        for ruta in ("/api/demo", "/api/ajustes", "/api/clave"):  # la barra y los ajustes van por la interfaz
+            self.assertEqual(pedir(puerto, ruta, {}, propio)[0], 404, ruta)
         self.assertEqual(self.pedidas, [])
 
     def test_sin_red_las_imagenes_no_estan_y_nada_se_rompe(self):
-        self.assertEqual(pedir(self.puerto, "/ddragon/campeon/Diana.png")[0], 404)
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(ddragon, "RUTA_IMAGENES", Path(d)):
+            self.assertIsNone(ddragon.imagen("campeon", "Diana", "0.0.1"))
+            self.assertEqual(list(Path(d).iterdir()), [])
         self.assertEqual(len(self.pedidas), 1)
         self.assertTrue(self.pedidas[0].startswith(DDRAGON), self.pedidas)  # lo único de fuera: Data Dragon
-        self.assertEqual(self.json("/api/estado")["clave"]["ok"], True)
-
-    def test_otra_web_no_cambia_la_escena(self):
-        ajena = {"Origin": "https://ejemplo.com", "Content-Type": "application/json"}
-        self.assertEqual(pedir(self.puerto, "/api/demo", {"escena": "juego"}, ajena)[0], 403)
-        self.assertEqual(self.app.escena, demo.ESCENA_INICIAL)
-
-    def test_la_app_de_verdad_no_tiene_escenas(self):
-        real, _, _ = montar()
-        srv = servidor.crear(real, 0)
-        threading.Thread(target=srv.serve_forever, daemon=True).start()
-        try:
-            self.assertEqual(pedir(srv.server_address[1], "/api/demo", {"escena": "juego"})[0], 404)
-        finally:
-            srv.shutdown()
-            srv.server_close()
+        self.assertIsNone(ddragon.imagen("campeon", "../config", "0.0.1"))  # ni rutas raras
+        self.assertEqual(len(self.pedidas), 1)
 
 
 class CarpetaDeLaDemo(unittest.TestCase):
@@ -317,8 +290,16 @@ def huella(carpeta):
     return {p.name: (p.stat().st_size, p.stat().st_mtime_ns) for p in carpeta.iterdir() if p.is_file()}
 
 
+def huella_honda(carpeta):
+    """Lo mismo, con lo que hay en las carpetas de dentro; None si no existe."""
+    if not carpeta.exists():
+        return None
+    return {str(p): (p.stat().st_size, p.stat().st_mtime_ns) for p in carpeta.rglob("*") if p.is_file()}
+
+
 class LaDemoEntera(unittest.TestCase):
-    """py -m deepprep --demo --sin-ventana de verdad, en otro proceso, con DEEPPREP_DATOS apuntando a un centinela."""
+    """py -m deepprep --demo de verdad, en otro proceso (con Qt sin pantalla), con DEEPPREP_DATOS apuntando a un centinela.
+    Se cierra desde fuera con /api/salir, como el instalador cierra la app."""
 
     def test_no_escribe_fuera_de_su_carpeta_y_la_borra_al_salir(self):
         with tempfile.TemporaryDirectory() as raiz_prueba:
@@ -328,6 +309,9 @@ class LaDemoEntera(unittest.TestCase):
             carpetas = (RAIZ, RAIZ / "deepprep", RAIZ / "deepprep" / "demo")
             antes = {c: huella(c) for c in carpetas}
             habia = {n for n in DATOS_DE_LA_APP if (RAIZ / n).exists()}
+            # Donde guardaría Qt sus cachés si no se le dijera otra cosa: la demo no escribe ahí.
+            de_qt = Path(os.environ.get("LOCALAPPDATA", RAIZ)) / "Deep Prep"
+            antes_qt = huella_honda(de_qt)
             entorno = dict(
                 os.environ,
                 DEEPPREP_DATOS=str(centinela),
@@ -335,9 +319,10 @@ class LaDemoEntera(unittest.TestCase):
                 TMP=str(temporal),
                 PYTHONDONTWRITEBYTECODE="1",
                 PYTHONUTF8="1",
+                QT_QPA_PLATFORM="offscreen",
             )
             proc = subprocess.Popen(
-                [sys.executable, "-m", "deepprep", "--demo", "--sin-ventana", "--puerto", "0"],
+                [sys.executable, "-m", "deepprep", "--demo", "--puerto", "0"],
                 cwd=RAIZ,
                 env=entorno,
                 stdin=subprocess.DEVNULL,
@@ -360,15 +345,14 @@ class LaDemoEntera(unittest.TestCase):
                 (carpeta,) = list(temporal.iterdir())  # la suya, nueva, en la carpeta temporal del sistema
                 self.assertTrue(carpeta.name.startswith(config.PREFIJO_DEMO))
                 origen = {"Origin": f"http://127.0.0.1:{puerto}", "Content-Type": "application/json"}
-                for escena in ("seleccion", "juego", "carga"):
-                    self.assertEqual(pedir(puerto, "/api/demo", {"escena": escena}, origen)[0], 200)
-                    self.assertEqual(json.loads(pedir(puerto, "/api/estado")[1])["demo"]["escena"], escena)
-                for ruta in ("/api/revisiones", "/api/ajustes", "/api/estado?vista=overlay"):
-                    self.assertEqual(pedir(puerto, ruta)[0], 200, ruta)
-                codigo, cuerpo = pedir(puerto, "/api/ajustes", {"notas": {"131": "Nota de prueba"}}, origen)
-                self.assertEqual((codigo, json.loads(cuerpo)), (200, {"ok": True}))
-                self.assertTrue((carpeta / "config.json").is_file())
-                self.assertEqual(json.loads(pedir(puerto, "/api/salir", {}, origen)[1]), {"ok": True})
+                self.assertEqual(json.loads(pedir(puerto, "/api/estado")[1])["demo"]["escena"], demo.ESCENA_INICIAL)
+                self.assertEqual(pedir(puerto, "/api/estado?vista=overlay")[0], 200)
+                # Hasta que la ventana está montada no hay quien cierre: se pide hasta que contesta que sí.
+                limite, cerrada = time.time() + 60, dict[str, object]()
+                while time.time() < limite and not cerrada.get("ok"):
+                    cerrada = json.loads(pedir(puerto, "/api/salir", {}, origen)[1])
+                    time.sleep(0.3)
+                self.assertEqual(cerrada, {"ok": True})
                 self.assertEqual(proc.wait(timeout=30), 0)
             finally:
                 if proc.poll() is None:
@@ -379,6 +363,7 @@ class LaDemoEntera(unittest.TestCase):
             self.assertEqual(list(centinela.iterdir()), [])  # DEEPPREP_DATOS ni se ha tocado
             self.assertEqual({c: huella(c) for c in carpetas}, antes)  # ni la carpeta del proyecto
             self.assertEqual({n for n in DATOS_DE_LA_APP if (RAIZ / n).exists()}, habia)
+            self.assertEqual(huella_honda(de_qt), antes_qt)
 
     def _puerto(self, lineas):
         limite = time.time() + 60

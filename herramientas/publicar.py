@@ -3,8 +3,8 @@
 Uso: py herramientas/publicar.py 2.0.1 "Qué cambia" [--puente]   (sin versión: solo empaqueta, para probar)
      py herramientas/publicar.py [2.0.1] [--puente] --solo-construir CARPETA
 
-1. Pasa lo mismo que la CI: ruff format --check, ruff check, mypy, las pruebas con cobertura (y su mínimo) y
-   node --test. Si algo falla, no publica. ruff, mypy y coverage salen del entorno de desarrollo si lo hay
+1. Pasa lo mismo que la CI: ruff format --check, ruff check, mypy y las pruebas con cobertura (y su mínimo). Si
+   algo falla, no publica. ruff, mypy y coverage salen del entorno de desarrollo si lo hay
    (.venv en el proyecto o ~/.venvs/deep-prep); si no, de este mismo python.
 2. Pone la versión en deepprep/__init__.py y empaqueta con PyInstaller + ffmpeg.
 3. Comprime en empaquetado/DeepPrep-X.Y.Z.zip con su huella (.sha256).
@@ -82,7 +82,6 @@ def comprobaciones(python):
         ("Tipos (mypy)", [python, "-m", "mypy"]),
         ("Pruebas con cobertura", [python, "-X", "utf8", *pruebas]),
         ("Cobertura mínima (fail_under de pyproject.toml)", [python, "-m", "coverage", "report"]),
-        ("Panel web (node --test)", ["node", "--test"]),
     ]
 
 
@@ -93,7 +92,7 @@ def pasar_comprobaciones(lista, ejecutar=subprocess.run):
         paso(nombre)
         try:
             bien = ejecutar(orden, cwd=RAIZ).returncode == 0
-        except OSError as e:  # no está la herramienta (p. ej. node fuera del PATH)
+        except OSError as e:  # no está la herramienta
             print(f"No se puede ejecutar {orden[0]}: {e}")
             bien = False
         if not bien:
@@ -112,13 +111,95 @@ def leer_version():
     return re.search(r'__version__ = "([^"]+)"', (RAIZ / "deepprep" / "__init__.py").read_text(encoding="utf-8")).group(1)
 
 
+# Lo que la interfaz nativa (Qt Quick) no usa de PySide6: fuera del paquete, para que la descarga no crezca de más.
+# Se queda lo que carga al arrancar (Qt6Core, Gui, Qml, Quick, Shapes, Network, OpenGL, Svg) y, de los complementos,
+# la plataforma de Windows y los formatos ico, jpeg y svg (los emblemas de rango).
+QT_FUERA = [
+    "opengl32sw.dll",  # OpenGL por software: Qt Quick dibuja con Direct3D 11
+    "Qt6Labs*.dll",
+    "Qt6QuickControls2*.dll",  # la interfaz está hecha con QML a mano, sin Qt Quick Controls
+    "Qt6QuickDialogs2*.dll",
+    "Qt6QuickTemplates2.dll",
+    "Qt6QuickNativeStyle.dll",
+    "Qt6QuickParticles.dll",
+    "Qt6QuickTest.dll",
+    "Qt6Test.dll",
+    "Qt6QuickTimeline*.dll",
+    "Qt6QuickVectorImage*.dll",
+    "Qt6QuickEffects.dll",
+    "Qt6QuickLayouts.dll",
+    "Qt6QuickShapesDesignHelpers.dll",
+    "Qt6QmlDesignSupport.dll",
+    "Qt6QmlLocalStorage.dll",
+    "Qt6QmlXmlListModel.dll",
+    "Qt6Sql.dll",
+    "Qt6Widgets.dll",
+    "translations",
+    "qml/QtQuick/Controls",
+    "qml/QtQuick/VirtualKeyboard",
+    "qml/QtQuick/Dialogs",
+    "qml/QtQuick/Templates",
+    "qml/QtQuick/NativeStyle",
+    "qml/QtQuick/Particles",
+    "qml/QtQuick/tooling",
+    "qml/QtQuick/Timeline",
+    "qml/QtQuick/VectorImage",
+    "qml/QtQuick/Layouts",
+    "qml/QtQuick/Effects",
+    "qml/QtQuick/LocalStorage",
+    "qml/QtTest",
+    "qml/Qt/labs",
+    "plugins/qmltooling",
+    "plugins/tls",  # las imágenes y la API de Riot van por Python, con su OpenSSL
+    "plugins/networkinformation",
+    "plugins/generic",
+    "plugins/iconengines",
+    "plugins/platforms/qdirect2d.dll",
+    "plugins/platforms/qoffscreen.dll",
+    "plugins/platforms/qminimal.dll",
+    "plugins/imageformats/qtiff.dll",
+    "plugins/imageformats/qwebp.dll",
+    "plugins/imageformats/qicns.dll",
+    "plugins/imageformats/qgif.dll",
+    "plugins/imageformats/qtga.dll",
+    "plugins/imageformats/qwbmp.dll",
+    "plugins/imageformats/qpdf.dll",
+]
+# El OpenSSL de PySide (para el TLS de Qt, que no se usa): Python trae el suyo.
+QT_FUERA_RAIZ = ["libcrypto-3-x64.dll", "libssl-3-x64.dll"]
+
+
+def recortar_qt(dist):
+    """Quita de dist lo de QT_FUERA y QT_FUERA_RAIZ. Devuelve cuántos MB ha quitado."""
+    interno = dist / "_internal"
+    pyside = interno / "PySide6"
+    quitado = 0
+    for patron in QT_FUERA:
+        for ruta in pyside.glob(patron):
+            if ruta.is_dir():
+                quitado += sum(f.stat().st_size for f in ruta.rglob("*") if f.is_file())
+                shutil.rmtree(ruta)
+            elif ruta.is_file():
+                quitado += ruta.stat().st_size
+                ruta.unlink()
+    for nombre in QT_FUERA_RAIZ:
+        ruta = interno / nombre
+        if ruta.is_file():
+            quitado += ruta.stat().st_size
+            ruta.unlink()
+    return quitado / 2**20
+
+
 def empaquetar(salida=EMP):
-    """PyInstaller + ffmpeg en salida/dist/DeepPrep (lo de PyInstaller, en salida). Devuelve esa carpeta."""
+    """PyInstaller + ffmpeg en salida/dist/DeepPrep (lo de PyInstaller, en salida). Devuelve esa carpeta.
+
+    Con el python del entorno de desarrollo (tiene PySide6 y PyInstaller): el del PC no necesita nada instalado.
+    """
     dist = salida / "dist" / "DeepPrep"
     paso("PyInstaller")
     subprocess.run(
         [
-            sys.executable,
+            python_de_herramientas(),
             "-m",
             "PyInstaller",
             "--noconfirm",
@@ -127,18 +208,20 @@ def empaquetar(salida=EMP):
             "--name",
             "DeepPrep",
             "--icon",
-            str(RAIZ / "deepprep" / "web" / "icono.ico"),
+            str(RAIZ / "deepprep" / "recursos" / "icono.ico"),
+            # El icono y las imágenes propias (emblemas de rango), junto a deepprep/recursos como en el código.
             "--add-data",
-            f"{RAIZ / 'deepprep' / 'web'};deepprep/web",
+            f"{RAIZ / 'deepprep' / 'recursos'};deepprep/recursos",
+            # La interfaz nativa: su QML y sus fuentes, junto a deepprep/nativa como en el código.
+            "--add-data",
+            f"{RAIZ / 'deepprep' / 'nativa' / 'qml'};deepprep/nativa/qml",
+            "--add-data",
+            f"{RAIZ / 'deepprep' / 'nativa' / 'fuentes'};deepprep/nativa/fuentes",
             # Los datos de ejemplo de la demo (DeepPrep.exe --demo), junto a deepprep/demo como en el código.
             "--add-data",
             f"{RAIZ / 'deepprep' / 'demo' / '*.json'};deepprep/demo",
-            "--collect-all",
-            "webview",
-            "--collect-all",
-            "clr_loader",
-            "--collect-all",
-            "pythonnet",
+            "--exclude-module",
+            "tkinter",
             "--distpath",
             str(salida / "dist"),
             "--workpath",
@@ -150,6 +233,8 @@ def empaquetar(salida=EMP):
         check=True,
         cwd=RAIZ,
     )
+    paso("Qt: fuera lo que no se usa")
+    print(f"{recortar_qt(dist):.0f} MB menos")
     paso("ffmpeg")
     destino = dist / "ffmpeg"
     destino.mkdir(exist_ok=True)

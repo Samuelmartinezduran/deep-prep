@@ -1,18 +1,14 @@
-"""Arranque: py -m deepprep  (--sin-ventana: solo el servidor, sin ventanas)
+"""Arranque: py -m deepprep  (--sin-ventana: sin ventanas, solo lo de fondo: vigía, grabación y recolector)
 
---demo: la app con una partida de ejemplo, sin el LoL ni clave de Riot (ver deepprep/demo). Con --sin-ventana, solo el
-servidor; --puerto N lo pone en ese puerto (si no, uno libre) y --escena seleccion|carga|juego elige con qué empieza.
+--demo: la app con una partida de ejemplo, sin el LoL ni clave de Riot (ver deepprep/demo). --escena seleccion|carga|juego
+elige con qué empieza y --puerto N pone su canal de control en ese puerto (si no, en uno libre).
 """
 
 import json
 import logging
-import os
-import subprocess
 import sys
 import threading
 import time
-import webbrowser
-from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING
 
@@ -21,31 +17,14 @@ from .sistema import pedir_a_la_copia_en_marcha
 
 if TYPE_CHECKING:
     from .app import App
-    from .demo import AppDemo
     from .servidor import Servidor
     from .tipos import AppDelPanel
 
 logger = logging.getLogger(__name__)
 
-# Sin ventanas (--sin-ventana o sin pywebview): sin panel abierto durante este tiempo la app se cierra sola,
-# salvo con el cliente del LoL abierto, porque tiene que seguir ahí para grabar la siguiente partida.
+# Sin ventanas (--sin-ventana, o si la interfaz no arranca): sin nadie mirando el estado durante este tiempo la app se
+# cierra sola, salvo con el cliente del LoL abierto, porque tiene que seguir ahí para grabar la siguiente partida.
 MINUTOS_SIN_PANEL = 5
-
-
-def abrir_ventana(url: str) -> None:
-    """Plan B sin pywebview: el panel como ventana propia de Chrome o Edge, o en el navegador por defecto."""
-    candidatos = [
-        Path(os.environ.get("PROGRAMFILES", "")) / "Google/Chrome/Application/chrome.exe",
-        Path(os.environ.get("PROGRAMFILES(X86)", "")) / "Google/Chrome/Application/chrome.exe",
-        Path(os.environ.get("LOCALAPPDATA", "")) / "Google/Chrome/Application/chrome.exe",
-        Path(os.environ.get("PROGRAMFILES(X86)", "")) / "Microsoft/Edge/Application/msedge.exe",
-        Path(os.environ.get("PROGRAMFILES", "")) / "Microsoft/Edge/Application/msedge.exe",
-    ]
-    for exe in candidatos:
-        if exe.is_file():
-            subprocess.Popen([str(exe), f"--app={url}", "--window-size=1500,950"])
-            return
-    webbrowser.open(url)
 
 
 def pedir_que_se_muestre(url: str) -> bool:
@@ -92,15 +71,15 @@ def main() -> None:
     try:
         srv = servidor.crear(app, cfg["puerto"])
     except OSError:
-        # El puerto está ocupado: ya hay otra copia en marcha, basta con enseñar su panel
+        # El puerto está ocupado: ya hay otra copia en marcha, basta con que enseñe su ventana
         # (salvo si esta es la del arranque con Windows, que no tiene que enseñar nada).
         if "--oculta" not in sys.argv and con_ventana and not pedir_que_se_muestre(url):
-            abrir_ventana(url)
+            logger.warning("Ya hay una copia en %s, pero no contesta: no abro otra", url)
         return
     app.arrancar()
     threading.Thread(target=srv.serve_forever, name="servidor", daemon=True).start()
     logger.info("Deep Prep en %s", url)
-    if con_ventana and _ventanas(app, url):
+    if con_ventana and _ventanas(app):
         return
     _seguir_mientras_haga_falta(app)
 
@@ -120,37 +99,37 @@ def _terminar_actualizacion(actualizador: ModuleType) -> None:
     actualizador.terminar_actualizacion(sys.argv[i + 1], sys.argv[i + 2], modo)
 
 
-def _ventanas(app: "AppDelPanel", url: str, demo: bool = False) -> bool:
-    """Abre las ventanas propias (bloquea hasta que la app se cierra) y devuelve True.
+def _ventanas(app: "AppDelPanel", demo: bool = False) -> bool:
+    """Abre las ventanas (bloquea hasta que la app se cierra) y devuelve True.
 
-    Sin pywebview, sin WebView2 o con un fallo de .NET abre el panel en el navegador y devuelve False: no hay overlay.
-    demo: la ventana de la demo, sin overlay; se cierra de verdad al cerrarla.
+    Si la interfaz no arranca (le falta algo a Qt en el paquete, por ejemplo), lo apunta en el registro y devuelve
+    False: la app sigue sin ventanas, grabando y recogiendo duelos. demo: la ventana de la demo, sin overlay encima del
+    juego; se cierra de verdad al cerrarla.
     """
     try:
         import ctypes
 
         # Así la barra de tareas usa el icono de Deep Prep y no el de Python.
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Samuel.DeepPrep")
-        from .ventanas import Ventanas
+        from .nativa.ventanas import VentanasQt
 
         titulo = "Deep Prep · demo" if demo else "Deep Prep"
-        Ventanas(app, url, titulo=titulo, demo=demo).arrancar(oculta="--oculta" in sys.argv and not demo)
+        VentanasQt(app, titulo=titulo, demo=demo).arrancar(oculta="--oculta" in sys.argv and not demo)
         return True
-    except Exception as e:  # noqa: BLE001  sin pywebview, sin WebView2 o un fallo de .NET: panel en Chrome, sin overlay
-        logger.warning("Sin ventanas propias (%r); abro el panel en el navegador y no habrá overlay", e)
-        abrir_ventana(url)
+    except Exception:  # cualquier fallo de Qt: mejor sin ventanas que sin grabar ni recoger
+        logger.exception("La interfaz no ha podido arrancar; sigo sin ventanas")
         return False
 
 
 def _seguir_mientras_haga_falta(app: "App") -> None:
-    """Sin ventanas propias, la app sigue mientras alguien mire el panel, el cliente del LoL esté abierto o esté
-    'siempre en marcha'."""
+    """Sin ventanas, la app sigue mientras alguien lea su estado, el cliente del LoL esté abierto o esté 'siempre en
+    marcha'."""
     try:
         while (
             app.cfg.get("siempre_en_marcha") or time.time() - app.ultima_consulta < MINUTOS_SIN_PANEL * 60 or app.fase is not None
         ):
             time.sleep(5)
-        logger.info("Nadie mira el panel y el cliente está cerrado; cierro.")
+        logger.info("Nadie mira y el cliente está cerrado; cierro.")
     except KeyboardInterrupt:
         pass
 
@@ -160,38 +139,26 @@ def _demo() -> None:
 
     Sin vigía del cliente del LoL, sin llamadas a Riot, sin grabación, recolector ni actualizaciones, sin instalarse
     ni tocar accesos directos o el arranque con Windows. config.DATOS es una carpeta temporal nueva (la elige config al
-    ver --demo) y se borra al salir: al cerrar la ventana, desde Ajustes o, sin ventanas, cuando nadie mira el panel.
+    ver --demo) y se borra al salir: al cerrar la ventana, desde Ajustes o con /api/salir de su canal de control.
     """
     from . import demo, servidor
 
     app = demo.AppDemo(config.DATOS, escena=opcion("--escena") or demo.ESCENA_INICIAL)
-    salida = threading.Event()
-    # «Cerrar Deep Prep del todo» (Ajustes) sin ventanas propias; con ellas, Ventanas lo cambia por cerrarlas.
-    app.al_salir = salida.set
     try:
-        srv = servidor.crear(app, int(opcion("--puerto") or 0), post=app.rutas())
+        srv = servidor.crear(app, int(opcion("--puerto") or 0))
     except (OSError, ValueError) as e:
-        logger.error("La demo no puede abrir su servidor: %r", e)
+        logger.error("La demo no puede abrir su canal de control: %r", e)
         _cerrar_demo(None)
         return
     url = f"http://127.0.0.1:{srv.server_address[1]}/"
     threading.Thread(target=srv.serve_forever, name="servidor", daemon=True).start()
     logger.info("Deep Prep (demo) en %s; lo que guardes va a %s y se borra al salir", url, config.DATOS)
     try:
-        if "--sin-ventana" in sys.argv or not _ventanas(app, url, demo=True):
-            _seguir_mientras_miren(app, salida)
+        _ventanas(app, demo=True)
     except KeyboardInterrupt:
         pass
     finally:
         _cerrar_demo(srv)
-
-
-def _seguir_mientras_miren(app: "AppDemo", salida: threading.Event) -> None:
-    """Demo sin ventanas propias: sigue hasta que se pide salir o nadie mira el panel en MINUTOS_SIN_PANEL."""
-    while not salida.wait(5):
-        if time.time() - app.ultima_consulta > MINUTOS_SIN_PANEL * 60:
-            logger.info("Nadie mira el panel de la demo; cierro.")
-            return
 
 
 def _cerrar_demo(srv: "Servidor | None") -> None:

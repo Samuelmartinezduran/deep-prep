@@ -3,8 +3,10 @@
 from collections.abc import Callable, Collection, Iterable
 from typing import TYPE_CHECKING, Any, Protocol
 
+from .analisis import POSICIONES
 from .comparador import COMPARAR_CON
 from .config import Configuracion
+from .constantes import MODOS
 from .ddragon import Datos
 from .overlay import parsear_atajo
 from .tipos import Json, Resultado
@@ -27,6 +29,8 @@ EDITABLES = (
     "perfil_base",
     "grabacion_codificador",
     "grabacion_max_gb",
+    "rol",
+    "modos",
 )
 
 
@@ -82,6 +86,17 @@ def _atajo(valor: Any) -> str:
 
 def _opacidad(valor: Any) -> float:
     return min(1.0, max(0.4, float(valor)))
+
+
+def _rol(valor: Any) -> str:
+    if valor not in POSICIONES:
+        raise _Rechazo("Ese rol no existe.")
+    return str(valor)
+
+
+def _modos(valor: Any) -> dict[str, bool]:
+    """{modo: sí o no} de los modos que existen; los demás se ignoran."""
+    return {str(k): bool(v) for k, v in dict(valor).items() if k in MODOS}
 
 
 class Ajustes:
@@ -147,6 +162,8 @@ class Ajustes:
             ("overlay", bool),
             ("siempre_en_marcha", bool),
             ("comparar_con", _comparar_con),
+            ("rol", _rol),
+            ("modos", _modos),
             ("perfil_base", self._perfil_base),
         )
         despues: tuple[tuple[str, Callable[[Any], Any]], ...] = (

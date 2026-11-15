@@ -2,6 +2,47 @@
 
 Los cambios importantes de cada versión. El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones, [versionado semántico](https://semver.org/lang/es/). Hasta la 1.0.2 la app se llamaba Porofesor.
 
+## [2.1.0] - sin publicar
+
+La interfaz deja de ser una página web dentro de Edge (WebView2): ahora es nativa, con Qt Quick, y la dibuja la gráfica. Y deja de ser solo para junglas: tu rol se elige (y se cambia en cada partida), si no juegas jungla el panel enseña a tu rival de línea, y en Ajustes se elige en qué modos de juego sale.
+
+### Cambiado
+
+- Interfaz nativa con Qt Quick (PySide6) en `deepprep/nativa`. Se ve igual que el panel web (mismos colores, letras y medidas) y dice lo mismo: las vistas pasan de `web/js` a `nativa/vistas.py`, en Python y con pruebas, y el QML solo coloca.
+- Gasta menos de la mitad de memoria. Medida en la demo: unos 125 MB, frente a 283 MB del panel web, que eran Python más seis procesos de Edge.
+- La descarga crece 18 MB (de 54 a 72), porque Qt va dentro del paquete. Lo que la interfaz no usa de Qt se quita al empaquetar (`publicar.py`, `recortar_qt`).
+- La barra de arriba de la ventana es la de la app: se arrastra desde ella, con doble clic se maximiza y la ✕ se pone roja como en Windows. Windows sigue haciendo lo suyo: encajarla arrastrándola a un borde, Win+flechas, la sombra, las esquinas redondeadas y, en Windows 11, el menú de distribuciones al dejar el ratón sobre maximizar.
+- El overlay es una ventana de Qt: sin foco, transparente al ratón y siempre encima, con la opacidad de Qt. Cuándo sale lo sigue decidiendo `overlay.Controlador`, con las mismas normas de Riot.
+- Las imágenes de Data Dragon se bajan en paralelo: con la caché vacía, la ventana se rellena antes.
+- La revisión y la grabación son solo para los modos de la Grieta con posiciones (clasificatorias, normales y Clash): una partida de URF o personalizada en la Grieta ya no se graba.
+- El servidor local queda como canal de control: `/api/mostrar` (otra copia pide que se enseñe la ventana), `/api/salir` (el instalador) y `/api/estado`, solo para leer. Lo demás de su API era del panel web.
+- Las imágenes de Data Dragon las baja y las guarda `ddragon.imagen`, y el icono y los emblemas de rango pasan a `deepprep/recursos`.
+- Las cachés de Qt (el QML compilado y lo preparado para la gráfica) van en la carpeta de datos, en `qt\`, y no en una carpeta aparte de Qt.
+
+### Añadido
+
+- Tu rol. En Ajustes eliges tu rol principal (sin elegir, el que más juegas en tus clasificatorias). En cada partida manda la posición que te toque en la selección y, si la cola no la da (a ciegas, Swiftplay), tu rol principal; ya en partida, los hechizos lo corrigen (con Aplastar, jungla). En la selección y en el panel, «Tu rol» la cambia para esa partida, y la app reparte otra vez las posiciones.
+- Tu rival de línea, cuando no juegas jungla: de sus partidas recientes en esa posición, con su campeón, la fase de líneas, su oro y su CS al minuto 10 frente a su rival, qué pasa si se adelanta, sus muertes antes del 10 y cuánto se mueve a otras líneas antes del 14:00. Sale en el panel y, en la pantalla de carga, en el overlay; ya jugando, en neutro, como el perfil del jungla. Se piden hasta 6 líneas de tiempo suyas (`lineas_rival_linea`).
+- De línea, el plan cuenta cómo llega tu rival al 10, si el primer gank del jungla rival suele ir a tu línea y por dónde empieza. Si el plan lo dijo (300 de oro o más, por delante o por detrás), la revisión comprueba cómo llegó contra ti.
+- En Revisiones, las muertes de la partida que estás viendo salen en violeta en el mapa «Dónde mueres», más grandes y por encima; las demás se atenúan.
+- Modos de juego en Ajustes: clasificatoria solo/dúo, flexible, normales (con partida rápida y Swiftplay), Clash, ARAM (con ARAM: Caos y el Clash de ARAM), Arena y otros modos. En los apagados no salen el panel ni el overlay y no se graba; buscar a mano la partida de alguien funciona igual. De fábrica, todos menos Arena y otros modos.
+- Fuera de la Grieta (ARAM, Arena y el resto) el panel enseña lo básico de cada jugador: su rango y su maestría con el campeón, con sus etiquetas (Main, Primera vez, Poco rodado...). No se pide el historial de nadie: unas 20 consultas a Riot en vez de unas 270.
+- Al pulsar el nombre de un jugador en la tabla de equipos se copia su Riot ID (`Nombre#TAG`), para buscarlo en op.gg o donde sea.
+- Los avisos de Qt (un error en una pieza de la interfaz, un archivo que falta) van a `deepprep.log`.
+
+- Gráfico de la partida en cada revisión: la diferencia de oro entre los equipos minuto a minuto (azul si va por delante tu equipo, rojo si el rival), con los objetivos encima y tus muertes debajo. Al pasar el ratón sale el detalle de ese minuto. Sustituye a la línea de tiempo de puntos.
+- Cada revisión guarda esa diferencia (`dif_oro`). Las de antes la completan una vez en segundo plano con su línea de tiempo, como ya se hizo con el mapa de muertes.
+- `py -m deepprep.nativa` abre la interfaz con la demo, para diseñar: capturas sin enseñar la ventana, la memoria que gasta, el detalle de un minuto del gráfico y la partida en otra posición (`--rol MIDDLE`). En la demo, «Tu rol» también funciona: cambia tu posición en la tabla y saca un rival de línea de ejemplo.
+
+### Quitado
+
+- El panel web: HTML, CSS y 19 módulos de JavaScript, la ventana de WebView2 con `pywebview` y sus 95 pruebas con `node --test` (y el trabajo de Node de la CI). También `--web`, la demo en el navegador (`--demo --sin-ventana`), `herramientas/maqueta.py` y `herramientas/captura.py`: para diseñar está `py -m deepprep.nativa`. Si Qt no arranca, la app ya no abre el panel en el navegador: lo apunta en el registro y sigue sin ventanas, grabando y recogiendo duelos.
+
+### Corregido
+
+- En ARAM el panel enseñaba cosas de la Grieta: el jungla rival, «Dónde va a haber errores», tu duelo y un plan, con posiciones repartidas a los diez jugadores. Además, la forma de cada jugador salía de sus partidas de la Grieta.
+- Si no jugabas jungla, el plan de la pantalla de carga era el del jungla (dónde gankear). Ahora es el de tu línea.
+
 ## [2.0.0] - 2026-11-06
 
 Porofesor pasa a llamarse Deep Prep y se rehace por dentro para publicar el código. Lo que ve el jugador no cambia, salvo los arreglos de abajo.

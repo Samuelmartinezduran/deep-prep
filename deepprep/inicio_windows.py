@@ -46,7 +46,7 @@ def poner(encendido: bool) -> str:
         argumentos,
         "Deep Prep (en segundo plano)",
         carpeta=config.RAIZ,
-        icono=config.RUTA_WEB / "icono.ico",
+        icono=config.RUTA_RECURSOS / "icono.ico",
         texto=True,
     )
     return "" if r.returncode == 0 and ACCESO.exists() else f"No se pudo crear el arranque con Windows: {r.stderr.strip()[:200]}"

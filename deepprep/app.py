@@ -23,7 +23,6 @@ from .ajustes import Ajustes
 from .base_duelos import BaseDuelos
 from .cache import Cache
 from .comparador import Comparador
-from .constantes import GRIETA
 from .cuentas import Cuentas
 from .ddragon import Datos
 from .grabacion import Grabador
@@ -58,6 +57,10 @@ def para_el_modo(panel: Panel, modo: str) -> Panel:
     if jungla:
         # El mapa de dónde suele estar en los primeros minutos se queda fuera: ya jugando, se parecería a seguirle.
         jungla = dict(jungla, tarjetas=[dict(t, tono="neutro") for t in jungla["tarjetas"]], mapa={})
+    extra: Panel = {}
+    rival_linea = panel.get("rival_linea")
+    if rival_linea:
+        extra["rival_linea"] = dict(rival_linea, tarjetas=[dict(t, tono="neutro") for t in rival_linea["tarjetas"]])
     return dict(
         panel,
         plan=[],
@@ -65,6 +68,7 @@ def para_el_modo(panel: Panel, modo: str) -> Panel:
         avisos=[dict(a, tono="neutro") for a in panel["avisos"]],
         jungla=jungla,
         duelo=None,  # lo que hacen los que ganan el duelo es una lectura: solo antes de empezar
+        **extra,
     )
 
 
@@ -99,6 +103,9 @@ class App:
         self.cola = Cola(al_fallar=self._fallo_tarea)
         self.recolector: rec.Recolector | None = None
         self.actualizador = actualizador.Actualizador(self)
+        # Tu posición en esta partida si la eliges a mano en la pestaña Partida; '' hasta entonces (se olvida al
+        # empezar la siguiente selección).
+        self.rol_elegido = ""
         self._crear_piezas(arranque_windows)
         self.ultima_consulta = time.time()  # última vez que el panel pidió el estado
         self.al_mostrar: Callable[[], None] | None = None  # lo pone la ventana principal: otra copia arrancada pide enseñarla
@@ -123,7 +130,16 @@ class App:
         self.sesiones = Sesiones(
             lambda juego, yo, origen: Sesion(self, juego, yo, origen), cliente, self.mis_cuentas, self._partida_terminada
         )
-        self._seleccion = Seleccion(self.lcu, datos, self.cuentas, self.partidas, self.comparador, self.notas_de)
+        self._seleccion = Seleccion(
+            self.lcu,
+            datos,
+            self.cuentas,
+            self.partidas,
+            self.comparador,
+            self.notas_de,
+            rol_de_hoy=self.rol_de_hoy,
+            al_empezar=self._nueva_seleccion,
+        )
         self.vigia = Vigia(
             self.lcu,
             cliente,
@@ -260,10 +276,11 @@ class App:
             self.partidas.sincronizar(puuid, ocupada=self.sesiones.cargando)
         if self.cuentas and self.fase not in EN_JUEGO:
             self.revisor.rellenar()
+            self.revisor.rellenar_oro()
 
     def _partida_terminada(self, s: Sesion) -> None:
         """Tu partida ha acabado: si era en la Grieta, se prepara su revisión (con la grabación, si la hay)."""
-        if s.mapa != GRIETA or not self.cfg.get("revisar", True):
+        if not s.completo or not self.cfg.get("revisar", True):
             return
         panel = s.panel()
         carpeta = self.grabador.carpeta_reciente() if self.grabador else None
@@ -294,6 +311,36 @@ class App:
     def actualizar_modo(self) -> None:
         self.vigia.actualizar_modo()
 
+    # --- tu rol en la partida ------------------------------------------------------------------------
+    def rol_principal(self) -> str:
+        """Tu rol principal: el de Ajustes o, si no lo has elegido, el que más juegas."""
+        return str(self.cfg.get("rol") or self.partidas.posicion_habitual() or "JUNGLE")
+
+    def rol_de_hoy(self, con_smite: bool | None, inferido: str) -> tuple[str, str]:
+        """Tu posición en esta partida y por qué (ver analisis.rol_de_hoy)."""
+        return an.rol_de_hoy(self.rol_elegido, self._seleccion.pos_asignada, self.rol_principal(), con_smite, inferido)
+
+    def elegir_rol(self, rol: str) -> Resultado:
+        """Tu posición en esta partida, elegida a mano en la pestaña Partida (en la selección o ya en la carga)."""
+        if rol not in an.POSICIONES:
+            return {"ok": False, "error": "Ese rol no existe."}
+        self.rol_elegido = rol
+        if self.fase == "ChampSelect":
+            self._seleccion.releer()
+        s = self.sesion
+        if s and s.origen == "propia" and not s.terminada:
+            s.cambiar_rol()
+        return {"ok": True}
+
+    def _nueva_seleccion(self) -> None:
+        """Empieza otra selección: lo que eligieras a mano para la partida anterior ya no vale."""
+        self.rol_elegido = ""
+
+    @property
+    def partida_apagada(self) -> str | None:
+        """El modo de la partida de ahora si está apagado en Ajustes (sin panel, overlay ni grabación), o None."""
+        return self.vigia.apagada
+
     def duelo(self, a: int, pos: str, b: int | None) -> Json | None:
         return self.comparador.duelo(a, pos, b)
 
@@ -313,7 +360,7 @@ class App:
         return self._ajustes.notas_de(campeones, rivales)
 
     def ajustes(self) -> Json:
-        return self._ajustes.leer()
+        return {**self._ajustes.leer(), "rol": self.rol_principal()}
 
     def guardar_ajustes(self, cambios: Any) -> Resultado:
         return self._ajustes.guardar(cambios)
@@ -383,6 +430,7 @@ class App:
             "grabacion": self.grabador.estado() if self.grabador else None,
             "ultima_revision": self.ultima_revision,
             "seleccion": self.seleccion,
+            "apagada": self.partida_apagada,
             "recolector": self._estado_recolector(),
             "version": self.actualizador.estado,
             "novedades": self.actualizador.novedades(),

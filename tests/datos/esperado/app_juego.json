@@ -28,6 +28,7 @@
  },
  "ultima_revision": null,
  "seleccion": null,
+ "apagada": null,
  "recolector": {
   "partidas": 875,
   "miradas": 875,
@@ -35,9 +36,15 @@
   "pool": []
  },
  "panel": {
-  "duelo": null,
   "id": 7000000002,
   "cola": "Clasificatoria solo/dúo",
+  "modo": "clasificatoria",
+  "completo": true,
+  "rol": {
+   "actual": "TOP",
+   "motivo": "por tus hechizos",
+   "elegible": true
+  },
   "yo": {
    "campeon": "Campeón 40",
    "splash": ""
@@ -656,6 +663,66 @@
     }
    ]
   },
+  "bans": [
+   {
+    "nombre": "Campeón 53",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 238",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 246",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 91",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 11",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 39",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 120",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 84",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 432",
+    "icono": ""
+   },
+   {
+    "nombre": "Campeón 64",
+    "icono": ""
+   }
+  ],
+  "recordatorios": [
+   "Mirar el minimapa"
+  ],
+  "notas": [
+   {
+    "campeon": "Campeón 40",
+    "icono": "",
+    "texto": "Guardar la E",
+    "rival": false
+   },
+   {
+    "campeon": "Campeón 421",
+    "icono": "",
+    "texto": "Pega fuerte a nivel 3",
+    "rival": true
+   }
+  ],
+  "duelo": null,
   "jungla": {
    "nombre": "Larkspur",
    "campeon": "Campeón 887",
@@ -708,6 +775,53 @@
     }
    ],
    "mapa": {},
+   "cargando": false
+  },
+  "rival_linea": {
+   "nombre": "Gloam",
+   "campeon": "Campeón 421",
+   "icono": "",
+   "rol": "TOP",
+   "n": 1,
+   "n_campeon": 1,
+   "n_lineas": 1,
+   "tarjetas": [
+    {
+     "titulo": "Con su campeón",
+     "valor": "0V 1D",
+     "detalle": "1 de sus últimas 1 partidas en esta posición.",
+     "tono": "neutro"
+    },
+    {
+     "titulo": "Al minuto 10",
+     "valor": "59 CS · −337 de oro",
+     "detalle": "Frente a su rival de línea, media de 1 partidas.",
+     "tono": "neutro"
+    },
+    {
+     "titulo": "Si se adelanta",
+     "valor": "Por detrás 0 de 1",
+     "detalle": "4,0/6,0/1,0 de media en top, 19% del daño de su equipo.",
+     "tono": "neutro"
+    },
+    {
+     "titulo": "Muertes tempranas",
+     "valor": "1,0 antes del 10",
+     "detalle": "Media de 1 partidas con línea de tiempo.",
+     "tono": "neutro"
+    },
+    {
+     "titulo": "Se mueve",
+     "valor": "0,0 kills o asistencias en otras líneas",
+     "detalle": "Antes del 14:00, media de 1 partidas.",
+     "tono": "neutro"
+    }
+   ],
+   "al10": {
+    "oro": -337,
+    "cs": 59,
+    "n": 1
+   },
    "cargando": false
   },
   "lineas": [
@@ -911,65 +1025,6 @@
    }
   ],
   "plan": [],
-  "bans": [
-   {
-    "nombre": "Campeón 53",
-    "icono": ""
-   },
-   {
-    "nombre": "Campeón 238",
-    "icono": ""
-   },
-   {
-    "nombre": "Campeón 246",
-    "icono": ""
-   },
-   {
-    "nombre": "Campeón 91",
-    "icono": ""
-   },
-   {
-    "nombre": "Campeón 11",
-    "icono": ""
-   },
-   {
-    "nombre": "Campeón 39",
-    "icono": ""
-   },
-   {
-    "nombre": "Campeón 120",
-    "icono": ""
-   },
-   {
-    "nombre": "Campeón 84",
-    "icono": ""
-   },
-   {
-    "nombre": "Campeón 432",
-    "icono": ""
-   },
-   {
-    "nombre": "Campeón 64",
-    "icono": ""
-   }
-  ],
-  "recordatorios": [
-   "Mirar el minimapa"
-  ],
-  "notas": [
-   {
-    "campeon": "Campeón 40",
-    "icono": "",
-    "texto": "Guardar la E",
-    "rival": false
-   },
-   {
-    "campeon": "Campeón 421",
-    "icono": "",
-    "texto": "Pega fuerte a nivel 3",
-    "rival": true
-   }
-  ],
   "progreso": {
    "hechas": 58,
    "total": 58

@@ -1,6 +1,6 @@
 # Deep Prep
 
-Panel para el League of Legends pensado para jugadores de rango alto: antes de cada partida te enseña cómo va cada jugador, cómo juega el jungla rival (y dónde suele estar en sus primeros minutos) y cómo suele ir tu duelo contra tu rival directo, con datos de partidas de Master o más. En la selección de campeón compara tus campeones contra el rival de tu posición. En partida puedes volver a verlo con **Ctrl+Tab**. Al acabar, graba la partida y te hace una revisión: dónde moriste, por qué, qué se perdió por esa muerte, un clip de cada muerte y los LP que ganaste o perdiste.
+Panel para el League of Legends pensado para jugadores de rango alto, en cualquier rol: antes de cada partida te enseña cómo va cada jugador, cómo juega tu rival de línea, cómo juega el jungla rival (y dónde suele estar en sus primeros minutos) y cómo suele ir tu duelo contra tu rival directo, con datos de partidas de Master o más. En la selección de campeón compara tus campeones contra el rival de tu posición. En partida puedes volver a verlo con **Ctrl+Tab**. Al acabar, graba la partida y te hace una revisión: dónde moriste, por qué, qué se perdió por esa muerte, un clip de cada muerte y los LP que ganaste o perdiste.
 
 ## Instalarla
 
@@ -26,6 +26,12 @@ La app pide los datos a Riot con **tu propia clave**. Es gratis:
    Cuando te la aprueben, pega la clave nueva en la app y ya no caduca.
 
 **No compartas tu clave con nadie** (ni la pegues en Discord): es personal y Riot la puede anular.
+
+## Tu rol y los modos de juego
+
+En **Ajustes** elige tu rol principal. En cada partida la app usa la posición que te toque en la selección y, si la cola no la da (a ciegas, Swiftplay), tu rol principal. Si juegas otra, cámbiala en la pestaña **Partida** con **Tu rol**.
+
+En **Ajustes → Modos de juego** eliges en qué modos sale el panel. En ARAM, Arena y el resto solo enseña lo básico de cada jugador: su rango y su maestría con el campeón.
 
 ## Para que salga encima del juego
 

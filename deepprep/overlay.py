@@ -100,8 +100,9 @@ class Controlador:
         self._modo_juego: str | None = None  # WindowMode leído al entrar en partida
 
     def puede(self) -> bool:
-        """Encima de una pantalla completa exclusiva el juego se minimizaría: solo con ventana sin bordes."""
-        if not self.app.cfg.get("overlay", True):
+        """Encima de una pantalla completa exclusiva el juego se minimizaría: solo con ventana sin bordes. Tampoco en
+        un modo de juego apagado en Ajustes."""
+        if not self.app.cfg.get("overlay", True) or self.app.partida_apagada:
             return False
         return self._modo_juego == MODO_SIN_BORDES
 

@@ -4,6 +4,7 @@ import datetime
 import logging
 import threading
 import time
+from collections import Counter
 from collections.abc import Callable
 from typing import Any
 
@@ -35,6 +36,7 @@ class Partidas:
         self._en_curso: dict[str, threading.Event] = {}
         self._mias: tuple[Any, list[Partida]] = (None, [])  # (marca, partidas) de la última vez
         self._pool: tuple[float, list[tuple[int, str]]] = (0.0, [])
+        self._habitual: tuple[float, str] = (0.0, "")
 
     # --- datos compartidos ------------------------------------------------------------------
     def _una_vez(self, clave: str, fn: Callable[[], None]) -> None:
@@ -114,6 +116,13 @@ class Partidas:
         if time.time() - self._pool[0] > CADA_POOL_S:
             self._pool = (time.time(), an.pool_de(self.mis_partidas(), set(self.cuentas)))
         return self._pool[1]
+
+    def posicion_habitual(self) -> str:
+        """La posición que más juegas (en tus clasificatorias de la temporada), o '' sin partidas; cada 10 min."""
+        if time.time() - self._habitual[0] > CADA_POOL_S:
+            cuenta = Counter(j["pos"] for m in self.mis_partidas() for j in m["jug"] if j["puuid"] in self.cuentas and j["pos"])
+            self._habitual = (time.time(), cuenta.most_common(1)[0][0] if cuenta else "")
+        return self._habitual[1]
 
     def sincronizar(self, puuid: str, ocupada: Callable[[], bool] = lambda: False) -> None:
         """Baja las clasificatorias de la temporada de una cuenta propia, sin estorbar a una partida en curso.

@@ -6,10 +6,10 @@ App de escritorio para Windows que prepara cada partida de League of Legends con
 [![Python 3.14](https://img.shields.io/badge/python-3.14-3776ab)](https://www.python.org/downloads/)
 [![Licencia MIT](https://img.shields.io/badge/licencia-MIT-informational)](LICENSE)
 
-**208 pruebas de Python · 95 del panel en JavaScript · 73,8 % de cobertura · mypy estricto · ruff sin avisos · CI en Windows**
+**281 pruebas de Python · 76,9 % de cobertura · mypy estricto · ruff sin avisos · CI en Windows**
 
-> **In English.** Deep Prep is a Windows desktop companion for League of Legends, built for high-elo players and especially junglers. Before the game it shows matchup data measured on Master+ games and a panel of all ten players, including where the enemy jungler usually is at minutes 2–6; in game, a separate always-on-top window shows only pre-game data, as Riot's third-party policy requires; after the game it reviews each death and what it cost, and cuts a clip of each one from the recording.
-> Python 3.14, pywebview, a local HTTP server with vanilla JS modules, SQLite and FFmpeg; code and UI are in Spanish, MIT licensed. Try it without the game or a Riot key: `py -m deepprep --demo`.
+> **In English.** Deep Prep is a Windows desktop companion for League of Legends, built for high-elo players in any role, with extra depth for junglers. Before the game it shows matchup data measured on Master+ games and a panel of all ten players, including your lane opponent's habits and where the enemy jungler usually is at minutes 2–6; in game, a separate always-on-top window shows only pre-game data, as Riot's third-party policy requires; after the game it reviews each death and what it cost, and cuts a clip of each one from the recording.
+> Python 3.14 with a native Qt Quick interface (PySide6), SQLite and FFmpeg; code and UI are in Spanish, MIT licensed. Try it without the game or a Riot key: `py -m deepprep --demo`.
 
 ![Modo demo: selección de campeón, pantalla de carga con el mapa del jungla rival del 2:00 al 6:00, overlay en partida y revisión](docs/img/demo.gif)
 
@@ -17,12 +17,13 @@ App de escritorio para Windows que prepara cada partida de League of Legends con
 
 ## Qué hace
 
-Acompaña cada partida en tres momentos. Lee el cliente del LoL para saber en qué fase estás y pide los datos a la API de Riot con tu propia clave.
+Acompaña cada partida en tres momentos. Lee el cliente del LoL para saber en qué fase estás y pide los datos a la API de Riot con tu propia clave. Vale para cualquier rol: tu posición es la que te toca en la selección o, si la cola no la da, tu rol principal, y se cambia con un clic para esa partida.
 
 ### 1. Antes de la partida
 
 - **Selección de campeón.** Tu duelo contra el rival de tu posición, medido en partidas de Master o más de los últimos 45 días: peleas por nivel, cuánto se gana con ventaja de oro al minuto 10, si escala y la build más jugada. Al lado, tu pool contra su campeón y tu historial contra lo que van eligiendo. En esta fase no se pide nada a Riot: todo sale de bases locales.
-- **Pantalla de carga.** Los diez jugadores con rango, maestría, forma reciente, grupos premade y quién va fuera de rol. El jungla rival tiene su perfil (por dónde empieza, dónde da el primer gank, cuánto invade) y un mapa de dónde estaba en sus partidas a cada minuto del 2:00 al 6:00, girado al lado del mapa que le toca hoy.
+- **Pantalla de carga.** Los diez jugadores con rango, maestría, forma reciente, grupos premade y quién va fuera de rol; al pulsar un nombre se copia su Riot ID, para buscarlo en op.gg. Si juegas en una línea, tu rival de línea tiene su perfil: cómo llega al minuto 10, si gana cuando se adelanta, cuánto muere pronto y cuánto se mueve a otras líneas. El jungla rival tiene el suyo (por dónde empieza, dónde da el primer gank, cuánto invade) y un mapa de dónde estaba en sus partidas a cada minuto del 2:00 al 6:00, girado al lado del mapa que le toca hoy.
+- **ARAM, Arena y el resto.** Sin posiciones no hay perfiles de línea ni de jungla: de cada jugador salen su rango y su maestría con el campeón que lleva. En Ajustes se elige en qué modos sale el panel; de fábrica, en todos menos Arena y los modos temporales.
 
 ![Pantalla de carga: los diez jugadores y el duelo de jungla medido en 214 partidas de Master+](docs/img/carga.png)
 
@@ -34,9 +35,9 @@ Una ventana aparte, encima del juego, que deja pasar los clics y no coge el foco
 
 ### 3. Después de la partida
 
-Graba cada partida en la Grieta y, cuando Riot la publica, la revisa: cada muerte con quién la causó, dónde y si costó un objetivo; los objetivos en una línea de tiempo; oro, CS y experiencia contra tu rival al 10 y al 15; qué acertó y qué falló el panel; los LP ganados o perdidos, y un clip de cada muerte (20 s antes y 4 s después) recortado de la grabación. Con las revisiones salen tus tendencias de la temporada: por hora, por duración y después de ganar o de perder.
+Graba cada partida en la Grieta y, cuando Riot la publica, la revisa: la diferencia de oro entre los equipos minuto a minuto, con los objetivos y tus muertes encima; cada muerte con quién la causó, dónde y si costó un objetivo; oro, CS y experiencia contra tu rival al 10 y al 15; qué acertó y qué falló el panel; los LP ganados o perdidos, y un clip de cada muerte (20 s antes y 4 s después) recortado de la grabación. Con las revisiones salen tus tendencias de la temporada (por hora, por duración y después de ganar o de perder) y un mapa de dónde mueres, con las muertes de la partida que estás viendo en violeta.
 
-![Revisión de una derrota: KDA, línea de tiempo de objetivos y muertes, y cada muerte con su clip](docs/img/revision.png)
+![Revisiones: tus tendencias, el mapa de dónde mueres con las muertes de la partida elegida en violeta y la revisión de una derrota con la diferencia de oro minuto a minuto](docs/img/revision.png)
 
 ## Pruébalo en un minuto
 
@@ -59,9 +60,9 @@ py -m pip install -e .
 py -m deepprep --demo
 ```
 
-Una barra en la parte de arriba del panel cambia de escena: selección de campeón, pantalla de carga, en partida, revisiones y ajustes. En la carga y en partida hay un enlace al overlay. Las revisiones salen de una partida real anonimizada con el mismo código que las de verdad, y en partida el panel pasa por el mismo filtro de las normas de Riot que la app.
+Una barra en la parte de arriba del panel cambia de escena: selección de campeón, pantalla de carga, en partida, revisiones y ajustes. En la carga y en partida hay un enlace al overlay, y con «Tu rol» se ve el panel de un mid, un ADC o un support. Las revisiones salen de una partida real anonimizada con el mismo código que las de verdad, y en partida el panel pasa por el mismo filtro de las normas de Riot que la app.
 
-La demo no arranca el vigía del cliente, la grabación, el recolector ni el actualizador, no llama a la API de Riot y no se instala ni toca accesos directos o el arranque con Windows. Lo que se guarda en Ajustes va a una carpeta temporal nueva que se borra al cerrar; `tests/test_demo.py` lanza la demo en otro proceso y comprueba que no escribe fuera de ella. Solo los retratos de los campeones vienen de Data Dragon: sin red, la demo funciona igual, con los huecos grises. Con `py -m deepprep --demo --sin-ventana --puerto 5252` no abre ventana y se ve en el navegador, en `http://127.0.0.1:5252/`.
+La demo no arranca el vigía del cliente, la grabación, el recolector ni el actualizador, no llama a la API de Riot y no se instala ni toca accesos directos o el arranque con Windows. Lo que se guarda en Ajustes va a una carpeta temporal nueva que se borra al cerrar; `tests/test_demo.py` lanza la demo en otro proceso y comprueba que no escribe fuera de ella. Solo los retratos de los campeones vienen de Data Dragon: sin red, la demo funciona igual, con los huecos grises.
 
 ## Normas de Riot
 
@@ -69,7 +70,7 @@ Las normas de Riot para apps de terceros dejan preparar la partida y revisarla, 
 
 | Momento | Qué se enseña |
 |---|---|
-| Selección y pantalla de carga | Todo: datos, avisos, perfil y mapa del jungla rival, tu duelo |
+| Selección y pantalla de carga | Todo: datos, avisos, los perfiles de tu rival de línea y del jungla rival, el mapa del jungla, tu duelo |
 | En partida | Solo datos de antes de empezar y solo mientras mantienes el atajo. Sin plan, sin veredictos de línea, sin duelo, sin el mapa del jungla y sin colores de alerta |
 | Después de la partida | La revisión, con conclusiones |
 
@@ -77,9 +78,10 @@ El recorte se hace en un solo sitio del backend (`app.para_el_modo`), antes de e
 
 ## Cómo está hecha
 
-- **Una sola dependencia de ejecución:** `pywebview` 6.2.1. Lo demás es biblioteca estándar (`http.server`, `sqlite3`, `urllib`, `ctypes`): 34 módulos de Python con unas 7 900 líneas y 19 módulos ES de JavaScript con unas 1 300, sin bundler ni npm.
-- **Interfaz web servida en local.** Un `ThreadingHTTPServer` en `127.0.0.1` y dos ventanas de WebView2 (panel y overlay) sobre la misma página. Cada petición comprueba `Host` (contra el DNS rebinding) y, si trae `Origin`, que sea el propio panel (contra el CSRF: los navegadores lo ponen en todo POST), para que otra web abierta en el navegador no pueda usar la API; los archivos se sirven desde una lista blanca.
-- **Overlay sin tocar el juego.** Una ventana Win32 con `WS_EX_LAYERED`, `WS_EX_TRANSPARENT` y `WS_EX_NOACTIVATE`, siempre encima, y el atajo leído cada 30 ms sin ganchos de teclado.
+- **Una sola dependencia de ejecución:** PySide6-Essentials 6.12 (Qt Quick). Lo demás es biblioteca estándar (`http.server`, `sqlite3`, `urllib`, `ctypes`): 40 módulos de Python con unas 10 700 líneas y 57 archivos de QML con unas 7 000.
+- **Interfaz nativa, sin navegador.** Dos ventanas de QML, la principal y el overlay, que dibuja la gráfica: unos 125 MB de memoria frente a los 283 del panel web en WebView2 (Python y seis procesos de Edge). Lo que se escribe en pantalla se prepara en Python (`nativa/vistas.py`, probado sin Qt) y el QML solo lo coloca; el estado llega por un puente (`nativa/puente.py`) que lo lee cada segundo y solo avisa si ha cambiado. La barra de arriba es la de la app, pero Windows sigue haciendo lo suyo (encajarla arrastrando, Win+flechas, el menú de distribuciones de Windows 11) porque `nativa/marco.py` le contesta `WM_NCHITTEST`.
+- **Un canal de control local.** Un `ThreadingHTTPServer` en `127.0.0.1` con tres rutas: una segunda copia pide a la primera que enseñe su ventana, el instalador le pide que se cierre y el estado se puede leer para diagnosticar. Cada petición comprueba `Host` (contra el DNS rebinding) y, si trae `Origin`, que sea el de la propia app (contra el CSRF).
+- **Overlay sin tocar el juego.** Una ventana de Qt sin foco, transparente al ratón y siempre encima, y el atajo leído cada 30 ms sin ganchos de teclado.
 - **Cuota de Riot repartida por prioridad.** Una partida con la caché vacía cuesta unas 270 peticiones y la clave personal da 100 cada 2 minutos. Un limitador de ventana deslizante por host, que se sincroniza con la cuenta que devuelve Riot (`X-App-Rate-Limit-Count`), y una cola de 6 hilos con prioridades hacen que lo más útil llegue en la primera ventana de cuota.
 - **SQLite con JSON comprimido.** Una partida terminada no cambia: se guarda para siempre, reducida a lo que se usa (de los ~850 KB de una línea de tiempo quedan posiciones y oro por minuto hasta el 15, kills y objetivos) y comprimida con zlib. Solo van en columnas los campos por los que se busca.
 - **Base de duelos propia.** Un recolector recorre las ligas Challenger, Gran Maestro y Master de cuatro regiones con tu clave y saca diez registros de duelo de cada partida. No hay servidor del autor por medio.
@@ -90,19 +92,19 @@ Las decisiones, con la alternativa que se descartó y lo que cuesta cada una, es
 
 ## Calidad
 
-Medido el 6 de noviembre de 2026 sobre la rama `main`:
+Medido el 14 de noviembre de 2026 sobre la rama `interfaz-nativa` (la 2.1.0):
 
 | Qué | Cifra | Cómo se mide |
 |---|---|---|
-| Pruebas de Python | 208 en 15 archivos, 7 s | `py -X utf8 -m unittest discover -s tests -t .` |
+| Pruebas de Python | 281 en 16 archivos, 16 s | `py -X utf8 -m unittest discover -s tests -t .` |
 | De ellas, de caracterización | 12, contra 12 JSON esperados | `tests/test_caracterizacion.py` |
-| Pruebas del panel | 95 en 9 archivos | `node --test` (Node 24, sin dependencias) |
-| Cobertura de Python | 73,8 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
-| Tipos | mypy estricto en todo `deepprep`, 0 errores en 50 archivos | `mypy` |
+| De ellas, de la interfaz | 59; las de Qt, sin pantalla | `tests/test_nativa.py` |
+| Cobertura de Python | 76,9 % de líneas y ramas; mínimo exigido, 70 % | `coverage run -m unittest discover -s tests -t .` y `coverage report` |
+| Tipos | mypy estricto en todo `deepprep`, 0 errores en 57 archivos | `mypy` |
 | Lint y formato | ruff, 0 avisos | `ruff check .` y `ruff format --check .` |
-| CI | GitHub Actions: Windows con Python 3.14 (formato, lint, tipos, pruebas y cobertura) y Ubuntu con Node 24 (panel) | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
+| CI | GitHub Actions: Windows con Python 3.14 (formato, lint, tipos, pruebas y cobertura) | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 
-Las pruebas usan falsos de la API de Riot, del cliente del LoL y del grabador, y bases SQLite en memoria; `test_partida_propia_de_principio_a_fin` recorre el vigía desde la sala hasta el final de la partida. Antes de reordenar el código se fijó con pruebas de caracterización lo que salía de las funciones grandes, y con esa red se partió la clase `App` (unas 1 000 líneas) en piezas y ninguna función pasa de 50 líneas. La lógica pura pasa del 93 % de cobertura (`analisis` 93,3 %, `duelos` 94,1 %, `revision` 97,1 %); lo que habla con Windows o con la red se queda muy por debajo (`ventanas` 0 %, `lcu` 18,5 %, `grabacion` 36,9 %) y se prueba a mano con el cliente real.
+Las pruebas usan falsos de la API de Riot, del cliente del LoL y del grabador, y bases SQLite en memoria; `test_partida_propia_de_principio_a_fin` recorre el vigía desde la sala hasta el final de la partida. `tests/test_nativa.py` carga la interfaz entera sin pantalla (Qt en «offscreen»), con todas las escenas de la demo, jugando de mid y en ARAM, y falla si Qt da un solo aviso. Antes de reordenar el código se fijó con pruebas de caracterización lo que salía de las funciones grandes, y con esa red se partió la clase `App` (unas 1 000 líneas) en piezas y ninguna función pasa de 50 líneas. La lógica pura pasa del 93 % de cobertura (`analisis` 93,3 %, `duelos` 94,1 %, `revision` 97,3 %, `nativa/vistas` 93,3 %); lo que habla con Windows o con la red se queda por debajo (`lcu` 18,5 %, `grabacion` 36,9 %, `nativa/marco` 50,2 %) y se prueba a mano con el cliente real.
 
 ## Estructura del repositorio
 
@@ -110,17 +112,18 @@ Las pruebas usan falsos de la API de Riot, del cliente del LoL y del grabador, y
 deep-prep/
 ├── deepprep/              paquete de la app (py -m deepprep)
 │   ├── app.py             composición: crea las piezas y las conecta
-│   ├── analisis.py        perfil del jungla rival e historial (lógica pura)
+│   ├── analisis.py        perfiles del jungla rival y de tu rival de línea, posiciones e historial (lógica pura)
 │   ├── duelos.py          duelos de Master+ (lógica pura)
 │   ├── revision.py        revisión de la partida (lógica pura)
 │   ├── riot.py, lcu.py    API de Riot con su limitador y cliente del LoL
 │   ├── cache.py, ...      SQLite, configuración, Data Dragon
 │   ├── overlay.py, grabacion.py, clips.py   Windows: overlay, grabación y recortes
-│   ├── servidor.py        API JSON y archivos del panel en 127.0.0.1
+│   ├── servidor.py        canal de control en 127.0.0.1 (otra copia, el instalador)
 │   ├── demo/              modo demo: AppDemo y la partida de ejemplo en JSON
-│   └── web/               panel: index.html, estilo.css, js/ (módulos ES) y fuentes
-├── tests/                 unittest, con datos anonimizados en tests/datos; tests/js con node --test
-├── herramientas/          publicar, maqueta, captura, anonimizar, simular una partida...
+│   ├── nativa/            interfaz con Qt Quick: vistas.py (lo que se escribe), puente.py, ventanas.py, marco.py y qml/
+│   └── recursos/          el icono y los emblemas de rango
+├── tests/                 unittest, con datos anonimizados en tests/datos
+├── herramientas/          publicar, anonimizar, simular una partida, el logo...
 ├── empaquetado/           entrada de PyInstaller y LEEME.md, la guía de instalación para jugadores
 ├── docs/                  ARQUITECTURA.md e imágenes
 └── pyproject.toml         paquete, ruff, mypy y coverage
@@ -134,8 +137,8 @@ py -3.14 -m venv .venv
 py -m pip install -e ".[dev]"
 
 py -m deepprep                                    # la app de verdad: necesita el cliente del LoL y una clave de Riot
-py herramientas/maqueta.py                        # el panel de la demo en http://127.0.0.1:5252, para diseñar
-py herramientas/captura.py http://127.0.0.1:5252/ panel.png   # foto del panel con Chrome sin ventana
+py -m deepprep.nativa                             # la interfaz con la demo, para diseñar (--vista, --escena, --rol MIDDLE)
+py -m deepprep.nativa --captura panel.png         # foto de la ventana sin enseñarla (con --overlay, la del overlay)
 
 ruff check .
 ruff format --check .
@@ -143,9 +146,8 @@ mypy
 py -X utf8 -m unittest discover -s tests -t .
 coverage run -m unittest discover -s tests -t .
 coverage report
-node --test
 
-py herramientas/publicar.py 2.0.1 "Qué cambia"    # pasa lo mismo que la CI, empaqueta y publica en GitHub Releases
+py herramientas/publicar.py 2.1.0 "Qué cambia"    # pasa lo mismo que la CI, empaqueta y publica en GitHub Releases
 ```
 
 La clave de Riot se pega en el panel la primera vez (se pide gratis en [developer.riotgames.com](https://developer.riotgames.com/)) y se guarda en `clave.txt`, en la carpeta de datos, fuera del repositorio. Para instalar la app como jugador, sin el código, está [empaquetado/LEEME.md](empaquetado/LEEME.md).
@@ -158,13 +160,13 @@ La clave de Riot se pega en el panel la primera vez (se pide gratis en [develope
 
 ## Historia
 
-Empezó como **Porofesor**, una app que el autor hizo para uso propio y de unos amigos. La 1.0.0 (14 de octubre de 2026) traía el panel de partida, los duelos de Master+, las revisiones, la grabación y el actualizador; la 1.0.1 (29 de octubre) rehízo la interfaz y añadió tu pool en la selección de campeón, el mapa del jungla rival y los clips de cada muerte, y la 1.0.2 (el mismo día) arregló el actualizador. Para publicar el código pasó a llamarse **Deep Prep** (2.0.0, 6 de noviembre de 2026) y se rehízo por dentro sin cambiar lo que ve el jugador: de 99 pruebas a 208, tipos, registro con `logging`, el panel en módulos, CI y el modo demo. Las copias de Porofesor se actualizan solas a Deep Prep y se llevan sus datos. El detalle, en el [CHANGELOG](CHANGELOG.md).
+Empezó como **Porofesor**, una app que el autor hizo para uso propio y de unos amigos. La 1.0.0 (14 de octubre de 2026) traía el panel de partida, los duelos de Master+, las revisiones, la grabación y el actualizador; la 1.0.1 (29 de octubre) rehízo la interfaz y añadió tu pool en la selección de campeón, el mapa del jungla rival y los clips de cada muerte, y la 1.0.2 (el mismo día) arregló el actualizador. Para publicar el código pasó a llamarse **Deep Prep** (2.0.0, 6 de noviembre de 2026) y se rehízo por dentro sin cambiar lo que ve el jugador: de 99 pruebas a 208, tipos, registro con `logging`, el panel en módulos, CI y el modo demo. Las copias de Porofesor se actualizan solas a Deep Prep y se llevan sus datos. La 2.1.0 cambia el panel web por una interfaz nativa con Qt Quick, con menos de la mitad de memoria, y deja de ser solo para junglas: tu rol, tu rival de línea y en qué modos de juego sale el panel. El detalle, en el [CHANGELOG](CHANGELOG.md).
 
 Hecho por Samuel Martínez Durán ([Samuelmartinezduran](https://github.com/Samuelmartinezduran) en GitHub).
 
 ## Licencia
 
-El código es [MIT](LICENSE). Las fuentes del panel (Space Grotesk e IBM Plex Mono) van con su licencia, la [SIL Open Font License](deepprep/web/fuentes/OFL.txt).
+El código es [MIT](LICENSE). Las fuentes de la interfaz (Space Grotesk e IBM Plex Mono) van con su licencia, la [SIL Open Font License](deepprep/nativa/fuentes/OFL.txt).
 
 ---
 

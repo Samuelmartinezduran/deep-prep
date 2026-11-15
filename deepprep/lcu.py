@@ -129,15 +129,17 @@ class Cliente:
         t = datos.get("gameTime") if isinstance(datos, dict) else None
         return float(t) if isinstance(t, (int, float)) else None
 
-    def mapa(self) -> int:
-        """Id del mapa de la partida en curso (11 = Grieta del Invocador), o 0 si no se sabe."""
+    def cola_y_mapa(self) -> tuple[int, int]:
+        """(cola, mapa) de la sala, la selección o la partida en curso (11 = Grieta del Invocador), o 0 si no se sabe."""
         flujo = self.get("/lol-gameflow/v1/session")
         if not isinstance(flujo, dict):
-            return 0
-        return (flujo.get("map") or {}).get("id") or ((flujo.get("gameData") or {}).get("queue") or {}).get("mapId") or 0
+            return 0, 0
+        cola = (flujo.get("gameData") or {}).get("queue") or {}
+        return cola.get("id") or 0, (flujo.get("map") or {}).get("id") or cola.get("mapId") or 0
 
     def seleccion(self) -> dict[str, Any] | None:
-        """Selección en curso: {'mio', 'aliados', 'rivales'} con ids de campeón (0 = sin elegir) y 'cola'."""
+        """Selección en curso: {'mio', 'aliados', 'rivales'} con ids de campeón (0 = sin elegir), 'cola', 'mapa' y 'pos'
+        (la posición que te ha tocado, si la cola la da)."""
         s = self.get("/lol-champ-select/v1/session")
         if not isinstance(s, dict) or "myTeam" not in s:
             return None
@@ -153,6 +155,5 @@ class Cliente:
             elif campeon:
                 aliados.append(campeon)
         rivales = [j["championId"] for j in s.get("theirTeam", []) if j.get("championId")]
-        flujo = self.get("/lol-gameflow/v1/session")
-        cola = ((flujo.get("gameData") or {}).get("queue") or {}).get("id", 0) if isinstance(flujo, dict) else 0
-        return {"mio": mio, "aliados": aliados, "rivales": rivales, "cola": cola, "pos": pos}
+        cola, mapa = self.cola_y_mapa()
+        return {"mio": mio, "aliados": aliados, "rivales": rivales, "cola": cola, "mapa": mapa, "pos": pos}

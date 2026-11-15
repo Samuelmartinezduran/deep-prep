@@ -3,7 +3,7 @@
 import itertools
 import statistics
 from collections import Counter
-from collections.abc import Collection, Iterable, Mapping
+from collections.abc import Collection, Iterable, Mapping, Sequence
 from typing import Any
 
 from .constantes import COLAS_GRIETA, DIA_MS, MIN
@@ -16,6 +16,7 @@ RolesCampeon = Mapping[int, Mapping[str, float]]  # campeón -> {posición: frec
 POSICIONES = ("TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY")
 NOMBRE_POS = {"TOP": "top", "JUNGLE": "jungla", "MIDDLE": "mid", "BOTTOM": "ADC", "UTILITY": "support"}
 NOMBRE_LINEA = {"top": "top", "mid": "mid", "bot": "bot"}
+LINEA_DE = {"TOP": "top", "MIDDLE": "mid", "BOTTOM": "bot", "UTILITY": "bot"}  # la línea en la que se juega cada posición
 SMITE = 11
 CAMPO_LINEA = "laningPhaseGoldExpAdvantage"
 # Kills en solitario por partida a partir de las cuales un jugador destaca en su rol
@@ -143,6 +144,18 @@ def estado_por_minuto(frames: list[Json]) -> tuple[dict[str, list[list[int]]], d
                 ]
             )
     return pos, est
+
+
+def diferencia_oro(est: Mapping[str, Sequence[Sequence[int]]], equipo_de: Mapping[int, int], mi_equipo: int) -> list[int]:
+    """Oro de tu equipo menos el del rival en cada fotograma de la línea de tiempo (uno al empezar cada minuto y el
+    último al acabar). est: el de estado_por_minuto; equipo_de: {pid: 100 o 200}."""
+    n = max((len(filas) for filas in est.values()), default=0)
+    dif = [0] * n
+    for pid, filas in est.items():
+        signo = 1 if equipo_de.get(int(pid)) == mi_equipo else -1
+        for i, fila in enumerate(filas):
+            dif[i] += signo * int(fila[0])
+    return dif
 
 
 def kill_reducida(e: Json) -> list[Any]:
@@ -334,18 +347,23 @@ def oro_al(linea: Linea, pid: int, minuto: int) -> int | None:
 
 # --- roles en la partida en vivo ----------------------------------------------------------
 def asignar_roles(
-    equipo: list[Json], roles_campeon: RolesCampeon, historiales: dict[str, Counter[str]] | None = None
+    equipo: list[Json],
+    roles_campeon: RolesCampeon,
+    historiales: dict[str, Counter[str]] | None = None,
+    fijos: Mapping[int, str] | None = None,
 ) -> list[str]:
     """Reparte las cinco posiciones entre los cinco jugadores de un equipo.
 
     equipo: lista de dicts con 'campeon', 's1', 's2' y 'puuid'.
     roles_campeon: {campeon: {posición: frecuencia}}.
     historiales: {puuid: Counter de posiciones recientes} (opcional, afina el reparto).
+    fijos: {índice en 'equipo': posición} que se respetan (la tuya, cuando se sabe).
     Devuelve una lista de posiciones en el mismo orden que 'equipo'.
     """
     if len(equipo) != 5:
         return [""] * len(equipo)
     historiales = historiales or {}
+    fijos = fijos or {}
 
     def puntos(j: Json, pos: str) -> float:
         tasas = roles_campeon.get(j["campeon"]) or {}
@@ -360,7 +378,7 @@ def asignar_roles(
                 s += 0.6 * hist.get(pos, 0) / jugadas
         return s
 
-    tabla = [[puntos(j, pos) for pos in POSICIONES] for j in equipo]
+    tabla = [[puntos(j, pos) + (100.0 if fijos.get(i) == pos else 0.0) for pos in POSICIONES] for i, j in enumerate(equipo)]
     mejor = max(itertools.permutations(range(5)), key=lambda perm: sum(tabla[i][perm[i]] for i in range(5)))
     return [POSICIONES[mejor[i]] for i in range(5)]
 
@@ -412,17 +430,7 @@ def resumen_jugador(puuid: str, partidas: list[Partida], campeon: int, lineas: d
     def ch(campo: str, lista: list[Juego] | None = None) -> list[float]:
         return [j["ch"][campo] for _, j in (lista or juegos) if campo in j["ch"]]
 
-    # Riot solo marca la ventaja de línea cuando es clara (~15% de las partidas), así que
-    # "perder línea" se lee en la marca del rival directo.
-    linea = {"n": 0, "v": 0, "d": 0}
-    for m, j in juegos:
-        rival = next((r for r in m["jug"] if r["pos"] == j["pos"] and r["equipo"] != j["equipo"]), None)
-        if not j["pos"] or not rival or CAMPO_LINEA not in j["ch"]:
-            continue
-        linea["n"] += 1
-        linea["v"] += int(j["ch"][CAMPO_LINEA] >= 1)
-        linea["d"] += int(rival["ch"].get(CAMPO_LINEA, 0) >= 1)
-    res["linea"] = linea
+    res["linea"] = _ventaja_de_linea(juegos)
     res["solo"] = media(ch("soloKills"))
     res["kp"] = media(ch("killParticipation"))
     res["dano_pct"] = media(ch("teamDamagePercentage"))
@@ -435,6 +443,28 @@ def resumen_jugador(puuid: str, partidas: list[Partida], campeon: int, lineas: d
             tempranas.append(muertes_antes(tl, j["pid"], 15))
     res["muertes15"] = {"n": len(tempranas), "media": media(tempranas)}
     return res
+
+
+def _ventaja_de_linea(juegos: Iterable[Juego]) -> dict[str, int]:
+    """En cuántas partidas sacó ventaja clara en la fase de líneas (v) y en cuántas se la sacaron (d), de n.
+
+    Riot solo la marca cuando es clara (~15% de las partidas), así que «perder línea» se lee en la marca del rival
+    directo.
+    """
+    linea = {"n": 0, "v": 0, "d": 0}
+    for m, j in juegos:
+        rival = _rival_directo(m, j)
+        if not j["pos"] or not rival or CAMPO_LINEA not in j["ch"]:
+            continue
+        linea["n"] += 1
+        linea["v"] += int(j["ch"][CAMPO_LINEA] >= 1)
+        linea["d"] += int(rival["ch"].get(CAMPO_LINEA, 0) >= 1)
+    return linea
+
+
+def _rival_directo(m: Partida, j: Jugador) -> Jugador | None:
+    """El de la misma posición en el otro equipo."""
+    return next((r for r in m["jug"] if r["pos"] == j["pos"] and r["equipo"] != j["equipo"]), None)
 
 
 def rol_principal(res: Json) -> str:
@@ -715,7 +745,7 @@ def _si_se_adelanta(juegos: list[Juego], con_campeon: list[Juego], con_linea: li
     delante: list[bool] = []
     detras: list[bool] = []
     for m, j, l in con_linea:
-        rival = next((r for r in m["jug"] if r["pos"] == "JUNGLE" and r["equipo"] != j["equipo"]), None)
+        rival = _rival_directo(m, j)
         if not rival:
             continue
         mio, suyo = oro_al(l, j["pid"], 10), oro_al(l, rival["pid"], 10)
@@ -727,7 +757,10 @@ def _si_se_adelanta(juegos: list[Juego], con_campeon: list[Juego], con_linea: li
             detras.append(j["gana"])
     base = con_campeon if len(con_campeon) >= 3 else juegos
     k, d, a = (media(j[c] for _, j in base) for c in ("k", "d", "a"))
-    con_que = "con este campeón" if base is con_campeon else "de jungla"
+    pos = base[0][1]["pos"] if base else ""
+    con_que = (
+        "con este campeón" if base is con_campeon else ("de jungla" if pos == "JUNGLE" else f"en {NOMBRE_POS.get(pos, pos)}")
+    )
     dano = media(j["ch"].get("teamDamagePercentage", 0) for _, j in base)
     snowball = {
         "delante": [sum(delante), len(delante)],
@@ -759,7 +792,8 @@ def _si_se_adelanta(juegos: list[Juego], con_campeon: list[Juego], con_linea: li
     return tarjeta, snowball
 
 
-def _muertes_tempranas(con_linea: list[ConLinea]) -> Tarjeta | None:
+def _muertes_tempranas(con_linea: list[ConLinea], muchas: float = 2.0) -> Tarjeta | None:
+    """Muertes antes del 10 de media; desde 'muchas' es algo que te favorece (en jungla, 2; en una línea, 1,5)."""
     tempranas = [muertes_antes(l, j["pid"], 10) for _, j, l in con_linea]
     if not tempranas:
         return None
@@ -768,8 +802,160 @@ def _muertes_tempranas(con_linea: list[ConLinea]) -> Tarjeta | None:
         "titulo": "Muertes tempranas",
         "valor": f"{num(m10)} antes del 10",
         "detalle": f"Media de {len(tempranas)} partidas con línea de tiempo.",
-        "tono": "bien" if m10 >= 2 else "neutro",
+        "tono": "bien" if m10 >= muchas else "neutro",
     }
+
+
+# --- tu rival de línea (cuando no juegas jungla) ------------------------------------------------------------
+def perfil_linea(puuid: str, partidas: list[Partida], lineas: dict[str, Linea], campeon: int, rol: str) -> Json:
+    """Cómo juega su línea tu rival directo, de sus partidas recientes en esa posición y de sus líneas de tiempo.
+
+    Como perfil_jungla: datos crudos ('al10', 'snowball') y 'tarjetas' ya redactadas para el panel, con el 'tono' desde
+    tu punto de vista ('ojo' es algo de lo que cuidarte, 'bien' algo que te favorece).
+    """
+    juegos: list[Juego] = [(m, j) for m in validas(partidas) if (j := jugador_en(m, puuid)) and j["pos"] == rol]
+    con_campeon = [(m, j) for m, j in juegos if j["campeon"] == campeon]
+    con_linea = [(m, j, lineas[m["id"]]) for m, j in juegos if m["id"] in lineas]
+    perfil: Json = {
+        "n": len(juegos),
+        "n_campeon": len(con_campeon),
+        "n_lineas": len(con_linea),
+        "tarjetas": [],
+        "al10": None,
+        "snowball": None,
+    }
+    if not juegos:
+        return perfil
+    tarjetas: list[Tarjeta] = perfil["tarjetas"]
+    tarjetas.append(_con_su_campeon(juegos, con_campeon))
+    fase = _fase_de_lineas(juegos)
+    if fase:
+        tarjetas.append(fase)
+    al10, perfil["al10"] = _al_minuto_10(con_linea, rol)
+    if al10:
+        tarjetas.append(al10)
+    tarjeta, perfil["snowball"] = _si_se_adelanta(juegos, con_campeon, con_linea)
+    tarjetas.append(tarjeta)
+    tarjetas.extend(t for t in (_muertes_tempranas(con_linea, muchas=1.5), _fuera_de_su_linea(con_linea, rol)) if t)
+    return perfil
+
+
+def _con_su_campeon(juegos: list[Juego], con_campeon: list[Juego]) -> Tarjeta:
+    n = len(con_campeon)
+    if not n:
+        return {
+            "titulo": "Con su campeón",
+            "valor": "Ninguna reciente",
+            "detalle": f"De sus últimas {len(juegos)} partidas en esta posición.",
+            "tono": "neutro",
+        }
+    v = sum(1 for _, j in con_campeon if j["gana"])
+    tono = "ojo" if n >= 5 and v / n >= 0.65 else ("bien" if n >= 5 and v / n <= 0.35 else "neutro")
+    return {
+        "titulo": "Con su campeón",
+        "valor": f"{v}V {n - v}D",
+        "detalle": f"{n} de sus últimas {len(juegos)} partidas en esta posición.",
+        "tono": tono,
+    }
+
+
+def _fase_de_lineas(juegos: list[Juego]) -> Tarjeta | None:
+    linea = _ventaja_de_linea(juegos)
+    n, v, d = linea["n"], linea["v"], linea["d"]
+    if n < 4:
+        return None
+    tono = "ojo" if v / n >= 0.4 and v > d else ("bien" if d / n >= 0.4 and d > v else "neutro")
+    return {
+        "titulo": "Fase de líneas",
+        "valor": f"Saca ventaja clara en {v} de {n}",
+        "detalle": f"Se la sacan a él en {d} de {n}. Riot solo la marca cuando es clara.",
+        "tono": tono,
+    }
+
+
+def con_signo(x: float) -> str:
+    """+350 o −120 (con el signo menos de verdad, como el resto de la interfaz)."""
+    n = round(x)
+    return f"+{n}" if n > 0 else f"−{-n}" if n < 0 else "0"
+
+
+def _al_minuto_10(con_linea: list[ConLinea], rol: str) -> tuple[Tarjeta | None, Json | None]:
+    """Su oro al 10 frente al de su rival de línea, y su CS, de media: (tarjeta, {'oro', 'cs', 'n'}) o (None, None)."""
+    difs: list[int] = []
+    cs: list[int] = []
+    for m, j, l in con_linea:
+        rival = _rival_directo(m, j)
+        suyo = l["est"].get(str(j["pid"])) or []
+        otro = (l["est"].get(str(rival["pid"])) or []) if rival else []
+        if len(suyo) <= 10 or len(otro) <= 10:
+            continue
+        difs.append(suyo[10][0] - otro[10][0])
+        cs.append(suyo[10][2])
+    if not difs:
+        return None, None
+    al10: Json = {"oro": round(media(difs)), "cs": round(media(cs)), "n": len(difs)}
+    oro = f"{con_signo(al10['oro'])} de oro"
+    tarjeta: Tarjeta = {
+        "titulo": "Al minuto 10",
+        # Un support no farmea: su CS no dice nada.
+        "valor": oro if rol == "UTILITY" else f"{al10['cs']} CS · {oro}",
+        "detalle": f"Frente a su rival de línea, media de {al10['n']} partidas.",
+        "tono": "ojo" if al10["oro"] >= 300 else ("bien" if al10["oro"] <= -300 else "neutro"),
+    }
+    return tarjeta, al10
+
+
+def _fuera_de_su_linea(con_linea: list[ConLinea], rol: str) -> Tarjeta | None:
+    """Kills y asistencias antes del 14:00 en otras líneas, de media: cuánto se mueve de la suya."""
+    suya = LINEA_DE.get(rol, "")
+    if not suya or not con_linea:
+        return None
+    veces: list[int] = []
+    for _, j, l in con_linea:
+        fuera = 0
+        for t, x, y, asesino, _victima, asistentes in l["kills"]:
+            if t >= 14 * MIN:
+                break
+            if j["pid"] != asesino and j["pid"] not in asistentes:
+                continue
+            donde = linea_de_kill(x, y)
+            fuera += int(donde in NOMBRE_LINEA and donde != suya)
+        veces.append(fuera)
+    m = media(veces)
+    return {
+        "titulo": "Se mueve",
+        "valor": f"{num(m)} kills o asistencias en otras líneas",
+        "detalle": f"Antes del 14:00, media de {len(veces)} partidas.",
+        "tono": "ojo" if m >= 1.5 else "neutro",
+    }
+
+
+# --- tu rol en la partida ---------------------------------------------------------------------------------
+MOTIVOS_ROL = {
+    "elegido": "elegido por ti",
+    "asignado": "el que te ha tocado",
+    "principal": "tu rol principal",
+    "hechizos": "por tus hechizos",
+}
+
+
+def rol_de_hoy(elegido: str, asignado: str, principal: str, con_smite: bool | None, inferido: str) -> tuple[str, str]:
+    """Tu posición en esta partida y por qué: (posición, clave de MOTIVOS_ROL).
+
+    Manda la que elijas a mano; si no, la que te toque en la selección y, si la cola no la da, tu rol principal. Ya en
+    partida, los hechizos corrigen esas dos (con_smite; None en la selección, donde aún pueden cambiar): con Aplastar
+    vas de jungla y sin él no, por un cambio de posiciones en la selección o una normal a ciegas. Sin Aplastar, la
+    posición es la que se deduce de tu campeón (inferido).
+    """
+    if elegido:
+        return elegido, "elegido"
+    base, motivo = (asignado, "asignado") if asignado else (principal, "principal")
+    if con_smite is not None and con_smite != (base == "JUNGLE"):
+        if con_smite:
+            return "JUNGLE", "hechizos"
+        if inferido and inferido != "JUNGLE":
+            return inferido, "hechizos"
+    return base, motivo
 
 
 # --- dónde va a haber errores -----------------------------------------------------------------

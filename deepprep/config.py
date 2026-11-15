@@ -22,6 +22,7 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Self
 
+from .constantes import MODOS_POR_DEFECTO
 from .tipos import Cfg
 
 logger = logging.getLogger(__name__)
@@ -135,7 +136,7 @@ DATOS.mkdir(parents=True, exist_ok=True)
 RUTA_CLAVE = DATOS / "clave.txt"
 RUTA_CONFIG = DATOS / "config.json"
 RUTA_CACHE = DATOS / "cache.db"
-RUTA_WEB = Path(__file__).resolve().parent / "web"
+RUTA_RECURSOS = Path(__file__).resolve().parent / "recursos"  # el icono y las imágenes que van con la app
 RUTA_REGISTRO = DATOS / "deepprep.log"
 
 POR_DEFECTO: Cfg = {
@@ -148,6 +149,7 @@ POR_DEFECTO: Cfg = {
     "partidas_por_jugador": 20,
     # Líneas de tiempo: son las consultas caras, por eso van contadas.
     "lineas_jungla_rival": 8,
+    "lineas_rival_linea": 6,  # las de tu rival de línea, cuando no juegas jungla
     "lineas_por_jugador": 4,
     "inicio_temporada": "2026-01-01",
     # Dónde está instalado el LoL. Si ahí no está, se busca solo (ajustes de Riot y discos habituales).
@@ -177,6 +179,11 @@ POR_DEFECTO: Cfg = {
     "referencias": {},
     # Revisión automática al acabar cada partida propia en la Grieta.
     "revisar": True,
+    # Tu rol principal (TOP, JUNGLE, MIDDLE, BOTTOM o UTILITY); vacío, el que más juegas. En cada partida manda la
+    # posición que te toque en la selección y, desde la pestaña Partida, se cambia para esa partida.
+    "rol": "",
+    # En qué modos sale el panel ({modo: sí o no}, ver constantes.MODOS); los que falten, como vienen de fábrica.
+    "modos": dict(MODOS_POR_DEFECTO),
     "recordatorios": [],
 }
 
@@ -317,7 +324,7 @@ def configurar_registro() -> None:
     """Configura el registro de la app una vez, al arrancar: fecha y hora, nivel, módulo y mensaje.
 
     Lanzada con pyw no hay consola: todo va a deepprep.log, también lo que no pasa por logging (los errores de un
-    hilo que muere, los de pywebview...). Desde una consola sale por ella.
+    hilo que muere, los de Qt...). Desde una consola sale por ella.
     """
     if sys.stderr is None:
         registro = open(RUTA_REGISTRO, "a", encoding="utf-8", buffering=1)  # noqa: SIM115  el registro dura lo que la app

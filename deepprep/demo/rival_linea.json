@@ -1,0 +1,280 @@
+{
+  "TOP": {
+    "n": 4,
+    "n_campeon": 1,
+    "n_lineas": 4,
+    "al10": {
+      "oro": -240,
+      "cs": 61,
+      "n": 4
+    },
+    "tarjetas": [
+      {
+        "titulo": "Con su campeón",
+        "valor": "1V 0D",
+        "detalle": "1 de sus últimas 4 partidas en esta posición.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Al minuto 10",
+        "valor": "61 CS · −240 de oro",
+        "detalle": "Frente a su rival de línea, media de 4 partidas.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Rendimiento",
+        "valor": "3,5/5,0/4,8 de media en top",
+        "detalle": "17% del daño de su equipo.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Muertes tempranas",
+        "valor": "1,5 antes del 10",
+        "detalle": "Media de 4 partidas con línea de tiempo.",
+        "tono": "bien"
+      },
+      {
+        "titulo": "Se mueve",
+        "valor": "0,3 kills o asistencias en otras líneas",
+        "detalle": "Antes del 14:00, media de 4 partidas.",
+        "tono": "neutro"
+      }
+    ],
+    "avisos": [
+      {
+        "tono": "ojo",
+        "texto": "Talon gana 3 de 3 cuando va por delante al minuto 10."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon saca 3,0 kills en solitario por partida."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon (jungla) ha ganado 10 de sus últimas 11 con ese campeón."
+      },
+      {
+        "tono": "neutro",
+        "texto": "Rivales con poco rodaje o fuera de rol: Swain (top, fuera de rol)."
+      },
+      {
+        "tono": "neutro",
+        "texto": "Aliados con poco rodaje o fuera de rol: Irelia (mid, poco rodaje)."
+      }
+    ]
+  },
+  "MIDDLE": {
+    "n": 14,
+    "n_campeon": 9,
+    "n_lineas": 6,
+    "al10": {
+      "oro": 410,
+      "cs": 78,
+      "n": 6
+    },
+    "tarjetas": [
+      {
+        "titulo": "Con su campeón",
+        "valor": "6V 3D",
+        "detalle": "9 de sus últimas 14 partidas en esta posición.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Fase de líneas",
+        "valor": "Saca ventaja clara en 5 de 11",
+        "detalle": "Se la sacan a él en 2 de 11. Riot solo la marca cuando es clara.",
+        "tono": "ojo"
+      },
+      {
+        "titulo": "Al minuto 10",
+        "valor": "78 CS · +410 de oro",
+        "detalle": "Frente a su rival de línea, media de 6 partidas.",
+        "tono": "ojo"
+      },
+      {
+        "titulo": "Si se adelanta",
+        "valor": "Por delante al 10 gana 4 de 5; por detrás 1 de 3",
+        "detalle": "7,8/4,1/5,2 de media con este campeón, 29% del daño de su equipo.",
+        "tono": "ojo"
+      },
+      {
+        "titulo": "Muertes tempranas",
+        "valor": "0,8 antes del 10",
+        "detalle": "Media de 6 partidas con línea de tiempo.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Se mueve",
+        "valor": "1,6 kills o asistencias en otras líneas",
+        "detalle": "Antes del 14:00, media de 6 partidas.",
+        "tono": "ojo"
+      }
+    ],
+    "avisos": [
+      {
+        "tono": "ojo",
+        "texto": "Qiyana (mid) gana 4 de 5 cuando va por delante al 10."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon gana 3 de 3 cuando va por delante al minuto 10."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon saca 3,0 kills en solitario por partida."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon (jungla) ha ganado 10 de sus últimas 11 con ese campeón."
+      },
+      {
+        "tono": "neutro",
+        "texto": "Rivales con poco rodaje o fuera de rol: Swain (top, fuera de rol)."
+      }
+    ]
+  },
+  "BOTTOM": {
+    "n": 12,
+    "n_campeon": 7,
+    "n_lineas": 6,
+    "al10": {
+      "oro": -180,
+      "cs": 71,
+      "n": 6
+    },
+    "tarjetas": [
+      {
+        "titulo": "Con su campeón",
+        "valor": "4V 3D",
+        "detalle": "7 de sus últimas 12 partidas en esta posición.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Fase de líneas",
+        "valor": "Saca ventaja clara en 2 de 10",
+        "detalle": "Se la sacan a él en 4 de 10. Riot solo la marca cuando es clara.",
+        "tono": "bien"
+      },
+      {
+        "titulo": "Al minuto 10",
+        "valor": "71 CS · −180 de oro",
+        "detalle": "Frente a su rival de línea, media de 6 partidas.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Si se adelanta",
+        "valor": "Por delante al 10 gana 2 de 3; por detrás 1 de 4",
+        "detalle": "6,1/5,3/6,7 de media con este campeón, 31% del daño de su equipo.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Muertes tempranas",
+        "valor": "1,7 antes del 10",
+        "detalle": "Media de 6 partidas con línea de tiempo.",
+        "tono": "bien"
+      },
+      {
+        "titulo": "Se mueve",
+        "valor": "0,4 kills o asistencias en otras líneas",
+        "detalle": "Antes del 14:00, media de 6 partidas.",
+        "tono": "neutro"
+      }
+    ],
+    "avisos": [
+      {
+        "tono": "ojo",
+        "texto": "Talon gana 3 de 3 cuando va por delante al minuto 10."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon saca 3,0 kills en solitario por partida."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon (jungla) ha ganado 10 de sus últimas 11 con ese campeón."
+      },
+      {
+        "tono": "neutro",
+        "texto": "Rivales con poco rodaje o fuera de rol: Swain (top, fuera de rol)."
+      },
+      {
+        "tono": "neutro",
+        "texto": "Aliados con poco rodaje o fuera de rol: Irelia (mid, poco rodaje)."
+      }
+    ]
+  },
+  "UTILITY": {
+    "n": 16,
+    "n_campeon": 11,
+    "n_lineas": 6,
+    "al10": {
+      "oro": 120,
+      "cs": 9,
+      "n": 6
+    },
+    "tarjetas": [
+      {
+        "titulo": "Con su campeón",
+        "valor": "7V 4D",
+        "detalle": "11 de sus últimas 16 partidas en esta posición.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Fase de líneas",
+        "valor": "Saca ventaja clara en 3 de 13",
+        "detalle": "Se la sacan a él en 3 de 13. Riot solo la marca cuando es clara.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Al minuto 10",
+        "valor": "+120 de oro",
+        "detalle": "Frente a su rival de línea, media de 6 partidas.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Si se adelanta",
+        "valor": "Por delante al 10 gana 3 de 4; por detrás 2 de 5",
+        "detalle": "1,6/4,9/13,8 de media con este campeón, 9% del daño de su equipo.",
+        "tono": "ojo"
+      },
+      {
+        "titulo": "Muertes tempranas",
+        "valor": "1,1 antes del 10",
+        "detalle": "Media de 6 partidas con línea de tiempo.",
+        "tono": "neutro"
+      },
+      {
+        "titulo": "Se mueve",
+        "valor": "2,1 kills o asistencias en otras líneas",
+        "detalle": "Antes del 14:00, media de 6 partidas.",
+        "tono": "ojo"
+      }
+    ],
+    "avisos": [
+      {
+        "tono": "ojo",
+        "texto": "Leona (support) gana 3 de 4 cuando va por delante al 10."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon gana 3 de 3 cuando va por delante al minuto 10."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon saca 3,0 kills en solitario por partida."
+      },
+      {
+        "tono": "ojo",
+        "texto": "Talon (jungla) ha ganado 10 de sus últimas 11 con ese campeón."
+      },
+      {
+        "tono": "neutro",
+        "texto": "Rivales con poco rodaje o fuera de rol: Swain (top, fuera de rol)."
+      },
+      {
+        "tono": "neutro",
+        "texto": "Aliados con poco rodaje o fuera de rol: Irelia (mid, poco rodaje)."
+      }
+    ]
+  }
+}

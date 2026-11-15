@@ -12,6 +12,7 @@ class AppFalsa:
         self.cfg = {"overlay": True, "atajo_overlay": "ctrl+tab", "ruta_lol": "."}
         self.fase = "InProgress"
         self.modo = "carga"
+        self.partida_apagada: str | None = None  # el modo de la partida, si está apagado en Ajustes
 
         self.miradas = 0
 
@@ -64,6 +65,14 @@ class Visibilidad(unittest.TestCase):
         self.assertFalse(ventana.visible)
         ctl.paso()
         self.assertEqual(ventana.cambios, 4)  # sin cambios, no se toca la ventana
+
+    def test_en_un_modo_apagado_no_sale(self):
+        app, ventana, ctl, _ = montar(pulsadas={0x11, 0x09})
+        app.partida_apagada = "ARAM"
+        for modo in ("carga", "juego"):
+            app.modo = modo
+            ctl.paso()
+            self.assertFalse(ventana.visible)
 
     def test_fuera_de_partida_nunca(self):
         app, ventana, ctl, _teclas = montar(pulsadas={0x11, 0x09})

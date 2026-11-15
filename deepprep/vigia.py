@@ -6,7 +6,7 @@ import time
 from collections.abc import Callable
 
 from .config import Configuracion
-from .constantes import GRIETA
+from .constantes import MODOS, MODOS_GRIETA, modo_activo, modo_de
 from .cuentas import Cuentas
 from .grabacion import Grabador
 from .lcu import Cliente as ClienteLoL
@@ -31,6 +31,8 @@ FASES = {
     "EndOfGame": "Fin de partida",
 }
 EN_JUEGO = ("GameStart", "InProgress", "Reconnect")
+# Fases con una cola elegida: la sala, la cola, la selección y la partida (luego, el fin de partida ya no cuenta).
+CON_COLA = ("Lobby", "Matchmaking", "ReadyCheck", "ChampSelect", *EN_JUEGO)
 # Fases en las que la partida está al caer: el historial propio deja de descargarse.
 PARTIDA_CERCA = ("Matchmaking", "ReadyCheck", "ChampSelect", "GameStart")
 # Cada cuánto se pregunta a Riot por tu partida en vivo: sin cliente a la vista y ya en partida.
@@ -91,6 +93,13 @@ class Sesiones:
             return
         s.terminada = True
         self._al_terminar(s)
+
+    def soltar_propia(self) -> None:
+        """Empieza una partida tuya en un modo apagado: el panel de la anterior deja de estar a la vista."""
+        with self._lock:
+            if self.actual and self.actual.origen == "propia":
+                self.actual.cancelar()
+                self.actual = None
 
     def cargando(self) -> bool:
         s = self.actual
@@ -158,6 +167,7 @@ class Vigia:
         self.reloj: float | None = None  # segundos de partida según el propio juego (None hasta que empieza)
         self._reloj_en_carga: float | None = None  # la primera lectura del reloj en la pantalla de carga
         self.cuenta_activa: str | None = None  # puuid de la cuenta abierta en el cliente
+        self.modo_partida: str | None = None  # el modo de la cola en la que estás (constantes.MODOS), si se sabe
         self.ultimo_sondeo = 0.0  # última vez que se preguntó a Riot por la partida en vivo
         self._plataforma_vista = False  # región del cliente ya mirada en esta sesión del cliente
 
@@ -174,10 +184,12 @@ class Vigia:
             self.ajustar_plataforma(self.lcu.plataforma())
             self._al_ver_cliente()
         anterior, self.fase = self.fase, est["fase"]
+        if self.fase != anterior:
+            self.modo_partida = self._modo_de_la_cola()
         self.cliente.limitador.tope_fondo = FONDO_PARTIDA_CERCA if self.fase in PARTIDA_CERCA else FONDO_NORMAL
         if est["nombre"] and est["tag"]:
             self.cuenta_activa = self.cuentas.apuntar(f"{est['nombre']}#{est['tag']}", recordar=True) or self.cuenta_activa
-        if self.fase == "ChampSelect":
+        if self.fase == "ChampSelect" and not self.apagada:
             self.seleccion.leer()
         else:
             self.seleccion.cerrar()
@@ -186,6 +198,25 @@ class Vigia:
             self._en_partida(anterior, ahora)
         else:
             self.sesiones.terminar()
+
+    @property
+    def apagada(self) -> str | None:
+        """El nombre del modo de la partida de ahora si está apagado en Ajustes (sin panel, overlay ni grabación)."""
+        modo = self.modo_partida
+        return MODOS[modo] if modo and not modo_activo(self.cfg.get("modos"), modo) else None
+
+    def _modo_de_la_cola(self) -> str | None:
+        if self.fase not in CON_COLA:
+            return None
+        cola, mapa = self.lcu.cola_y_mapa()
+        return modo_de(cola, mapa) if cola or mapa else None
+
+    def _activa(self, juego: Json) -> bool:
+        """Si el panel sale en el modo de esta partida en vivo (de Riot: vale también si el cliente no lo dijo)."""
+        modo = modo_de(juego.get("gameQueueConfigId", 0), juego.get("mapId", 0))
+        if self.fase in EN_JUEGO and self.modo_partida is None:
+            self.modo_partida = modo
+        return modo_activo(self.cfg.get("modos"), modo)
 
     def _sin_cliente(self, ahora: float) -> None:
         """Cliente cerrado: todo a cero y, de vez en cuando, se pregunta a Riot si alguna cuenta tuya está en partida
@@ -200,7 +231,7 @@ class Vigia:
         self.ultimo_sondeo = ahora
         for puuid in list(self.cuentas.propias):
             juego = self.cliente.partida_activa(puuid)
-            if juego:
+            if juego and self._activa(juego):
                 self.sesiones.abrir(juego, puuid, "propia")
                 return
         self.sesiones.terminar()
@@ -209,17 +240,22 @@ class Vigia:
         """Ya en partida: al empezar se arma el grabador, y tu sesión se abre en cuanto Riot da la partida en vivo."""
         if anterior not in EN_JUEGO:
             self.sesiones.fijada = False  # partida nueva: manda la propia
-            # Si no se sabe el mapa se graba igual: mejor una grabación de más que una de menos.
+            if self.apagada:
+                self.sesiones.soltar_propia()
+            # Solo en la Grieta (es lo que se revisa). Si no se sabe el modo se graba igual: mejor una grabación de más
+            # que una de menos.
             grabador = self._grabador()
-            if grabador and self.lcu.mapa() in (0, GRIETA):
+            if grabador and not self.apagada and self.modo_partida in (None, *MODOS_GRIETA):
                 grabador.armar()
+        if self.apagada:
+            return
         s = self.sesiones.actual
         viva = s and s.origen == "propia" and not s.terminada
         if viva or self.sesiones.fijada or not self.cuenta_activa or ahora - self.ultimo_sondeo < SONDEO_EN_PARTIDA_S:
             return
         self.ultimo_sondeo = ahora
         juego = self.cliente.partida_activa(self.cuenta_activa)
-        if juego:
+        if juego and self._activa(juego):
             self.sesiones.abrir(juego, self.cuenta_activa, "propia")
 
     def ajustar_plataforma(self, plataforma: str | None) -> None:
