@@ -6,7 +6,7 @@ Panel para el League of Legends pensado para jugadores de rango alto, en cualqui
 
 1. Descarga `DeepPrep-x.y.z.zip` de la última versión (abajo, en **Releases**), descomprímelo y abre `DeepPrep.exe`.
 2. Windows avisará de que es una app desconocida (no está firmada). Pulsa **Más información → Ejecutar de todas formas**.
-3. Se instala sola, deja un acceso directo en el escritorio y arranca con Windows en segundo plano. Las actualizaciones también llegan solas: la app avisa cuando hay una versión nueva y, al instalarla, te enseña qué ha cambiado.
+3. Se instala sola, deja un acceso directo en el escritorio y arranca con Windows en segundo plano. Las actualizaciones también llegan solas: la app avisa cuando hay una versión nueva. Pulsa **Actualizar ahora** en ese aviso para instalarla al momento, o déjalo y se instala sola cuando cierres la ventana, fuera de partida. Al abrirse, te enseña qué ha cambiado.
 4. A partir de ahí ábrela siempre con el acceso directo **Deep Prep** del escritorio. La carpeta que descomprimiste ya no hace falta: puedes borrarla.
 
 ## ¿Tenías Porofesor?

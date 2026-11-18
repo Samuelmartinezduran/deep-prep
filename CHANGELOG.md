@@ -2,7 +2,13 @@
 
 Los cambios importantes de cada versión. El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones, [versionado semántico](https://semver.org/lang/es/). Hasta la 1.0.2 la app se llamaba Porofesor.
 
-## [2.1.0] - sin publicar
+## [2.1.1] - sin publicar
+
+### Añadido
+
+- «Actualizar ahora» en el aviso de versión nueva: la instala en el momento y la app se vuelve a abrir a la vista en unos segundos. Si estás en cola, en la selección, en partida o con la grabación o la revisión a medias, dice por qué no puede y la deja para después. Sin pulsarlo, todo sigue como antes: se instala sola cuando cierras la ventana, fuera de partida. Con la ventana estrecha, el aviso entero hace de botón. Llega a partir de esta versión: las que ya tienes instaladas se actualizan solas como siempre.
+
+## [2.1.0] - 2026-11-15
 
 La interfaz deja de ser una página web dentro de Edge (WebView2): ahora es nativa, con Qt Quick, y la dibuja la gráfica. Y deja de ser solo para junglas: tu rol se elige (y se cambia en cada partida), si no juegas jungla el panel enseña a tu rival de línea, y en Ajustes se elige en qué modos de juego sale.
 
@@ -122,4 +128,6 @@ Primera versión, como Porofesor.
 - Grabación integrada de cada partida.
 - Actualizaciones automáticas desde GitHub Releases: la versión nueva espera a que se cierre la vieja y se instala ella.
 
+[2.1.1]: https://github.com/Samuelmartinezduran/deep-prep/releases/tag/v2.1.1
+[2.1.0]: https://github.com/Samuelmartinezduran/deep-prep/releases/tag/v2.1.0
 [2.0.0]: https://github.com/Samuelmartinezduran/deep-prep/releases/tag/v2.0.0

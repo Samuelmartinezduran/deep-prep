@@ -86,6 +86,8 @@ class _ConVersion(Protocol):
 class _ConNovedades(Protocol):
     def novedades_vistas(self) -> Resultado: ...
 
+    def actualizar_ahora(self) -> Resultado: ...
+
 
 class AppDelPanel(Protocol):
     """Lo que usan de la app el servidor del panel y las ventanas: la de verdad (app.App) o la de la demo

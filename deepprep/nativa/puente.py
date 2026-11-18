@@ -157,6 +157,7 @@ class Puente(QObject):
             "carpeta": lambda id_: a.abrir_carpeta(str(id_)),
             "clip": lambda id_, i: a.abrir_clip(str(id_), int(i)),
             "novedadesVistas": lambda: self._y_refrescar(a.actualizador.novedades_vistas()),
+            "actualizar": lambda: a.actualizador.actualizar_ahora(),
             "salir": a.salir,
             "escena": (lambda id_: self._y_refrescar(escena(str(id_))))
             if escena

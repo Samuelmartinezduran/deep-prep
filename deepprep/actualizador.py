@@ -4,7 +4,8 @@
   %LOCALAPPDATA%\\Programs\\DeepPrep, deja un acceso directo en el escritorio y arranca desde ahí.
 - Actualizar: cada 6 horas mira la última versión publicada en GitHub. Si hay una nueva, la descarga,
   comprueba su huella (sha256) y la instala cuando no estorba: sin partida, sin selección, sin grabación
-  y sin revisión pendiente. Los datos del usuario están en otra carpeta y no se tocan.
+  y sin revisión pendiente. Sola espera a que la ventana esté cerrada; con «Actualizar ahora», en el aviso de la
+  versión nueva, se instala en el momento. Los datos del usuario están en otra carpeta y no se tocan.
 - De Porofesor a Deep Prep: hasta la 1.0.2 la app se llamaba Porofesor. Esas versiones se actualizan desde
   su repositorio de descargas, donde va también la 2.0.0 (zip puente, ver herramientas/publicar.py), y piden
   instalarla en %LOCALAPPDATA%\\Programs\\Porofesor. La 2.0.0 se instala en la carpeta nueva, cambia los
@@ -55,6 +56,8 @@ CADA = 6 * 3600
 ARRANQUE_RECIENTE_S = 10 * 60
 # Sin ventana propia (panel en el navegador), alguien lo está mirando si lo ha pedido hace menos de esto.
 MIRANDO_S = 120
+# Lo que se dice cuando «Actualizar ahora» no puede: se puede volver a pulsar o dejar que se instale sola.
+OTRA_VEZ = " Vuelve a pulsar al acabar o se instalará sola."
 # Notas de la versión que se acaba de descargar: la versión nueva las enseña una vez al abrirse.
 NOVEDADES = config.DATOS / "novedades.json"
 # Última versión cuyas novedades se han visto. Si no está, quien viene de una versión que no la guardaba.
@@ -304,6 +307,8 @@ class Actualizador:
         self.repo = repo
         self.estado: EstadoVersion = {"version": __version__, "nueva": None, "lista": False, "error": ""}
         self._carpeta_nueva: Path | None = None
+        self._cerrojo = threading.Lock()
+        self._aplicada = False
 
     def arrancar(self) -> None:
         if config.CONGELADA:
@@ -400,33 +405,59 @@ class Actualizador:
             pass
         return {"ok": True}
 
-    def puede_instalar(self) -> bool:
-        """Sin partida a la vista, sin grabación, sin revisiones pendientes y sin nadie mirando la ventana:
-        instalar cierra la app, y cerrarla delante de alguien parece que se ha roto."""
+    def que_estorba(self) -> str:
+        """Por qué no se puede instalar ahora (vacío si nada lo impide): cola, selección, partida, grabación o revisión.
+        Instalar cierra la app un momento, y eso no puede pasar en medio de una partida ni perder su revisión."""
         app = self.app
-        grabando = bool(app.grabador and app.grabador.activa())
+        if app.fase in ("Matchmaking", "ReadyCheck"):
+            return "Ahora no: estás en cola." + OTRA_VEZ
+        if app.fase == "ChampSelect":
+            return "Ahora no: estás en la selección de campeones." + OTRA_VEZ
+        if app.fase not in (None, "None", "Lobby", "EndOfGame") or app.modo != "previa":
+            return "Ahora no: estás en partida." + OTRA_VEZ
+        if app.grabador and app.grabador.activa():
+            return "Ahora no: hay una grabación en marcha." + OTRA_VEZ
+        if app.revisando:
+            return "Ahora no: se está haciendo la revisión de la partida, que tarda un par de minutos." + OTRA_VEZ
+        return ""
+
+    def puede_instalar(self) -> bool:
+        """Sola: cuando nada estorba (que_estorba) y nadie mira la ventana, porque instalar cierra la app y cerrarla
+        delante de alguien parece que se ha roto."""
+        app = self.app
         visible = getattr(app, "ventana_visible", None)
         mirando = visible() if visible else time.time() - getattr(app, "ultima_consulta", 0) < MIRANDO_S
-        return (
-            app.fase in (None, "None", "Lobby", "EndOfGame")
-            and app.modo == "previa"
-            and not grabando
-            and not app.revisando
-            and not mirando
-        )
+        return not self.que_estorba() and not mirando
 
-    def aplicar(self) -> None:
-        """Arranca la versión nueva (desde la descarga) para que espere a que esta se cierre y se instale ella."""
-        carpeta = self._carpeta_nueva
-        if carpeta is None:  # no pasa: solo se aplica con una versión ya descargada (estado["lista"])
-            return
+    def actualizar_ahora(self) -> Resultado:
+        """El botón «Actualizar ahora»: con la versión nueva ya descargada y sin nada que estorbe, se instala ya, con la
+        ventana a la vista (lo ha pedido quien la mira) y se vuelve a abrir a la vista."""
+        if not self.estado["lista"]:
+            return {"ok": False, "error": "No hay ninguna versión nueva descargada."}
+        motivo = self.que_estorba()
+        if motivo:
+            return {"ok": False, "error": motivo}
+        # Un momento antes de cerrar, para que la ventana diga «Instalando» (como App.salir).
+        threading.Timer(0.5, self.aplicar, kwargs={"mostrar": True}).start()
+        return {"ok": True}
+
+    def aplicar(self, mostrar: bool = False) -> None:
+        """Arranca la versión nueva (desde la descarga) para que espere a que esta se cierre y se instale ella.
+        mostrar: la nueva se abre a la vista; si no, escondida (la instalación sola, con la ventana cerrada)."""
+        with self._cerrojo:  # el botón y el bucle podrían llegar a la vez: solo se lanza una
+            carpeta = self._carpeta_nueva
+            if carpeta is None or self._aplicada:  # sin versión descargada no se llega aquí
+                return
+            self._aplicada = True
         nueva = carpeta / EXE
         subprocess.Popen(
-            [str(nueva), "--actualizar", str(os.getpid()), str(CARPETA_PROGRAMA), "--oculta"],
+            [str(nueva), "--actualizar", str(os.getpid()), str(CARPETA_PROGRAMA), "--mostrar" if mostrar else "--oculta"],
             cwd=str(carpeta),
             creationflags=DESLIGADO,
         )
-        logger.info("Instalando la versión %s; la app se reabre sola", self.estado["nueva"])
+        logger.info(
+            "Instalando la versión %s%s; la app se reabre sola", self.estado["nueva"], " (pedida a mano)" if mostrar else ""
+        )
         if self.app.al_salir:
             self.app.al_salir()
         else:

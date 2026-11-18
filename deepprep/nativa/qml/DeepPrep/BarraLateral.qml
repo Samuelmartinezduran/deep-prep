@@ -175,17 +175,59 @@ Rectangle {
         spacing: 12
 
         Rectangle {
-            // Versión nueva descargada: se instala sola al cerrar la ventana, fuera de partida.
+            // Versión nueva descargada: «Actualizar ahora» la instala ya (fuera de cola y de partida); si no, se instala
+            // sola al cerrar la ventana. Estrecha, el aviso entero es el botón.
+            id: avisoVersion
+
+            property bool instalando: false
+            property string error: ""
+
+            function actualizar() {
+                if (instalando)
+                    return;
+                instalando = true;
+                error = "";
+                puente.llamar("actualizar", [], r => {
+                    if (r && r.ok)
+                        return; // la app se cierra y la versión nueva se abre sola
+                    avisoVersion.instalando = false;
+                    avisoVersion.error = r && r.error ? r.error : "No se ha podido.";
+                    if (lateral.compacta)
+                        Window.window.avisar(avisoVersion.error, "", avisoVersion);
+                    finError.restart();
+                });
+            }
+
             visible: !!lateral.comun.version
             width: parent.width
-            height: versionTxt.implicitHeight + 20
+            height: lateral.compacta ? 36 : versionTxt.implicitHeight + 20
             radius: Tema.radio
-            color: Tema.alfa(Tema.acento, 0.12)
-            border.color: Tema.alfa(Tema.acento, 0.35)
+            color: lateral.compacta && zonaVersion.containsMouse ? Tema.alfa(Tema.acento, 0.18) : Tema.alfa(Tema.acento, 0.12)
+            border.color: lateral.compacta && zonaVersion.containsMouse ? Tema.acento : Tema.alfa(Tema.acento, 0.35)
 
+            Timer {
+                id: finError
+
+                interval: 10000
+                onTriggered: avisoVersion.error = ""
+            }
+            MouseArea {
+                id: zonaVersion
+
+                enabled: lateral.compacta
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: avisoVersion.actualizar()
+            }
+            Tip {
+                enabled: lateral.compacta
+                texto: lateral.compacta ? (avisoVersion.instalando ? "Instalando la versión " + (lateral.comun.version || "") : "Versión " + (lateral.comun.version || "") + " lista") : ""
+                texto2: avisoVersion.instalando ? "Se cierra y vuelve a abrirse en unos segundos." : "Pulsa para actualizar ahora."
+            }
             Row {
                 x: lateral.compacta ? (parent.width - 6) / 2 : 8
-                y: 10
+                y: lateral.compacta ? (parent.height - 6) / 2 - 6 : 10
                 spacing: 10
 
                 Rectangle {
@@ -203,7 +245,7 @@ Rectangle {
                     spacing: 2
 
                     Text {
-                        text: "Versión " + (lateral.comun.version || "") + " lista"
+                        text: (avisoVersion.instalando ? "Instalando la " : "Versión ") + (lateral.comun.version || "") + (avisoVersion.instalando ? "" : " lista")
                         color: Tema.texto
                         font.family: Tema.sans
                         font.pixelSize: 13
@@ -211,11 +253,23 @@ Rectangle {
                     }
                     Text {
                         width: parent.width
-                        text: "Se instala sola cuando cierres esta ventana, fuera de partida."
-                        color: Tema.texto3
+                        text: avisoVersion.instalando ? "La app se cierra y vuelve a abrirse en unos segundos." : avisoVersion.error ? avisoVersion.error : "Instálala ahora (tarda unos segundos) o se instalará sola cuando cierres esta ventana, fuera de partida."
+                        color: avisoVersion.error && !avisoVersion.instalando ? Tema.mal : Tema.texto3
                         font.family: Tema.sans
                         font.pixelSize: 12
                         wrapMode: Text.Wrap
+                    }
+                    Item {
+                        visible: !avisoVersion.instalando
+                        width: 1
+                        height: 6
+                    }
+                    Boton {
+                        visible: !avisoVersion.instalando
+                        texto: "Actualizar ahora"
+                        primario: true
+                        pequeno: true
+                        onPulsar: avisoVersion.actualizar()
                     }
                 }
             }

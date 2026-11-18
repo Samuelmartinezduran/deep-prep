@@ -572,6 +572,7 @@ class PuenteConLaApp(unittest.TestCase):
         self.assertEqual(
             sorted(self.p.acciones()),
             [
+                "actualizar",
                 "ajustes",
                 "buscar",
                 "carpeta",
@@ -587,6 +588,9 @@ class PuenteConLaApp(unittest.TestCase):
                 "volver",
             ],
         )
+
+    def test_en_la_demo_no_se_actualiza(self):
+        self.assertEqual(self.p.acciones()["actualizar"](), {"ok": False, "error": "En la demo no se instala nada."})
 
     def test_las_vistas_del_estado(self):
         v = self.p.vistas_de(self.app.estado())

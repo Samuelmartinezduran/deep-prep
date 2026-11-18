@@ -93,6 +93,9 @@ class SinActualizaciones(Actualizador):
     def novedades_vistas(self) -> Resultado:
         return {"ok": True}
 
+    def actualizar_ahora(self) -> Resultado:
+        return {"ok": False, "error": "En la demo no se instala nada."}
+
 
 class ReferenciasDemo:
     """Tus jugadores de referencia sin preguntar a Riot: vale cualquier Nombre#TAG.
